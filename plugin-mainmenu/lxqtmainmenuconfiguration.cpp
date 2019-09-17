@@ -78,12 +78,16 @@ LXQtMainMenuConfiguration::LXQtMainMenuConfiguration(PluginSettings *settings, G
 
     connect(ui->filterMenuCB, &QCheckBox::toggled, [this] (bool enabled)
         {
-            ui->filterClearCB->setEnabled(enabled || ui->filterShowCB->isChecked());
+            bool search_enabled = enabled || ui->filterShowCB->isChecked();
+            ui->filterStartOfWordCB->setEnabled(search_enabled);
+            ui->filterClearCB->setEnabled(search_enabled);
             this->settings().setValue("filterMenu", enabled);
         });
     connect(ui->filterShowCB, &QCheckBox::toggled, [this] (bool enabled)
         {
-            ui->filterClearCB->setEnabled(enabled || ui->filterMenuCB->isChecked());
+            bool search_enabled = enabled || ui->filterMenuCB->isChecked();
+            ui->filterStartOfWordCB->setEnabled(search_enabled);
+            ui->filterClearCB->setEnabled(search_enabled);
             this->settings().setValue("filterShow", enabled);
         });
     connect(ui->filterShowMaxItemsSB, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [this] (int value)
@@ -97,6 +101,10 @@ LXQtMainMenuConfiguration::LXQtMainMenuConfiguration(PluginSettings *settings, G
     connect(ui->filterShowHideMenuCB, &QCheckBox::toggled, [this] (bool enabled)
         {
             this->settings().setValue("filterShowHideMenu", enabled);
+        });
+    connect(ui->filterStartOfWordCB, &QCheckBox::toggled, [this] (bool enabled)
+        {
+            this->settings().setValue("filterStartOfWord", enabled);
         });
     connect(ui->filterClearCB, &QCheckBox::toggled, [this] (bool enabled)
         {
@@ -143,6 +151,8 @@ void LXQtMainMenuConfiguration::loadSettings()
     ui->filterShowMaxWidthSB->setValue(settings().value("filterShowMaxWidth", 300).toInt());
     ui->filterShowHideMenuCB->setEnabled(filter_show);
     ui->filterShowHideMenuCB->setChecked(settings().value("filterShowHideMenu", true).toBool());
+    ui->filterStartOfWordCB->setChecked(settings().value("filterStartOfWord", false).toBool());
+    ui->filterStartOfWordCB->setEnabled(filter_menu || filter_show);
     ui->filterClearCB->setChecked(settings().value("filterClear", false).toBool());
     ui->filterClearCB->setEnabled(filter_menu || filter_show);
 }
