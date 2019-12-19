@@ -168,10 +168,6 @@ void LXQtMainMenu::showMenu()
     mMenu->popup(calculatePopupWindowPos(mMenu->sizeHint()).topLeft());
     if (mFilterMenu || mFilterShow)
     {
-        if (mFilterClear && !mSearchEdit->text().isEmpty())
-        {
-            mSearchEdit->setText(QString{});
-        }
         //Note: part of the workadound for https://bugreports.qt.io/browse/QTBUG-52021
         mSearchEdit->setReadOnly(false);
         //the setReadOnly also changes the cursor, override it back to normal
@@ -259,6 +255,8 @@ void LXQtMainMenu::settingsChanged()
     {
         mSearchEdit->setVisible(mFilterMenu || mFilterShow);
         mSearchEditAction->setVisible(mFilterMenu || mFilterShow);
+        if (mFilterClear && !mMenu->isVisible())
+            mSearchEdit->clear();
     }
     mSearchView->setMaxItemsToShow(settings()->value("filterShowMaxItems", 10).toInt());
     mSearchView->setMaxItemWidth(settings()->value("filterShowMaxWidth", 300).toInt());
@@ -420,7 +418,11 @@ void LXQtMainMenu::buildMenu()
     //(if the readOnly is not set, the "blink" timer is active also in case the menu is not shown ->
     //QWidgetLineControl::updateNeeded is performed w/o any need)
     //https://bugreports.qt.io/browse/QTBUG-52021
-    connect(mMenu, &QMenu::aboutToHide, [this] { mSearchEdit->setReadOnly(true); });
+    connect(mMenu, &QMenu::aboutToHide, [this] {
+        mSearchEdit->setReadOnly(true);
+        if (mFilterClear)
+            mSearchEdit->clear();
+    });
     mSearchEdit->setVisible(mFilterMenu || mFilterShow);
     mSearchEditAction->setVisible(mFilterMenu || mFilterShow);
     mSearchView->fillActions(mMenu);
