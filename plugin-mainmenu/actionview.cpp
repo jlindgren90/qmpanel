@@ -116,21 +116,20 @@ namespace
 
         virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
         {
-            QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-            //the XdgCachedMenuAction/XdgAction does load the icon upon showing its menu
-            if (icon.isNull())
-            {
-                XdgAction * action = qobject_cast<XdgAction *>(qvariant_cast<QAction *>(index.data(ActionView::ActionRole)));
-                if (action != nullptr)
-                {
-                  action->updateIcon();
-                  const_cast<QAbstractItemModel *>(index.model())->setData(index, action->icon(), Qt::DecorationRole);
-                }
-            }
             QSize s = QStyledItemDelegate::sizeHint(option, index);
             s.setWidth(qMin(mMaxItemWidth, s.width()));
             return s;
         }
+
+        virtual void initStyleOption(QStyleOptionViewItem * option,
+                                     const QModelIndex & index) const override
+        {
+            QStyledItemDelegate::initStyleOption(option, index);
+            auto lv = qobject_cast<QListView *>(parent());
+            if (lv != nullptr)
+                option->decorationSize = option->decorationSize.expandedTo(lv->iconSize());
+        }
+
     private:
         int mMaxItemWidth;
     };
@@ -178,11 +177,13 @@ void ActionView::ActionView::clear()
 
 void ActionView::addAction(QAction * action)
 {
+    auto xa = qobject_cast<XdgAction *>(action);
+    if (xa != nullptr)
+        xa->updateIcon();
+
     QStandardItem * item = new QStandardItem;
     item->setData(QVariant::fromValue<QAction *>(action), ActionRole);
     item->setFont(action->font());
-    //Note: XdgCachedMenuAction has delayed icon loading... we are loading the icon
-    //in QStyledItemDelegate:sizeHint if necessary
     item->setIcon(action->icon());
     item->setText(action->text());
     item->setToolTip(action->toolTip());
