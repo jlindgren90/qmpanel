@@ -49,9 +49,6 @@ private:
     bool startOfWord_ = false;
 };
 //==============================
-#ifdef HAVE_MENU_CACHE
-class QSortFilterProxyModel;
-#else
 #include <QSortFilterProxyModel>
 class FilterProxyModel : public QSortFilterProxyModel
 {
@@ -71,7 +68,6 @@ protected:
 private:
     StringFilter filter_;
 };
-#endif
 //==============================
 class ActionView : public QListView
 {
@@ -128,11 +124,7 @@ private:
 
 private:
     QStandardItemModel * mModel;
-#ifdef HAVE_MENU_CACHE
-    QSortFilterProxyModel * mProxy;
-#else
     FilterProxyModel * mProxy;
-#endif
     int mMaxItemsToShow;
 };
 

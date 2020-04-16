@@ -44,12 +44,7 @@
 #include <QApplication>
 
 #include <XdgMenuWidget>
-
-#ifdef HAVE_MENU_CACHE
-    #include "xdgcachedmenu.h"
-#else
-    #include <XdgAction>
-#endif
+#include <XdgAction>
 
 #define DEFAULT_SHORTCUT "Alt+F1"
 
@@ -68,11 +63,6 @@ LXQtMainMenu::LXQtMainMenu(const ILXQtPanelPluginStartupInfo &startupInfo):
     mFilterShowHideMenu(true),
     mHeavyMenuChanges(false)
 {
-#ifdef HAVE_MENU_CACHE
-    mMenuCache = NULL;
-    mMenuCacheNotify = 0;
-#endif
-
     mDelayedPopup.setSingleShot(true);
     mDelayedPopup.setInterval(200);
     connect(&mDelayedPopup, &QTimer::timeout, this, &LXQtMainMenu::showHideMenu);
@@ -133,15 +123,7 @@ LXQtMainMenu::~LXQtMainMenu()
         mMenu->removeAction(mSearchViewAction);
         delete mMenu;
     }
-#ifdef HAVE_MENU_CACHE
-    if(mMenuCache)
-    {
-        menu_cache_remove_reload_notify(mMenuCache, mMenuCacheNotify);
-        menu_cache_unref(mMenuCache);
-    }
-#endif
 }
-
 
 /************************************************
 
@@ -176,14 +158,6 @@ void LXQtMainMenu::showMenu()
     }
 }
 
-#ifdef HAVE_MENU_CACHE
-// static
-void LXQtMainMenu::menuCacheReloadNotify(MenuCache* cache, gpointer user_data)
-{
-    reinterpret_cast<LXQtMainMenu*>(user_data)->buildMenu();
-}
-#endif
-
 /************************************************
 
  ************************************************/
@@ -210,21 +184,6 @@ void LXQtMainMenu::settingsChanged()
     if (mMenuFile != menu_file)
     {
         mMenuFile = menu_file;
-#ifdef HAVE_MENU_CACHE
-        menu_cache_init(0);
-        if(mMenuCache)
-        {
-            menu_cache_remove_reload_notify(mMenuCache, mMenuCacheNotify);
-            menu_cache_unref(mMenuCache);
-        }
-        mMenuCache = menu_cache_lookup(mMenuFile.toLocal8Bit());
-        if (MenuCacheDir * root = menu_cache_dup_root_dir(mMenuCache))
-        {
-            menu_cache_item_unref(MENU_CACHE_ITEM(root));
-            buildMenu();
-        }
-        mMenuCacheNotify = menu_cache_add_reload_notify(mMenuCache, (MenuCacheReloadNotify)menuCacheReloadNotify, this);
-#else
         mXdgMenu.setEnvironments(QStringList() << "X-LXQT" << "LXQt");
         mXdgMenu.setLogDir(mLogDir);
 
@@ -239,7 +198,6 @@ void LXQtMainMenu::settingsChanged()
             QMessageBox::warning(0, "Parse error", mXdgMenu.errorString());
             return;
         }
-#endif
     }
 
     setMenuFontSize();
@@ -282,7 +240,6 @@ static bool filterMenu(QMenu * menu, const StringFilter& filter)
         {
             //real menu action -> app
             bool visible(filter.searchStr().isEmpty() || filter.isMatch(action->text()) || filter.isMatch(action->toolTip()));
-#ifndef HAVE_MENU_CACHE
             if(!visible)
             {
                 if (XdgAction * xdgAction = qobject_cast<XdgAction *>(action))
@@ -296,7 +253,6 @@ static bool filterMenu(QMenu * menu, const StringFilter& filter)
                     }
                 }
             }
-#endif
             action->setVisible(visible);
             has_visible |= action->isVisible();
         }
@@ -391,11 +347,7 @@ void LXQtMainMenu::buildMenu()
         mMenu->removeAction(mSearchViewAction);
         delete mMenu;
     }
-#ifdef HAVE_MENU_CACHE
-    mMenu = new XdgCachedMenu(mMenuCache, &mButton);
-#else
     mMenu = new XdgMenuWidget(mXdgMenu, "", &mButton);
-#endif
     mMenu->setObjectName("TopLevelMainMenu");
     setTranslucentMenus(mMenu);
     // Note: the QWidget::ensurePolished() workarounds problem with transparent
