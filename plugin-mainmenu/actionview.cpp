@@ -74,11 +74,10 @@ bool FilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& sourc
                 const XdgDesktopFile& df = action->desktopFile();
                 if (filter_.isMatch(df.name()))
                     return true;
-                QStringList list = df.expandExecString();
-                if (!list.isEmpty()) {
-                    if (filter_.isMatch(list.at(0)))
-                        return true;
-                }
+                QString exec = df.value("Exec").toString();
+                QString base = exec.section(' ', 0, 0).section('/', -1, -1);
+                if (filter_.isMatch(base))
+                    return true;
             }
         }
     }
