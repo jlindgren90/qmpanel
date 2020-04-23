@@ -64,7 +64,6 @@ public:
     bool isExpandable() const override { return mExpandable; }
 
     virtual ILXQtPanelPlugin::Flags flags() const override { return HaveConfigDialog; }
-    QDialog *configureDialog() override;
 
     virtual void realign() override;
 

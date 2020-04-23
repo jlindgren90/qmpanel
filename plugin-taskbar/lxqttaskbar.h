@@ -34,7 +34,6 @@
 
 #include "../panel/ilxqtpanel.h"
 #include "../panel/ilxqtpanelplugin.h"
-#include "lxqttaskbarconfiguration.h"
 #include "lxqttaskgroup.h"
 #include "lxqttaskbutton.h"
 
@@ -103,8 +102,6 @@ private slots:
     void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
     void onWindowAdded(WId window);
     void onWindowRemoved(WId window);
-    void registerShortcuts();
-    void shortcutRegistered();
     void activateTask(int pos);
 
 private:

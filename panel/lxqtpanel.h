@@ -235,11 +235,6 @@ public:
      * ILXQtPanelPlugin::SingleInstance flag set, false otherwise.
      */
     bool isPluginSingletonAndRunnig(QString const & pluginId) const;
-    /*!
-     * \brief Updates the config dialog. Used for updating its icons
-     * when the panel-specific icon theme changes.
-     */
-    void updateConfigDialog() const;
 
 public slots:
     /**
@@ -384,34 +379,7 @@ protected:
      */
     void showEvent(QShowEvent *event) override;
 
-public slots:
-    /**
-     * @brief Shows the ConfigPanelDialog and shows the "Config Panel"
-     * page, i.e. calls showConfigPanelPage(). If the dialog does not
-     * exist yet, it will be created before.
-     *
-     * The "Configure Panel" button in the context menu of the panel will
-     * be connected to this slot so this method gets called whenever the
-     * user clicks that button.
-     *
-     * Furthermore, this method will be called by LXQtPanelApplication
-     * when a new plugin gets added (the LXQtPanel instances are handled
-     * by LXQtPanelApplication). That is why this method/slot has to be
-     * public.
-     */
-    void showConfigDialog();
-
 private slots:
-    /**
-     * @brief Shows the ConfigPanelDialog and shows the "Config Plugins"
-     * page, i.e. calls showConfigPluginsPage(). If the dialog does not
-     * exist yet, it will be created before.
-     *
-     * The "Manage Widgets" button in the context menu of the panel will
-     * be connected to this slot so this method gets called whenever the
-     * user clicks that button.
-     */
-    void showAddPluginDialog();
     /**
      * @brief Recalculates the geometry of the panel and reserves the
      * window manager strut, i.e. it calls setPanelGeometry() and
@@ -663,12 +631,6 @@ private:
      * \sa updateWmStrut()
      */
     bool mReserveSpace;
-
-    /**
-     * @brief Pointer to the current ConfigPanelDialog if there is any. Make
-     * sure to test this pointer for validity because it is lazily loaded.
-     */
-    QPointer<ConfigPanelDialog> mConfigDialog;
 
     /**
      * @brief The animation used for showing/hiding an auto-hiding panel.

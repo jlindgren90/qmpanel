@@ -12,11 +12,6 @@ set(PRIV_HEADERS
     lxqtpanellimits.h
     popupmenu.h
     pluginmoveprocessor.h
-    lxqtpanelpluginconfigdialog.h
-    config/configpaneldialog.h
-    config/configpanelwidget.h
-    config/configpluginswidget.h
-    config/addplugindialog.h
 )
 
 # using LXQt namespace in the public headers.
@@ -38,17 +33,6 @@ set(SOURCES
     pluginsettings.cpp
     popupmenu.cpp
     pluginmoveprocessor.cpp
-    lxqtpanelpluginconfigdialog.cpp
-    config/configpaneldialog.cpp
-    config/configpanelwidget.cpp
-    config/configpluginswidget.cpp
-    config/addplugindialog.cpp
-)
-
-set(UI
-    config/configpanelwidget.ui
-    config/configpluginswidget.ui
-    config/addplugindialog.ui
 )
 
 set(LIBRARIES

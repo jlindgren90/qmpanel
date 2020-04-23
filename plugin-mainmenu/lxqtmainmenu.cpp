@@ -27,7 +27,6 @@
 
 
 #include "lxqtmainmenu.h"
-#include "lxqtmainmenuconfiguration.h"
 #include "../panel/lxqtpanel.h"
 #include "actionview.h"
 #include <QAction>
@@ -52,7 +51,6 @@ LXQtMainMenu::LXQtMainMenu(const ILXQtPanelPluginStartupInfo &startupInfo):
     QObject(),
     ILXQtPanelPlugin(startupInfo),
     mMenu(0),
-    mShortcut(0),
     mSearchEditAction{new QWidgetAction{this}},
     mSearchViewAction{new QWidgetAction{this}},
     mMakeDirtyAction{new QAction{this}},
@@ -91,23 +89,6 @@ LXQtMainMenu::LXQtMainMenu(const ILXQtPanelPluginStartupInfo &startupInfo):
     connect(mSearchEdit, &QLineEdit::returnPressed, mSearchView, &ActionView::activateCurrent);
     mSearchEditAction->setDefaultWidget(mSearchEdit);
     QTimer::singleShot(0, [this] { settingsChanged(); });
-
-    mShortcut = GlobalKeyShortcut::Client::instance()->addAction(QString{}, QString("/panel/%1/show_hide").arg(settings()->group()), LXQtMainMenu::tr("Show/hide main menu"), this);
-    if (mShortcut)
-    {
-        connect(mShortcut, &GlobalKeyShortcut::Action::registrationFinished, [this] {
-            if (mShortcut->shortcut().isEmpty())
-                mShortcut->changeShortcut(DEFAULT_SHORTCUT);
-        });
-        connect(mShortcut, &GlobalKeyShortcut::Action::activated, [this] {
-            if (!mHideTimer.isActive())
-                // Delay this a little -- if we don't do this, search field
-                // won't be able to capture focus
-                // See <https://github.com/lxqt/lxqt-panel/pull/131> and
-                // <https://github.com/lxqt/lxqt-panel/pull/312>
-                mDelayedPopup.start();
-        });
-    }
 }
 
 
@@ -164,20 +145,11 @@ void LXQtMainMenu::showMenu()
 void LXQtMainMenu::settingsChanged()
 {
     setButtonIcon();
-    if (settings()->value("showText", false).toBool())
-    {
-        mButton.setText(settings()->value("text", "Start").toString());
-        mButton.setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    }
-    else
-    {
-        mButton.setText("");
-        mButton.setToolButtonStyle(Qt::ToolButtonIconOnly);
-    }
+    mButton.setText("");
+    mButton.setToolButtonStyle(Qt::ToolButtonIconOnly);
+    mLogDir = "";
 
-    mLogDir = settings()->value("log_dir", "").toString();
-
-    QString menu_file = settings()->value("menu_file", "").toString();
+    QString menu_file = "/home/john/.config/menus/programs.menu"; /* TODO: rework menu */
     if (menu_file.isEmpty())
         menu_file = XdgMenu::getMenuFileName();
 
@@ -204,11 +176,11 @@ void LXQtMainMenu::settingsChanged()
 
     //clear the search to not leaving the menu in wrong state
     mSearchEdit->setText(QString{});
-    mFilterMenu = settings()->value("filterMenu", true).toBool();
-    mFilterShow = settings()->value("filterShow", true).toBool();
-    mFilterStartOfWord = settings()->value("filterStartOfWord", false).toBool();
-    mFilterClear = settings()->value("filterClear", false).toBool();
-    mFilterShowHideMenu = settings()->value("filterShowHideMenu", true).toBool();
+    mFilterMenu = true;
+    mFilterShow = true;
+    mFilterStartOfWord = true;
+    mFilterClear = true;
+    mFilterShowHideMenu = true;
     if (mMenu)
     {
         mSearchEdit->setVisible(mFilterMenu || mFilterShow);
@@ -216,8 +188,8 @@ void LXQtMainMenu::settingsChanged()
         if (mFilterClear && !mMenu->isVisible())
             mSearchEdit->clear();
     }
-    mSearchView->setMaxItemsToShow(settings()->value("filterShowMaxItems", 10).toInt());
-    mSearchView->setMaxItemWidth(settings()->value("filterShowMaxWidth", 300).toInt());
+    mSearchView->setMaxItemsToShow(10);
+    mSearchView->setMaxItemWidth(300); /* TODO: scale by DPI */
 
     realign();
 }
@@ -392,13 +364,7 @@ void LXQtMainMenu::setMenuFontSize()
         return;
 
     QFont menuFont = mButton.font();
-    bool customFont = settings()->value("customFont", false).toBool();
-
-    if(customFont)
-    {
-        menuFont = mMenu->font();
-        menuFont.setPointSize(settings()->value("customFontSize").toInt());
-    }
+    bool customFont = false;
 
     if (mMenu->font() != menuFont)
     {
@@ -430,24 +396,10 @@ void LXQtMainMenu::setMenuFontSize()
  ************************************************/
 void LXQtMainMenu::setButtonIcon()
 {
-    if (settings()->value("ownIcon", false).toBool())
-    {
-        mButton.setStyleSheet(QString("#MainMenu { qproperty-icon: url(%1); }")
-                .arg(settings()->value(QLatin1String("icon"), QLatin1String(LXQT_GRAPHICS_DIR"/helix.svg")).toString()));
-    } else
-    {
-        mButton.setStyleSheet(QString());
-    }
+    mButton.setStyleSheet(QString("#MainMenu { qproperty-icon: url(%1); }")
+           .arg("/usr/share/pixmaps/j-login.png")); /* TODO: make configurable */
 }
 
-
-/************************************************
-
- ************************************************/
-QDialog *LXQtMainMenu::configureDialog()
-{
-    return new LXQtMainMenuConfiguration(settings(), mShortcut, DEFAULT_SHORTCUT);
-}
 /************************************************
 
  ************************************************/

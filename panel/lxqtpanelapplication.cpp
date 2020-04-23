@@ -29,7 +29,6 @@
 #include "lxqtpanelapplication.h"
 #include "lxqtpanelapplication_p.h"
 #include "lxqtpanel.h"
-#include "config/configpaneldialog.h"
 #include <LXQt/Settings>
 #include <QtDebug>
 #include <QUuid>
@@ -160,9 +159,6 @@ void LXQtPanelApplication::addNewPanel()
     QStringList panels = d->mSettings->value("panels").toStringList();
     panels << name;
     d->mSettings->setValue("panels", panels);
-
-    // Poupup the configuration dialog to allow user configuration right away
-    p->showConfigDialog();
 }
 
 LXQtPanel* LXQtPanelApplication::addPanel(const QString& name)
@@ -303,7 +299,6 @@ void LXQtPanelApplication::setIconTheme(const QString &iconTheme)
         for(LXQtPanel* panel : qAsConst(mPanels))
         {
             panel->update();
-            panel->updateConfigDialog();
         }
     }
 }

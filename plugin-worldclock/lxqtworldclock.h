@@ -37,7 +37,6 @@
 #include <LXQt/RotatedWidget>
 
 #include "../panel/ilxqtpanelplugin.h"
-#include "lxqtworldclockconfiguration.h"
 
 
 class ActiveLabel;
@@ -60,7 +59,6 @@ public:
 
     virtual void settingsChanged();
     virtual void realign();
-    QDialog *configureDialog();
 
 private slots:
     void timeout();

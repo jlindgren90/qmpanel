@@ -69,7 +69,6 @@ public:
     virtual ILXQtPanelPlugin::Flags flags() const { return HaveConfigDialog ; }
 
     QWidget *widget() { return &mButton; }
-    QDialog *configureDialog();
 
     bool isSeparate() const { return true; }
 
@@ -84,7 +83,6 @@ private:
     QToolButton mButton;
     QString mLogDir;
     QMenu* mMenu;
-    GlobalKeyShortcut::Action *mShortcut;
     MenuStyle mTopMenuStyle;
     QWidgetAction * mSearchEditAction;
     QLineEdit * mSearchEdit;

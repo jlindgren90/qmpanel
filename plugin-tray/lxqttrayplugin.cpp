@@ -27,7 +27,6 @@
 
 
 #include "lxqttrayplugin.h"
-#include "lxqttrayconfiguration.h"
 #include "lxqttray.h"
 
 LXQtTrayPlugin::LXQtTrayPlugin(const ILXQtPanelPluginStartupInfo &startupInfo) :
@@ -45,11 +44,6 @@ LXQtTrayPlugin::~LXQtTrayPlugin()
 QWidget *LXQtTrayPlugin::widget()
 {
     return mWidget;
-}
-
-QDialog *LXQtTrayPlugin::configureDialog()
-{
-    return new LXQtTrayConfiguration(settings());
 }
 
 void LXQtTrayPlugin::realign()

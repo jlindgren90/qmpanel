@@ -90,7 +90,6 @@ LXQtTaskBar::LXQtTaskBar(ILXQtPanelPlugin *plugin, QWidget *parent) :
     setAcceptDrops(true);
 
     connect(mSignalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &LXQtTaskBar::activateTask);
-    QTimer::singleShot(0, this, &LXQtTaskBar::registerShortcuts);
 
     connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged)
             , this, &LXQtTaskBar::onWindowChanged);
@@ -449,28 +448,22 @@ void LXQtTaskBar::settingsChanged()
     bool showOnlyMinimizedTasksOld = mShowOnlyMinimizedTasks;
     const bool iconByClassOld = mIconByClass;
 
-    mButtonWidth = mPlugin->settings()->value("buttonWidth", 400).toInt();
-    mButtonHeight = mPlugin->settings()->value("buttonHeight", 100).toInt();
-    QString s = mPlugin->settings()->value("buttonStyle").toString().toUpper();
+    mButtonWidth = 200; /* TODO: scale by DPI */
+    mButtonHeight = 100;
 
-    if (s == "ICON")
-        setButtonStyle(Qt::ToolButtonIconOnly);
-    else if (s == "TEXT")
-        setButtonStyle(Qt::ToolButtonTextOnly);
-    else
-        setButtonStyle(Qt::ToolButtonTextBesideIcon);
+    setButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-    mShowOnlyOneDesktopTasks = mPlugin->settings()->value("showOnlyOneDesktopTasks", mShowOnlyOneDesktopTasks).toBool();
-    mShowDesktopNum = mPlugin->settings()->value("showDesktopNum", mShowDesktopNum).toInt();
-    mShowOnlyCurrentScreenTasks = mPlugin->settings()->value("showOnlyCurrentScreenTasks", mShowOnlyCurrentScreenTasks).toBool();
-    mShowOnlyMinimizedTasks = mPlugin->settings()->value("showOnlyMinimizedTasks", mShowOnlyMinimizedTasks).toBool();
-    mAutoRotate = mPlugin->settings()->value("autoRotate", true).toBool();
-    mCloseOnMiddleClick = mPlugin->settings()->value("closeOnMiddleClick", true).toBool();
-    mRaiseOnCurrentDesktop = mPlugin->settings()->value("raiseOnCurrentDesktop", false).toBool();
-    mGroupingEnabled = mPlugin->settings()->value("groupingEnabled",true).toBool();
-    mShowGroupOnHover = mPlugin->settings()->value("showGroupOnHover",true).toBool();
-    mIconByClass = mPlugin->settings()->value("iconByClass", false).toBool();
-    mCycleOnWheelScroll = mPlugin->settings()->value("cycleOnWheelScroll", true).toBool();
+    mShowOnlyOneDesktopTasks = false;
+    mShowDesktopNum = 0;
+    mShowOnlyCurrentScreenTasks = false;
+    mShowOnlyMinimizedTasks = false;
+    mAutoRotate = true;
+    mCloseOnMiddleClick = true;
+    mRaiseOnCurrentDesktop = false;
+    mGroupingEnabled = false;
+    mShowGroupOnHover = true;
+    mIconByClass = false;
+    mCycleOnWheelScroll = true;
 
     // Delete all groups if grouping feature toggled and start over
     if (groupingEnabledOld != mGroupingEnabled)
@@ -634,49 +627,6 @@ void LXQtTaskBar::changeEvent(QEvent* event)
 /************************************************
 
  ************************************************/
-void LXQtTaskBar::registerShortcuts()
-{
-    // Register shortcuts to switch to the task
-    // mPlaceHolder is always at position 0
-    // tasks are at positions 1..10
-    GlobalKeyShortcut::Action * gshortcut;
-    QString path;
-    QString description;
-    for (int i = 1; i <= 10; ++i)
-    {
-        path = QString("/panel/%1/task_%2").arg(mPlugin->settings()->group()).arg(i);
-        description = tr("Activate task %1").arg(i);
-
-        gshortcut = GlobalKeyShortcut::Client::instance()->addAction(QStringLiteral(), path, description, this);
-
-        if (nullptr != gshortcut)
-        {
-            mKeys << gshortcut;
-            connect(gshortcut, &GlobalKeyShortcut::Action::registrationFinished, this, &LXQtTaskBar::shortcutRegistered);
-            connect(gshortcut, &GlobalKeyShortcut::Action::activated, mSignalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-            mSignalMapper->setMapping(gshortcut, i);
-        }
-    }
-}
-
-void LXQtTaskBar::shortcutRegistered()
-{
-    GlobalKeyShortcut::Action * const shortcut = qobject_cast<GlobalKeyShortcut::Action*>(sender());
-
-    disconnect(shortcut, &GlobalKeyShortcut::Action::registrationFinished, this, &LXQtTaskBar::shortcutRegistered);
-
-    const int i = mKeys.indexOf(shortcut);
-    Q_ASSERT(-1 != i);
-
-    if (shortcut->shortcut().isEmpty())
-    {
-        // Shortcuts come in order they were registered
-        // starting from index 0
-        const int key = (i + 1) % 10;
-        shortcut->changeShortcut(QStringLiteral("Meta+%1").arg(key));
-    }
-}
-
 void LXQtTaskBar::activateTask(int pos)
 {
     for (int i = 1; i < mLayout->count(); ++i)

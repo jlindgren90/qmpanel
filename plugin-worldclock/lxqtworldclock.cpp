@@ -162,13 +162,11 @@ void LXQtWorldClock::restartTimer()
 
 void LXQtWorldClock::settingsChanged()
 {
-    PluginSettings *_settings = settings();
-
     QString oldFormat = mFormat;
 
     mTimeZones.clear();
 
-    QList<QMap<QString, QVariant> > array = _settings->readArray(QLatin1String("timeZones"));
+    QList<QMap<QString, QVariant> > array;
     for (const auto &map : array)
     {
         QString timeZoneName = map.value(QLatin1String("timeZone"), QString()).toString();
@@ -180,7 +178,7 @@ void LXQtWorldClock::settingsChanged()
     if (mTimeZones.isEmpty())
         mTimeZones.append(QLatin1String("local"));
 
-    mDefaultTimeZone = _settings->value(QLatin1String("defaultTimeZone"), QString()).toString();
+    mDefaultTimeZone = QString();
     if (mDefaultTimeZone.isEmpty())
         mDefaultTimeZone = mTimeZones[0];
     mActiveTimeZone = mDefaultTimeZone;
@@ -188,9 +186,9 @@ void LXQtWorldClock::settingsChanged()
 
     bool longTimeFormatSelected = false;
 
-    QString formatType = _settings->value(QLatin1String("formatType"), QString()).toString();
-    QString dateFormatType = _settings->value(QLatin1String("dateFormatType"), QString()).toString();
-    bool advancedManual = _settings->value(QLatin1String("useAdvancedManualFormat"), false).toBool();
+    QString formatType = "custom-timeonly";
+    QString dateFormatType = "custom";
+    bool advancedManual = true;
 
     // backward compatibility
     if (formatType == QLatin1String("custom"))
@@ -217,28 +215,28 @@ void LXQtWorldClock::settingsChanged()
     if (formatType == QLatin1String("long-timeonly"))
         longTimeFormatSelected = true;
 
-    bool timeShowSeconds = _settings->value(QLatin1String("timeShowSeconds"), false).toBool();
-    bool timePadHour = _settings->value(QLatin1String("timePadHour"), false).toBool();
-    bool timeAMPM = _settings->value(QLatin1String("timeAMPM"), false).toBool();
+    bool timeShowSeconds = false;
+    bool timePadHour = false;
+    bool timeAMPM = false;
 
     // timezone
-    bool showTimezone = _settings->value(QLatin1String("showTimezone"), false).toBool() && !longTimeFormatSelected;
+    bool showTimezone = false;
 
-    QString timezonePosition = _settings->value(QLatin1String("timezonePosition"), QString()).toString();
-    QString timezoneFormatType = _settings->value(QLatin1String("timezoneFormatType"), QString()).toString();
+    QString timezonePosition = "below";
+    QString timezoneFormatType = "iana";
 
     // date
-    bool showDate = _settings->value(QLatin1String("showDate"), false).toBool();
+    bool showDate = false;
 
-    QString datePosition = _settings->value(QLatin1String("datePosition"), QString()).toString();
+    QString datePosition = "below";
 
-    bool dateShowYear = _settings->value(QLatin1String("dateShowYear"), false).toBool();
-    bool dateShowDoW = _settings->value(QLatin1String("dateShowDoW"), false).toBool();
-    bool datePadDay = _settings->value(QLatin1String("datePadDay"), false).toBool();
-    bool dateLongNames = _settings->value(QLatin1String("dateLongNames"), false).toBool();
+    bool dateShowYear = false;
+    bool dateShowDoW = false;
+    bool datePadDay = false;
+    bool dateLongNames = false;
 
     // advanced
-    QString customFormat = _settings->value(QLatin1String("customFormat"), tr("'<b>'HH:mm:ss'</b><br/><font size=\"-2\">'ddd, d MMM yyyy'<br/>'TT'</font>'")).toString();
+    QString customFormat = "ddd MMM d, h:mm a";
 
     if (advancedManual)
         mFormat = customFormat;
@@ -339,7 +337,7 @@ void LXQtWorldClock::settingsChanged()
         }
     }
 
-    bool autoRotate = settings()->value(QLatin1String("autoRotate"), true).toBool();
+    bool autoRotate = true;
     if (autoRotate != mAutoRotate)
     {
         mAutoRotate = autoRotate;
@@ -354,11 +352,6 @@ void LXQtWorldClock::settingsChanged()
     }
 
     setTimeText();
-}
-
-QDialog *LXQtWorldClock::configureDialog()
-{
-    return new LXQtWorldClockConfiguration(settings());
 }
 
 void LXQtWorldClock::wheelScrolled(int delta)

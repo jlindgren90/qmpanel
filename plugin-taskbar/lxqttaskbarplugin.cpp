@@ -43,11 +43,6 @@ LXQtTaskBarPlugin::~LXQtTaskBarPlugin()
     delete mTaskBar;
 }
 
-QDialog *LXQtTaskBarPlugin::configureDialog()
-{
-    return new LXQtTaskbarConfiguration(settings());
-}
-
 void LXQtTaskBarPlugin::realign()
 {
     mTaskBar->realign();

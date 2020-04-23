@@ -46,8 +46,6 @@ public:
     virtual QString themeId() const { return "Tray"; }
     virtual Flags flags() const { return HaveConfigDialog | PreferRightAlignment | SingleInstance | NeedsHandle; }
 
-    QDialog *configureDialog();
-
     void realign();
     void settingsChanged();
 

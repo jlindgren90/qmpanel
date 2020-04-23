@@ -25,7 +25,6 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "spacer.h"
-#include "spacerconfiguration.h"
 #include <QApplication>
 
 void SpacerWidget::setType(QString const & type)
@@ -65,21 +64,13 @@ Spacer::Spacer(const ILXQtPanelPluginStartupInfo &startupInfo) :
  ************************************************/
 void Spacer::settingsChanged()
 {
-    mSize = settings()->value(QStringLiteral("size"), 8).toInt();
+    mSize = 8; /* TODO: scale by DPI */
     const bool old_expandable = mExpandable;
-    mExpandable = settings()->value(QStringLiteral("expandable"), false).toBool();
-    mSpacer.setType(settings()->value(QStringLiteral("spaceType"), SpacerConfiguration::msTypes[0]).toString());
+    mExpandable = false;
+    mSpacer.setType("spacer");
     setSizes();
     if (old_expandable != mExpandable)
         pluginFlagsChanged();
-}
-
-/************************************************
-
- ************************************************/
-QDialog *Spacer::configureDialog()
-{
-    return new SpacerConfiguration(settings());
 }
 
 /************************************************
