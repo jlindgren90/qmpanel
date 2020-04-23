@@ -42,8 +42,6 @@
 #include <XdgDesktopFile>
 #include <XdgIcon>
 #include <LXQt/GridLayout>
-#include "../panel/pluginsettings.h"
-
 
 LXQtQuickLaunch::LXQtQuickLaunch(ILXQtPanelPlugin *plugin, QWidget* parent) :
     QFrame(parent),
@@ -61,43 +59,31 @@ LXQtQuickLaunch::LXQtQuickLaunch(ILXQtPanelPlugin *plugin, QWidget* parent) :
     QString exec;
     QString icon;
 
-    const auto apps = mPlugin->settings()->readArray("apps");
-    for (const QMap<QString, QVariant> &app : apps)
-    {
-        desktop = app.value("desktop", "").toString();
-        file = app.value("file", "").toString();
-        if (!desktop.isEmpty())
-        {
-            XdgDesktopFile xdg;
-            if (!xdg.load(desktop))
-            {
-                qDebug() << "XdgDesktopFile" << desktop << "is not valid";
-                continue;
-            }
-            if (!xdg.isSuitable())
-            {
-                qDebug() << "XdgDesktopFile" << desktop << "is not applicable";
-                continue;
-            }
+    /* TODO: make this configurable */
+    const QStringList apps = {
+        "/usr/share/applications/nemo.desktop",
+        "/usr/share/applications/xfce4-terminal.desktop",
+        "/usr/share/applications/thunderbird.desktop",
+        "/usr/share/applications/firefox.desktop",
+        "/usr/share/applications/audacious.desktop",
+        "/usr/share/applications/org.qt-project.qtcreator.desktop"
+    };
 
-            addButton(new QuickLaunchAction(&xdg, this));
-        }
-        else if (! file.isEmpty())
+    for (const QString &desktop : apps)
+    {
+        XdgDesktopFile xdg;
+        if (!xdg.load(desktop))
         {
-            addButton(new QuickLaunchAction(file, this));
+            qDebug() << "XdgDesktopFile" << desktop << "is not valid";
+            continue;
         }
-        else
+        if (!xdg.isSuitable())
         {
-            execname = app.value("name", "").toString();
-            exec = app.value("exec", "").toString();
-            icon = app.value("icon", "").toString();
-            if (icon.isNull())
-            {
-                qDebug() << "Icon" << icon << "is not valid (isNull). Skipped.";
-                continue;
-            }
-            addButton(new QuickLaunchAction(execname, exec, icon, this));
+            qDebug() << "XdgDesktopFile" << desktop << "is not applicable";
+            continue;
         }
+
+        addButton(new QuickLaunchAction(&xdg, this));
     } // for
 
     if (mLayout->isEmpty())
@@ -157,157 +143,11 @@ void LXQtQuickLaunch::addButton(QuickLaunchAction* action)
     QuickLaunchButton* btn = new QuickLaunchButton(action, mPlugin, this);
     mLayout->addWidget(btn);
 
-    connect(btn, SIGNAL(switchButtons(QuickLaunchButton*,QuickLaunchButton*)), this, SLOT(switchButtons(QuickLaunchButton*,QuickLaunchButton*)));
-    connect(btn, SIGNAL(buttonDeleted()), this, SLOT(buttonDeleted()));
-    connect(btn, SIGNAL(movedLeft()), this, SLOT(buttonMoveLeft()));
-    connect(btn, SIGNAL(movedRight()), this, SLOT(buttonMoveRight()));
-
     mLayout->removeWidget(mPlaceHolder);
     delete mPlaceHolder;
     mPlaceHolder = 0;
     mLayout->setEnabled(true);
     realign();
-}
-
-
-void LXQtQuickLaunch::dragEnterEvent(QDragEnterEvent *e)
-{
-    // Getting URL from mainmenu...
-    if (e->mimeData()->hasUrls())
-    {
-        e->acceptProposedAction();
-        return;
-    }
-
-    if (e->source() && e->source()->parent() == this)
-    {
-        e->acceptProposedAction();
-    }
-}
-
-
-void LXQtQuickLaunch::dropEvent(QDropEvent *e)
-{
-    const auto urls = e->mimeData()->urls().toSet();
-    for (const QUrl &url : urls)
-    {
-        QString fileName(url.isLocalFile() ? url.toLocalFile() : url.url());
-        QFileInfo fi(fileName);
-        XdgDesktopFile xdg;
-
-        if (xdg.load(fileName))
-        {
-            if (xdg.isSuitable())
-                addButton(new QuickLaunchAction(&xdg, this));
-        }
-        else if (fi.exists() && fi.isExecutable() && !fi.isDir())
-        {
-            addButton(new QuickLaunchAction(fileName, fileName, "", this));
-        }
-        else if (fi.exists())
-        {
-            addButton(new QuickLaunchAction(fileName, this));
-        }
-        else
-        {
-            qWarning() << "XdgDesktopFile" << fileName << "is not valid";
-            QMessageBox::information(this, tr("Drop Error"),
-                              tr("File/URL '%1' cannot be embedded into QuickLaunch for now").arg(fileName)
-                            );
-        }
-    }
-    saveSettings();
-}
-
-void LXQtQuickLaunch::switchButtons(QuickLaunchButton *button1, QuickLaunchButton *button2)
-{
-    if (button1 == button2)
-        return;
-
-    int n1 = mLayout->indexOf(button1);
-    int n2 = mLayout->indexOf(button2);
-
-    int l = qMin(n1, n2);
-    int m = qMax(n1, n2);
-
-    mLayout->moveItem(l, m);
-    mLayout->moveItem(m-1, l);
-    saveSettings();
-}
-
-
-void LXQtQuickLaunch::buttonDeleted()
-{
-    QuickLaunchButton *btn = qobject_cast<QuickLaunchButton*>(sender());
-    if (!btn)
-        return;
-
-    mLayout->removeWidget(btn);
-    btn->deleteLater();
-    saveSettings();
-
-    if (mLayout->isEmpty())
-        showPlaceHolder();
-
-    realign();
-}
-
-
-void LXQtQuickLaunch::buttonMoveLeft()
-{
-    QuickLaunchButton *btn = qobject_cast<QuickLaunchButton*>(sender());
-    if (!btn)
-        return;
-
-    int index = indexOfButton(btn);
-    if (index > 0)
-    {
-        mLayout->moveItem(index, index - 1);
-        saveSettings();
-    }
-}
-
-
-void LXQtQuickLaunch::buttonMoveRight()
-{
-    QuickLaunchButton *btn1 = qobject_cast<QuickLaunchButton*>(sender());
-    if (!btn1)
-        return;
-
-    int index = indexOfButton(btn1);
-    if (index < countOfButtons() - 1)
-    {
-        mLayout->moveItem(index, index + 1);
-        saveSettings();
-    }
-}
-
-
-void LXQtQuickLaunch::saveSettings()
-{
-    PluginSettings *settings = mPlugin->settings();
-    settings->remove("apps");
-
-    QList<QMap<QString, QVariant> > hashList;
-    int size = mLayout->count();
-    for (int j = 0; j < size; ++j)
-    {
-        QuickLaunchButton *b = qobject_cast<QuickLaunchButton*>(mLayout->itemAt(j)->widget());
-        if (!b)
-            continue;
-
-        // convert QHash<QString, QString> to QMap<QString, QVariant>
-        QMap<QString, QVariant> map;
-        QHashIterator<QString, QString> it(b->settingsMap());
-        while (it.hasNext())
-        {
-            it.next();
-            map[it.key()] = it.value();
-        }
-        hashList << map;
-    }
-
-    settings->setArray("apps", hashList);
 }
 
 

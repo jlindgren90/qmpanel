@@ -38,7 +38,6 @@
 #include <vector>
 #include "trayicon.h"
 #include "../panel/ilxqtpanel.h"
-#include "../panel/pluginsettings.h"
 #include <LXQt/GridLayout>
 #include "lxqttray.h"
 #include "xfitman.h"
@@ -80,7 +79,7 @@ LXQtTray::LXQtTray(ILXQtPanelPlugin *plugin, QWidget *parent):
     mDisplay(QX11Info::display())
 {
     mLayout = new LXQt::GridLayout(this);
-    mLayout->setSpacing(mPlugin->settings()->value("spacing", 0).toInt());
+    mLayout->setSpacing(3); /* TODO: scale by DPI */
     realign();
     _NET_SYSTEM_TRAY_OPCODE = XfitMan::atom("_NET_SYSTEM_TRAY_OPCODE");
     // Init the selection later just to ensure that no signals are sent until
@@ -177,7 +176,7 @@ void LXQtTray::realign()
  ************************************************/
 void LXQtTray::settingsChanged()
 {
-    mLayout->setSpacing(mPlugin->settings()->value("spacing", 0).toInt());
+    mLayout->setSpacing(3); /* TODO: scale by DPI */
     sortIcons();
 }
 
@@ -419,10 +418,6 @@ void LXQtTray::addIcon(Window winId)
  ************************************************/
 void LXQtTray::sortIcons()
 {
-    // there is currently no way to un-sort icons once sorted
-    if(!mPlugin->settings()->value("sortIcons", false).toBool())
-        return;
-
     std::vector<QLayoutItem *> items;
 
     // temporarily remove all icons to sort them

@@ -277,15 +277,6 @@ void LXQtPanelApplication::removePanel(LXQtPanel* panel)
     panel->deleteLater();
 }
 
-bool LXQtPanelApplication::isPluginSingletonAndRunnig(QString const & pluginId) const
-{
-    for (auto const & panel : mPanels)
-        if (panel->isPluginSingletonAndRunnig(pluginId))
-            return true;
-
-    return false;
-}
-
 // See LXQtPanelApplication::LXQtPanelApplication for why this isn't good.
 void LXQtPanelApplication::setIconTheme(const QString &iconTheme)
 {

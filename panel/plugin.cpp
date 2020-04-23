@@ -28,7 +28,6 @@
 
 #include "plugin.h"
 #include "ilxqtpanelplugin.h"
-#include "pluginsettings_p.h"
 #include "lxqtpanel.h"
 #include <QDebug>
 #include <QProcessEnvironment>
@@ -68,51 +67,28 @@ QColor Plugin::mMoveMarkerColor= QColor(255, 0, 0, 255);
 /************************************************
 
  ************************************************/
-Plugin::Plugin(const LXQt::PluginInfo &desktopFile, LXQt::Settings *settings, const QString &settingsGroup, LXQtPanel *panel) :
+Plugin::Plugin(const QString &type, LXQtPanel *panel) :
     QFrame(panel),
-    mDesktopFile(desktopFile),
     mPluginLoader(0),
     mPlugin(0),
     mPluginWidget(0),
     mAlignment(AlignLeft),
     mPanel(panel)
 {
-    mSettings = PluginSettingsFactory::create(settings, settingsGroup);
-
-    setWindowTitle(desktopFile.name());
-    mName = desktopFile.name();
-
     QStringList dirs;
     dirs << QProcessEnvironment::systemEnvironment().value("LXQTPANEL_PLUGIN_PATH").split(":");
     dirs << PLUGIN_DIR;
 
     bool found = false;
-    if(ILXQtPanelPluginLibrary const * pluginLib = findStaticPlugin(desktopFile.id()))
+    if(ILXQtPanelPluginLibrary const * pluginLib = findStaticPlugin(type))
     {
         // this is a static plugin
         found = true;
         loadLib(pluginLib);
     }
-    else {
-        // this plugin is a dynamically loadable module
-        QString baseName = QString("lib%1.so").arg(desktopFile.id());
-        for(const QString &dirName : qAsConst(dirs))
-        {
-            QFileInfo fi(QDir(dirName), baseName);
-            if (fi.exists())
-            {
-                found = true;
-                if (loadModule(fi.absoluteFilePath()))
-                    break;
-            }
-        }
-    }
 
     if (!isLoaded())
     {
-        if (!found)
-            qWarning() << QString("Plugin %1 not found in the").arg(desktopFile.id()) << dirs;
-
         return;
     }
 
@@ -121,22 +97,9 @@ Plugin::Plugin(const LXQt::PluginInfo &desktopFile, LXQt::Settings *settings, co
     // plugin handle for easy context menu
     setProperty("NeedsHandle", mPlugin->flags().testFlag(ILXQtPanelPlugin::NeedsHandle));
 
-    QString s = mSettings->value("alignment").toString();
-
-    // Retrun default value
-    if (s.isEmpty())
-    {
-        mAlignment = (mPlugin->flags().testFlag(ILXQtPanelPlugin::PreferRightAlignment)) ?
-                    Plugin::AlignRight :
-                    Plugin::AlignLeft;
-    }
-    else
-    {
-        mAlignment = (s.toUpper() == "RIGHT") ?
-                    Plugin::AlignRight :
-                    Plugin::AlignLeft;
-
-    }
+    mAlignment = (mPlugin->flags().testFlag(ILXQtPanelPlugin::PreferRightAlignment)) ?
+                Plugin::AlignRight :
+                Plugin::AlignLeft;
 
     if (mPluginWidget)
     {
@@ -146,13 +109,6 @@ Plugin::Plugin(const LXQt::PluginInfo &desktopFile, LXQt::Settings *settings, co
         setLayout(layout);
         layout->addWidget(mPluginWidget, 0, 0);
     }
-
-    saveSettings();
-
-    // delay the connection to settingsChanged to avoid conflicts
-    // while the plugin is still being initialized
-    connect(mSettings, &PluginSettings::settingsChanged,
-            this, &Plugin::settingsChanged);
 }
 
 
@@ -163,13 +119,11 @@ Plugin::~Plugin()
 {
     delete mPlugin;
     delete mPluginLoader;
-    delete mSettings;
 }
 
 void Plugin::setAlignment(Plugin::Alignment alignment)
 {
     mAlignment = alignment;
-    saveSettings();
 }
 
 
@@ -242,14 +196,12 @@ ILXQtPanelPluginLibrary const * Plugin::findStaticPlugin(const QString &libraryN
 bool Plugin::loadLib(ILXQtPanelPluginLibrary const * pluginLib)
 {
     ILXQtPanelPluginStartupInfo startupInfo;
-    startupInfo.settings = mSettings;
-    startupInfo.desktopFile = &mDesktopFile;
     startupInfo.lxqtPanel = mPanel;
 
     mPlugin = pluginLib->instance(startupInfo);
     if (!mPlugin)
     {
-        qWarning() << QString("Can't load plugin \"%1\". Plugin can't build ILXQtPanelPlugin.").arg(mDesktopFile.id());
+        qWarning() << "Can't load plugin. Plugin can't build ILXQtPanelPlugin.";
         return false;
     }
 
@@ -326,18 +278,6 @@ void Plugin::unwatchWidgets(QObject * const widget)
 void Plugin::settingsChanged()
 {
     mPlugin->settingsChanged();
-}
-
-
-/************************************************
-
- ************************************************/
-void Plugin::saveSettings()
-{
-    mSettings->setValue("alignment", (mAlignment == AlignLeft) ? "Left" : "Right");
-    mSettings->setValue("type", mDesktopFile.id());
-    mSettings->sync();
-
 }
 
 

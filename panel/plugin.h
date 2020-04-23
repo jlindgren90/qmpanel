@@ -36,7 +36,6 @@
 #include <LXQt/Settings>
 #include "ilxqtpanel.h"
 #include "lxqtpanelglobals.h"
-#include "pluginsettings.h"
 
 class QPluginLoader;
 class QSettings;
@@ -58,21 +57,15 @@ public:
     };
 
 
-    explicit Plugin(const LXQt::PluginInfo &desktopFile, LXQt::Settings *settings, const QString &settingsGroup, LXQtPanel *panel);
+    explicit Plugin(const QString &type, LXQtPanel *panel);
     ~Plugin();
 
     bool isLoaded() const { return mPlugin != 0; }
     Alignment alignment() const { return mAlignment; }
     void setAlignment(Alignment alignment);
 
-    QString settingsGroup() const { return mSettings->group(); }
-
-    void saveSettings();
-
     QMenu* popupMenu() const;
     const ILXQtPanelPlugin * iPlugin() const { return mPlugin; }
-
-    const LXQt::PluginInfo desktopFile() const { return mDesktopFile; }
 
     bool isSeparate() const;
     bool isExpandable() const;
@@ -114,12 +107,10 @@ private:
     void watchWidgets(QObject * const widget);
     void unwatchWidgets(QObject * const widget);
 
-    const LXQt::PluginInfo mDesktopFile;
     QPluginLoader *mPluginLoader;
     ILXQtPanelPlugin *mPlugin;
     QWidget *mPluginWidget;
     Alignment mAlignment;
-    PluginSettings *mSettings;
     LXQtPanel *mPanel;
     static QColor mMoveMarkerColor;
     QString mName;

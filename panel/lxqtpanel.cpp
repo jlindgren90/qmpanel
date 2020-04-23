@@ -182,7 +182,6 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     this->layout()->addWidget(LXQtPanelWidget);
 
     mLayout = new LXQtPanelLayout(LXQtPanelWidget);
-    connect(mLayout, &LXQtPanelLayout::pluginMoved, this, &LXQtPanel::pluginMoved);
     LXQtPanelWidget->setLayout(mLayout);
     mLayout->setLineCount(mLineCount);
 
@@ -386,12 +385,6 @@ void LXQtPanel::loadPlugins()
     names_key += '/';
     names_key += QLatin1String(CFG_KEY_PLUGINS);
     mPlugins.reset(new PanelPluginsModel(this, names_key, pluginDesktopDirs()));
-
-    connect(mPlugins.data(), &PanelPluginsModel::pluginAdded, mLayout, &LXQtPanelLayout::addPlugin);
-    connect(mPlugins.data(), &PanelPluginsModel::pluginMovedUp, mLayout, &LXQtPanelLayout::moveUpPlugin);
-    //reemit signals
-    connect(mPlugins.data(), &PanelPluginsModel::pluginAdded, this, &LXQtPanel::pluginAdded);
-    connect(mPlugins.data(), &PanelPluginsModel::pluginRemoved, this, &LXQtPanel::pluginRemoved);
 
     const auto plugins = mPlugins->plugins();
     for (auto const & plugin : plugins)
@@ -1208,32 +1201,6 @@ QString LXQtPanel::qssPosition() const
 /************************************************
 
  ************************************************/
-void LXQtPanel::pluginMoved(Plugin * plug)
-{
-    //get new position of the moved plugin
-    bool found{false};
-    QString plug_is_before;
-    for (int i=0; i<mLayout->count(); ++i)
-    {
-        Plugin *plugin = qobject_cast<Plugin*>(mLayout->itemAt(i)->widget());
-        if (plugin)
-        {
-            if (found)
-            {
-                //we found our plugin in previous cycle -> is before this (or empty as last)
-                plug_is_before = plugin->settingsGroup();
-                break;
-            } else
-                found = (plug == plugin);
-        }
-    }
-    mPlugins->movePlugin(plug, plug_is_before);
-}
-
-
-/************************************************
-
- ************************************************/
 void LXQtPanel::userRequestForDeletion()
 {
     const QMessageBox::StandardButton ret
@@ -1351,13 +1318,4 @@ void LXQtPanel::setIconTheme(const QString& iconTheme)
 {
     LXQtPanelApplication *a = reinterpret_cast<LXQtPanelApplication*>(qApp);
     a->setIconTheme(iconTheme);
-}
-
-bool LXQtPanel::isPluginSingletonAndRunnig(QString const & pluginId) const
-{
-    Plugin const * plugin = mPlugins->pluginByID(pluginId);
-    if (nullptr == plugin)
-        return false;
-    else
-        return plugin->iPlugin()->flags().testFlag(ILXQtPanelPlugin::SingleInstance);
 }

@@ -226,16 +226,6 @@ public:
     int showDelay() const { return mShowDelayTimer.interval(); }
     QString iconTheme() const;
 
-    /*!
-     * \brief Checks if a given Plugin is running and has the
-     * ILXQtPanelPlugin::SingleInstance flag set.
-     * \param pluginId Plugin Identifier which is the basename of the
-     * .desktop file that specifies the plugin.
-     * \return true if the Plugin is running and has the
-     * ILXQtPanelPlugin::SingleInstance flag set, false otherwise.
-     */
-    bool isPluginSingletonAndRunnig(QString const & pluginId) const;
-
 public slots:
     /**
      * @brief Shows the QWidget and makes it visible on all desktops. This
@@ -391,14 +381,6 @@ private slots:
      * the theme.
      */
     void realign();
-    /**
-     * @brief Moves a plugin in PanelPluginsModel, i.e. calls
-     * PanelPluginsModel::movePlugin(Plugin * plugin, QString const & nameAfter).
-     * LXQtPanelLayout::pluginMoved() will be connected to this slot so
-     * it gets called whenever a plugin was moved in the layout by the user.
-     * @param plug
-     */
-    void pluginMoved(Plugin * plug);
     /**
      * @brief Removes this panel's entries from the config file and emits
      * the deletedByUser signal.

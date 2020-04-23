@@ -77,18 +77,6 @@ public:
      */
     int count() const { return mPanels.count(); }
 
-    /*!
-     * \brief Checks if a given Plugin is running and has the
-     * ILXQtPanelPlugin::SingleInstance flag set. As Plugins are added to
-     * LXQtPanel instances, this method only iterates over these LXQtPanel
-     * instances and lets them check the conditions.
-     * \param pluginId Plugin Identifier which is the basename of the .desktop
-     * file that specifies the plugin.
-     * \return true if the Plugin is running and has the
-     * ILXQtPanelPlugin::SingleInstance flag set, false otherwise.
-     */
-    bool isPluginSingletonAndRunnig(QString const & pluginId) const;
-
 public slots:
     /*!
      * \brief Adds a new LXQtPanel which consists of the following steps:

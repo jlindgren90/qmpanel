@@ -68,18 +68,10 @@ private:
     ILXQtPanelPlugin *mPlugin;
     QLabel *mPlaceHolder;
 
-    void dragEnterEvent(QDragEnterEvent *e);
-    void dropEvent(QDropEvent *e);
-
-    void saveSettings();
     void showPlaceHolder();
 
 private slots:
     void addButton(QuickLaunchAction* action);
-    void switchButtons(QuickLaunchButton *button1, QuickLaunchButton *button2);
-    void buttonDeleted();
-    void buttonMoveLeft();
-    void buttonMoveRight();
 };
 
 #endif
