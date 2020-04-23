@@ -50,18 +50,12 @@
 #include <XdgIcon>
 
 // statically linked built-in plugins
-#include "../plugin-desktopswitch/desktopswitch.h" // desktopswitch
-extern void * loadPluginTranslation_desktopswitch_helper;
 #include "../plugin-mainmenu/lxqtmainmenu.h" // mainmenu
 extern void * loadPluginTranslation_mainmenu_helper;
 #include "../plugin-quicklaunch/lxqtquicklaunchplugin.h" // quicklaunch
 extern void * loadPluginTranslation_quicklaunch_helper;
-#include "../plugin-showdesktop/showdesktop.h" // showdesktop
-extern void * loadPluginTranslation_showdesktop_helper;
 #include "../plugin-spacer/spacer.h" // spacer
 extern void * loadPluginTranslation_spacer_helper;
-#include "../plugin-statusnotifier/statusnotifier.h" // statusnotifier
-extern void * loadPluginTranslation_statusnotifier_helper;
 #include "../plugin-taskbar/lxqttaskbarplugin.h" // taskbar
 extern void * loadPluginTranslation_taskbar_helper;
 #include "../plugin-tray/lxqttrayplugin.h" // tray
