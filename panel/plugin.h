@@ -58,10 +58,6 @@ public:
     explicit Plugin(ILXQtPanelPlugin *plugin, LXQtPanel *panel);
     ~Plugin();
 
-    Alignment alignment() const { return mAlignment; }
-    void setAlignment(Alignment alignment);
-
-    QMenu* popupMenu() const;
     const ILXQtPanelPlugin * iPlugin() const { return mPlugin; }
 
     bool isSeparate() const;
@@ -79,20 +75,8 @@ public:
 
 public slots:
     void realign();
-    void showConfigureDialog();
-    void requestRemove();
-
-signals:
-    void startMove();
-    void remove();
-    /*!
-     * \brief Signal emitted when this widget or some of its children
-     * get the DragLeave event delivered.
-     */
-    void dragLeft();
 
 protected:
-    void contextMenuEvent(QContextMenuEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void showEvent(QShowEvent *event);
@@ -103,7 +87,6 @@ private:
 
     ILXQtPanelPlugin *mPlugin;
     QWidget *mPluginWidget;
-    Alignment mAlignment;
     LXQtPanel *mPanel;
     static QColor mMoveMarkerColor;
     QString mName;

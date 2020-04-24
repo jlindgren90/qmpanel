@@ -396,7 +396,6 @@ void LXQtPanel::loadPlugins()
     for (auto plugin : mPlugins)
     {
         mLayout->addPlugin(plugin);
-        connect(plugin, &Plugin::dragLeft, [this] { mShowDelayTimer.stop(); hidePanel(); });
         connect(this, &LXQtPanel::realigned, plugin, &Plugin::realign);
     }
 }
@@ -967,10 +966,6 @@ bool LXQtPanel::event(QEvent *event)
 {
     switch (event->type())
     {
-    case QEvent::ContextMenu:
-        showPopupMenu();
-        break;
-
     case QEvent::LayoutRequest:
         emit realigned();
         break;
@@ -1024,83 +1019,6 @@ void LXQtPanel::showEvent(QShowEvent *event)
 {
     QFrame::showEvent(event);
     realign();
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::showPopupMenu(Plugin *plugin)
-{
-    PopupMenu * menu = new PopupMenu(tr("Panel"), this);
-    menu->setAttribute(Qt::WA_DeleteOnClose);
-
-    menu->setIcon(XdgIcon::fromTheme("configure-toolbars"));
-
-    // Plugin Menu ..............................
-    if (plugin)
-    {
-        QMenu *m = plugin->popupMenu();
-
-        if (m)
-        {
-            menu->addTitle(plugin->windowTitle());
-            const auto actions = m->actions();
-            for (auto const & action : actions)
-            {
-                action->setParent(menu);
-                action->setDisabled(mLockPanel);
-                menu->addAction(action);
-            }
-            delete m;
-        }
-    }
-
-    // Panel menu ...............................
-
-    menu->addTitle(QIcon(), tr("Panel"));
-
-    menu->addAction(XdgIcon::fromTheme(QLatin1String("configure")),
-                   tr("Configure Panel"),
-                   this, SLOT(showConfigDialog())
-                  )->setDisabled(mLockPanel);
-
-    menu->addAction(XdgIcon::fromTheme("preferences-plugin"),
-                   tr("Manage Widgets"),
-                   this, SLOT(showAddPluginDialog())
-                  )->setDisabled(mLockPanel);
-
-    LXQtPanelApplication *a = reinterpret_cast<LXQtPanelApplication*>(qApp);
-    menu->addAction(XdgIcon::fromTheme(QLatin1String("list-add")),
-                   tr("Add New Panel"),
-                   a, SLOT(addNewPanel())
-                  );
-
-    if (a->count() > 1)
-    {
-        menu->addAction(XdgIcon::fromTheme(QLatin1String("list-remove")),
-                       tr("Remove Panel", "Menu Item"),
-                       this, SLOT(userRequestForDeletion())
-                      )->setDisabled(mLockPanel);
-    }
-
-    QAction * act_lock = menu->addAction(tr("Lock This Panel"));
-    act_lock->setCheckable(true);
-    act_lock->setChecked(mLockPanel);
-    connect(act_lock, &QAction::triggered, [this] { mLockPanel = !mLockPanel; saveSettings(false); });
-
-#ifdef DEBUG
-    menu->addSeparator();
-    menu->addAction("Exit (debug only)", qApp, SLOT(quit()));
-#endif
-
-    /* Note: in multihead & multipanel setup the QMenu::popup/exec places the window
-     * sometimes wrongly (it seems that this bug is somehow connected to misinterpretation
-     * of QDesktopWidget::availableGeometry)
-     */
-    menu->setGeometry(calculatePopupWindowPos(QCursor::pos(), menu->sizeHint()));
-    willShowWindow(menu);
-    menu->show();
 }
 
 Plugin* LXQtPanel::findPlugin(const ILXQtPanelPlugin* iPlugin) const

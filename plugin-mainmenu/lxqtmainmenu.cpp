@@ -396,8 +396,8 @@ void LXQtMainMenu::setMenuFontSize()
  ************************************************/
 void LXQtMainMenu::setButtonIcon()
 {
-    mButton.setStyleSheet(QString("#MainMenu { qproperty-icon: url(%1); }")
-           .arg("/usr/share/pixmaps/j-login.png")); /* TODO: make configurable */
+    /* TODO: make configurable */
+    mButton.setIcon(QIcon("/usr/share/pixmaps/j-login.png"));
 }
 
 /************************************************

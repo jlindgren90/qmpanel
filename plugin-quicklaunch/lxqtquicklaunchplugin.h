@@ -41,7 +41,6 @@ public:
 
     ~LXQtQuickLaunchPlugin() { delete mWidget; }
 
-    QString themeId() const override { return "QuickLaunch"; }
     QWidget * widget() override { return mWidget; }
 
 private:

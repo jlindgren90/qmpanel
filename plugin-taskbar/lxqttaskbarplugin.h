@@ -42,9 +42,6 @@ public:
     LXQtTaskBarPlugin(ILXQtPanel *lxqtPanel);
     ~LXQtTaskBarPlugin();
 
-    QString themeId() const { return "TaskBar"; }
-    virtual Flags flags() const { return HaveConfigDialog | NeedsHandle; }
-
     QWidget *widget() { return mTaskBar; }
 
     void settingsChanged() { mTaskBar->settingsChanged(); }

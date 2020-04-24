@@ -71,24 +71,14 @@ Plugin::Plugin(ILXQtPanelPlugin *plugin, LXQtPanel *panel) :
     QFrame(panel),
     mPlugin(plugin),
     mPluginWidget(plugin->widget()),
-    mAlignment(AlignLeft),
     mPanel(panel)
 {
     if (mPluginWidget)
     {
-        mPluginWidget->setObjectName(mPlugin->themeId());
         watchWidgets(mPluginWidget);
     }
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setObjectName(mPlugin->themeId() + "Plugin");
-
-    // plugin handle for easy context menu
-    setProperty("NeedsHandle", mPlugin->flags().testFlag(ILXQtPanelPlugin::NeedsHandle));
-
-    mAlignment = (mPlugin->flags().testFlag(ILXQtPanelPlugin::PreferRightAlignment)) ?
-                Plugin::AlignRight :
-                Plugin::AlignLeft;
 
     if (mPluginWidget)
     {
@@ -106,11 +96,6 @@ Plugin::Plugin(ILXQtPanelPlugin *plugin, LXQtPanel *panel) :
 Plugin::~Plugin()
 {
     delete mPlugin;
-}
-
-void Plugin::setAlignment(Plugin::Alignment alignment)
-{
-    mAlignment = alignment;
 }
 
 /************************************************
@@ -148,15 +133,6 @@ void Plugin::unwatchWidgets(QObject * const widget)
 void Plugin::settingsChanged()
 {
     mPlugin->settingsChanged();
-}
-
-
-/************************************************
-
- ************************************************/
-void Plugin::contextMenuEvent(QContextMenuEvent *event)
-{
-    mPanel->showPopupMenu(this);
 }
 
 
@@ -203,39 +179,6 @@ void Plugin::showEvent(QShowEvent *)
 /************************************************
 
  ************************************************/
-QMenu *Plugin::popupMenu() const
-{
-    QString name = this->name().replace("&", "&&");
-    QMenu* menu = new QMenu(windowTitle());
-
-    if (mPlugin->flags().testFlag(ILXQtPanelPlugin::HaveConfigDialog))
-    {
-        QAction* configAction = new QAction(
-            XdgIcon::fromTheme(QLatin1String("preferences-other")),
-            tr("Configure \"%1\"").arg(name), menu);
-        menu->addAction(configAction);
-        connect(configAction, SIGNAL(triggered()), this, SLOT(showConfigureDialog()));
-    }
-
-    QAction* moveAction = new QAction(XdgIcon::fromTheme("transform-move"), tr("Move \"%1\"").arg(name), menu);
-    menu->addAction(moveAction);
-    connect(moveAction, SIGNAL(triggered()), this, SIGNAL(startMove()));
-
-    menu->addSeparator();
-
-    QAction* removeAction = new QAction(
-        XdgIcon::fromTheme(QLatin1String("list-remove")),
-        tr("Remove \"%1\"").arg(name), menu);
-    menu->addAction(removeAction);
-    connect(removeAction, SIGNAL(triggered()), this, SLOT(requestRemove()));
-
-    return menu;
-}
-
-
-/************************************************
-
- ************************************************/
 bool Plugin::isSeparate() const
 {
    return mPlugin->isSeparate();
@@ -258,9 +201,6 @@ bool Plugin::eventFilter(QObject * watched, QEvent * event)
 {
     switch (event->type())
     {
-        case QEvent::DragLeave:
-            emit dragLeft();
-            break;
         case QEvent::ChildAdded:
             watchWidgets(dynamic_cast<QChildEvent *>(event)->child());
             break;
@@ -280,37 +220,4 @@ void Plugin::realign()
 {
     if (mPlugin)
         mPlugin->realign();
-}
-
-
-/************************************************
-
- ************************************************/
-void Plugin::showConfigureDialog()
-{
-    if (!mConfigDialog)
-        mConfigDialog = mPlugin->configureDialog();
-
-    if (!mConfigDialog)
-        return;
-
-    connect(this, &Plugin::destroyed, mConfigDialog.data(), &QWidget::close);
-    mPanel->willShowWindow(mConfigDialog);
-    mConfigDialog->show();
-    mConfigDialog->raise();
-    mConfigDialog->activateWindow();
-
-    WId wid = mConfigDialog->windowHandle()->winId();
-    KWindowSystem::activateWindow(wid);
-    KWindowSystem::setOnDesktop(wid, KWindowSystem::currentDesktop());
-}
-
-
-/************************************************
-
- ************************************************/
-void Plugin::requestRemove()
-{
-    emit remove();
-    deleteLater();
 }

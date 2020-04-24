@@ -65,9 +65,6 @@ public:
     LXQtMainMenu(ILXQtPanel *lxqtPanel);
     ~LXQtMainMenu();
 
-    QString themeId() const { return "MainMenu"; }
-    virtual ILXQtPanelPlugin::Flags flags() const { return HaveConfigDialog ; }
-
     QWidget *widget() { return &mButton; }
 
     bool isSeparate() const { return true; }

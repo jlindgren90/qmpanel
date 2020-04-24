@@ -441,13 +441,7 @@ LXQtPanelLayout::~LXQtPanelLayout()
  ************************************************/
 void LXQtPanelLayout::addItem(QLayoutItem *item)
 {
-    LayoutItemGrid *grid = mRightGrid;
-
-    Plugin *p = qobject_cast<Plugin*>(item->widget());
-    if (p && p->alignment() == Plugin::AlignLeft)
-        grid = mLeftGrid;
-
-    grid->addItem(item);
+    mRightGrid->addItem(item);
 }
 
 
@@ -1013,52 +1007,8 @@ bool LXQtPanelLayout::itemIsSeparate(QLayoutItem *item)
 /************************************************
 
  ************************************************/
-void LXQtPanelLayout::startMovePlugin()
-{
-    Plugin *plugin = qobject_cast<Plugin*>(sender());
-    if (plugin)
-    {
-        // We have not memoryleaks there.
-        // The processor will be automatically deleted when stopped.
-        PluginMoveProcessor *moveProcessor = new PluginMoveProcessor(this, plugin);
-        moveProcessor->start();
-        connect(moveProcessor, SIGNAL(finished()), this, SLOT(finishMovePlugin()));
-    }
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanelLayout::finishMovePlugin()
-{
-    PluginMoveProcessor *moveProcessor = qobject_cast<PluginMoveProcessor*>(sender());
-    if (moveProcessor)
-    {
-        Plugin *plugin = moveProcessor->plugin();
-        int n = indexOf(plugin);
-        plugin->setAlignment(n<mLeftGrid->count() ? Plugin::AlignLeft : Plugin::AlignRight);
-        emit pluginMoved(plugin);
-    }
-}
-
-/************************************************
-
- ************************************************/
-void LXQtPanelLayout::moveUpPlugin(Plugin * plugin)
-{
-    const int i = indexOf(plugin);
-    if (0 < i)
-        moveItem(i, i - 1, true);
-}
-
-/************************************************
-
- ************************************************/
 void LXQtPanelLayout::addPlugin(Plugin * plugin)
 {
-    connect(plugin, &Plugin::startMove, this, &LXQtPanelLayout::startMovePlugin);
-
     const int prev_count = count();
     addWidget(plugin);
 

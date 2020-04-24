@@ -59,22 +59,6 @@ class LXQT_PANEL_API ILXQtPanelPlugin
 {
 public:
     /**
-      This enum describes the properties of a plugin.
-     **/
-    enum Flag {
-        NoFlags              = 0,   ///< It does not have any properties set.
-        PreferRightAlignment = 1,   /**< The plugin prefers right alignment (for example the clock plugin);
-                                        otherwise the plugin prefers left alignment (like main menu).
-                                        This flag is used only at the first start, later positions of all
-                                        plugins are saved in a config, and this saved information is used. */
-        HaveConfigDialog     = 2,   ///< The plugin have a configuration dialog.
-        SingleInstance       = 4,   ///< The plugin allows only one instance to run.
-        NeedsHandle          = 8    ///< The plugin needs a handle for the context menu
-    };
-
-    Q_DECLARE_FLAGS(Flags, Flag)
-
-    /**
       This enum describes the reason the plugin was activated.
      **/
     enum ActivationReason {
@@ -95,19 +79,6 @@ public:
      Destroys the object.
      **/
     virtual ~ILXQtPanelPlugin() {}
-
-    /**
-    Returns the plugin flags.
-    The base class implementation returns a NoFlags.
-     **/
-    virtual Flags flags() const { return NoFlags; }
-
-    /**
-    Returns the string that is used in the theme QSS file.
-    If you return "WorldClock" string, theme author may write something like `#WorldClock { border: 1px solid red; }`
-    to set a custom border for your plugin.
-    **/
-    virtual QString themeId() const = 0;
 
     /**
      From the user's point of view, your plugin is some visual widget on the panel. This function returns a pointer to it.
@@ -192,7 +163,5 @@ public:
 private:
     ILXQtPanel *mPanel;
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(ILXQtPanelPlugin::Flags)
 
 #endif // ILXQTPANELPLUGIN_H

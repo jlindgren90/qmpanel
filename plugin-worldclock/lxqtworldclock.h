@@ -52,8 +52,6 @@ public:
     ~LXQtWorldClock();
 
     virtual QWidget *widget() { return mMainWidget; }
-    virtual QString themeId() const { return QLatin1String("WorldClock"); }
-    virtual ILXQtPanelPlugin::Flags flags() const { return PreferRightAlignment | HaveConfigDialog ; }
     bool isSeparate() const { return true; }
     void activated(ActivationReason reason);
 

@@ -129,16 +129,6 @@ public:
      */
     void readSettings();
 
-    /**
-     * @brief Creates and shows the popup menu (right click menu). If a plugin
-     * is given as parameter, the menu will be divided in two groups:
-     * plugin-specific options and panel-related options. As these two are
-     * shown together, this menu has to be created by LXQtPanel.
-     * @param plugin The plugin whose menu options will be included in the
-     * context menu.
-     */
-    void showPopupMenu(Plugin *plugin = 0);
-
     // ILXQtPanel overrides ........
     ILXQtPanel::Position position() const override { return mPosition; }
     QRect globalGeometry() const override;
