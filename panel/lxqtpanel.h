@@ -31,7 +31,6 @@
 
 #include <QPointer>
 #include <QWidget>
-#include "lxqtpanelglobals.h"
 
 class QHBoxLayout;
 class QScreen;
@@ -59,7 +58,7 @@ class Plugin;
  *
  * \sa LXQtPanelApplication, Plugin, PanelPluginsModel, LXQtPanelLayout.
  */
-class LXQT_PANEL_API LXQtPanel : public QWidget
+class LXQtPanel : public QWidget
 {
     Q_OBJECT
 

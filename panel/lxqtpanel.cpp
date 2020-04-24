@@ -28,7 +28,6 @@
 
 #include "lxqtpanel.h"
 #include "lxqtpanelapplication.h"
-#include "popupmenu.h"
 #include "plugin.h"
 
 #include "../plugin-mainmenu/lxqtmainmenu.h"
