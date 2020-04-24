@@ -90,11 +90,8 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     mSettings(settings),
     mConfigGroup(configGroup),
     mPanelSize(0),
-    mLength(0),
     mScreenNum(0), //whatever (avoid conditional on uninitialized value)
-    mActualScreenNum(0),
-    mAnimation(nullptr),
-    mLockPanel(false)
+    mActualScreenNum(0)
 {
     //You can find information about the flags and widget attributes in your
     //Qt documentation or at https://doc.qt.io/qt-5/qt.html
@@ -171,14 +168,8 @@ void LXQtPanel::readSettings()
     // By default we are using size & count from theme.
     setPanelSize(mSettings->value(CFG_KEY_PANELSIZE, PANEL_DEFAULT_SIZE).toInt(), false);
 
-    setLength(mSettings->value(CFG_KEY_LENGTH, 100).toInt(),
-              mSettings->value(CFG_KEY_PERCENT, true).toBool(),
-              false);
-
     mScreenNum = mSettings->value(CFG_KEY_SCREENNUM, QApplication::desktop()->primaryScreen()).toInt();
     setPosition(mScreenNum, false);
-
-    mLockPanel = mSettings->value(CFG_KEY_LOCKPANEL, false).toBool();
 
     mSettings->endGroup();
 }
@@ -205,7 +196,6 @@ void LXQtPanel::ensureVisible()
 LXQtPanel::~LXQtPanel()
 {
     mLayout->setEnabled(false);
-    delete mAnimation;
 }
 
 
@@ -216,19 +206,6 @@ void LXQtPanel::show()
 {
     QWidget::show();
     KWindowSystem::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
-}
-
-
-/************************************************
-
- ************************************************/
-QStringList pluginDesktopDirs()
-{
-    QStringList dirs;
-    dirs << QString(getenv("LXQT_PANEL_PLUGINS_DIR")).split(':', QString::SkipEmptyParts);
-    dirs << QString("%1/%2").arg(XdgDirs::dataHome(), "/lxqt/lxqt-panel");
-    dirs << PLUGIN_DESKTOPS_DIR;
-    return dirs;
 }
 
 
@@ -269,17 +246,7 @@ void LXQtPanel::setPanelGeometry(bool animate)
     QRect rect;
 
     rect.setHeight(qMax(PANEL_MINIMUM_SIZE, mPanelSize));
-    if (mLengthInPercents)
-        rect.setWidth(currentScreen.width() * mLength / 100.0);
-    else
-    {
-        if (mLength <= 0)
-            rect.setWidth(currentScreen.width() + mLength);
-        else
-            rect.setWidth(mLength);
-    }
-
-    rect.setWidth(qMax(rect.size().width(), mLayout->minimumSize().width()));
+    rect.setWidth(currentScreen.width());
     rect.moveLeft(currentScreen.left());
     rect.moveBottom(currentScreen.bottom());
 
@@ -378,22 +345,6 @@ void LXQtPanel::setPanelSize(int value, bool save)
         mPanelSize = value;
         realign();
     }
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::setLength(int length, bool inPercents, bool save)
-{
-    if (mLength == length &&
-            mLengthInPercents == inPercents)
-        return;
-
-    mLength = length;
-    mLengthInPercents = inPercents;
-
-    realign();
 }
 
 

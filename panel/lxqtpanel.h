@@ -141,8 +141,6 @@ public:
 
     // Settings
     int panelSize() const { return mPanelSize; }
-    int length() const { return mLength; }
-    bool lengthInPercents() const { return mLengthInPercents; }
     int screenNum() const { return mScreenNum; }
 
 public slots:
@@ -169,7 +167,6 @@ public slots:
      * @param save If true, saveSettings(true) will be called.
      */
     void setPanelSize(int value, bool save);
-    void setLength(int length, bool inPercents, bool save); //!< \sa setPanelSize()
     void setPosition(int screen, bool save); //!< \sa setPanelSize()
 
     /**
@@ -349,23 +346,6 @@ private:
     int mPanelSize;
 
     /**
-     * @brief Stores the length of the panel, i.e. the width of a horizontal
-     * panel or the height of a vertical panel. The unit of this value is
-     * determined by mLengthInPercents.
-     *
-     * \sa mLengthInPercents
-     */
-    int mLength;
-    /**
-     * @brief Stores if mLength is stored in pixels or relative to the
-     * screen size in percents. If true, the length is stored in percents,
-     * otherwise in pixels.
-     *
-     * \sa mLength
-     */
-    bool mLengthInPercents;
-
-    /**
      * @brief Returns the index of the screen on which this panel should be
      * shown. This is the user configured value which can differ from the
      * screen that the panel is actually shown on. If the panel can not be
@@ -385,16 +365,6 @@ private:
      * \sa mScreenNum, canPlacedOn(), findAvailableScreen().
      */
     int mActualScreenNum;
-
-    /**
-     * @brief The animation used for showing/hiding an auto-hiding panel.
-     */
-    QPropertyAnimation *mAnimation;
-
-    /**
-     * @brief Flag for providing the configuration options in panel's context menu
-     */
-    bool mLockPanel;
 };
 
 
