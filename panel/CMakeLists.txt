@@ -4,11 +4,9 @@ set(PRIV_HEADERS
     lxqtpanel.h
     lxqtpanelapplication.h
     lxqtpanelapplication_p.h
-    lxqtpanellayout.h
     plugin.h
     lxqtpanellimits.h
     popupmenu.h
-    pluginmoveprocessor.h
 )
 
 # using LXQt namespace in the public headers.
@@ -22,10 +20,8 @@ set(SOURCES
     main.cpp
     lxqtpanel.cpp
     lxqtpanelapplication.cpp
-    lxqtpanellayout.cpp
     plugin.cpp
     popupmenu.cpp
-    pluginmoveprocessor.cpp
 )
 
 set(LIBRARIES

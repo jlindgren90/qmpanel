@@ -508,7 +508,7 @@ void LXQtTaskBar::realign()
 
     if (panel->isHorizontal())
     {
-        mLayout->setRowCount(panel->lineCount());
+        mLayout->setRowCount(1);
         mLayout->setColumnCount(0);
     }
     else
@@ -518,7 +518,7 @@ void LXQtTaskBar::realign()
         if (mButtonStyle == Qt::ToolButtonIconOnly)
         {
             // Vertical + Icons
-            mLayout->setColumnCount(panel->lineCount());
+            mLayout->setColumnCount(1);
         }
         else
         {
@@ -530,7 +530,7 @@ void LXQtTaskBar::realign()
                 maxSize.rwidth()  = mButtonHeight;
                 maxSize.rheight() = mButtonWidth;
 
-                mLayout->setColumnCount(panel->lineCount());
+                mLayout->setColumnCount(1);
             }
             else
             {

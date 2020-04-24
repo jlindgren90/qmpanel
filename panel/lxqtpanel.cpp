@@ -30,13 +30,11 @@
 #include "lxqtpanellimits.h"
 #include "ilxqtpanelplugin.h"
 #include "lxqtpanelapplication.h"
-#include "lxqtpanellayout.h"
 #include "popupmenu.h"
 #include "plugin.h"
 
 #include "../plugin-mainmenu/lxqtmainmenu.h"
 #include "../plugin-quicklaunch/lxqtquicklaunchplugin.h"
-#include "../plugin-spacer/spacer.h"
 #include "../plugin-taskbar/lxqttaskbarplugin.h"
 #include "../plugin-tray/lxqttrayplugin.h"
 #include "../plugin-worldclock/lxqtworldclock.h"
@@ -128,7 +126,6 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     mSettings(settings),
     mConfigGroup(configGroup),
     mPanelSize(0),
-    mLineCount(0),
     mLength(0),
     mAlignment(AlignmentLeft),
     mPosition(ILXQtPanel::PositionBottom),
@@ -177,9 +174,9 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     setLayout(lav);
     this->layout()->addWidget(LXQtPanelWidget);
 
-    mLayout = new LXQtPanelLayout(LXQtPanelWidget);
-    LXQtPanelWidget->setLayout(mLayout);
-    mLayout->setLineCount(mLineCount);
+    mLayout = new QHBoxLayout(LXQtPanelWidget);
+    mLayout->setMargin(0);
+    mLayout->setSpacing(0);
 
     connect(QApplication::desktop(), &QDesktopWidget::resized, this, &LXQtPanel::ensureVisible);
     connect(QApplication::desktop(), &QDesktopWidget::screenCountChanged, this, &LXQtPanel::ensureVisible);
@@ -212,7 +209,6 @@ void LXQtPanel::readSettings()
 
     // By default we are using size & count from theme.
     setPanelSize(mSettings->value(CFG_KEY_PANELSIZE, PANEL_DEFAULT_SIZE).toInt(), false);
-    setLineCount(mSettings->value(CFG_KEY_LINECNT, PANEL_DEFAULT_LINE_COUNT).toInt(), false);
 
     setLength(mSettings->value(CFG_KEY_LENGTH, 100).toInt(),
               mSettings->value(CFG_KEY_PERCENT, true).toBool(),
@@ -286,21 +282,22 @@ QStringList pluginDesktopDirs()
  ************************************************/
 void LXQtPanel::loadPlugins()
 {
-    /* TODO: make this configurable */
     mPlugins.append(new Plugin(new LXQtMainMenu(this), this));
     mPlugins.append(new Plugin(new LXQtQuickLaunchPlugin(this), this));
     mPlugins.append(new Plugin(new LXQtTaskBarPlugin(this), this));
-    mPlugins.append(new Plugin(new Spacer(this), this));
     mPlugins.append(new Plugin(new LXQtTrayPlugin(this), this));
-    mPlugins.append(new Plugin(new Spacer(this), this));
     mPlugins.append(new Plugin(new LXQtWorldClock(this), this));
-    mPlugins.append(new Plugin(new Spacer(this), this));
 
     for (auto plugin : mPlugins)
     {
-        mLayout->addPlugin(plugin);
+        mLayout->addWidget(plugin);
         connect(this, &LXQtPanel::realigned, plugin, &Plugin::realign);
     }
+
+    mLayout->setStretch(2, 1);
+    mLayout->insertSpacing(3, 6); /* TODO: scale with DPI */
+    mLayout->insertSpacing(5, 6); /* TODO: scale with DPI */
+    mLayout->insertSpacing(7, 6); /* TODO: scale with DPI */
 }
 
 /************************************************
@@ -579,23 +576,6 @@ void LXQtPanel::setPanelSize(int value, bool save)
 /************************************************
 
  ************************************************/
-void LXQtPanel::setLineCount(int value, bool save)
-{
-    if (mLineCount != value)
-    {
-        mLineCount = value;
-        mLayout->setEnabled(false);
-        mLayout->setLineCount(mLineCount);
-        mLayout->setEnabled(true);
-
-        realign();
-    }
-}
-
-
-/************************************************
-
- ************************************************/
 void LXQtPanel::setLength(int length, bool inPercents, bool save)
 {
     if (mLength == length &&
@@ -620,7 +600,6 @@ void LXQtPanel::setPosition(int screen, ILXQtPanel::Position position, bool save
 
     mActualScreenNum = screen;
     mPosition = position;
-    mLayout->setPosition(mPosition);
 
     if (save)
     {

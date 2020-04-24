@@ -159,12 +159,12 @@ void LXQtTray::realign()
 
     if (panel->isHorizontal())
     {
-        mLayout->setRowCount(panel->lineCount());
+        mLayout->setRowCount(1);
         mLayout->setColumnCount(0);
     }
     else
     {
-        mLayout->setColumnCount(panel->lineCount());
+        mLayout->setColumnCount(1);
         mLayout->setRowCount(0);
     }
     mLayout->setEnabled(true);

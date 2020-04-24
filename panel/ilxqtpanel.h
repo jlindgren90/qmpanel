@@ -56,11 +56,6 @@ public:
     virtual Position position() const = 0;
 
     /**
-     * @brief Returns the number of lines/rows of this panel.
-     */
-    virtual int lineCount() const = 0;
-
-    /**
      * @brief Helper function for convenient direction/alignment checking.
      * @return True if the panel is on the top or the bottom of the
      * screen; otherwise returns false.

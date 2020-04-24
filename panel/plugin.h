@@ -60,9 +60,6 @@ public:
 
     const ILXQtPanelPlugin * iPlugin() const { return mPlugin; }
 
-    bool isSeparate() const;
-    bool isExpandable() const;
-
     QWidget *widget() { return mPluginWidget; }
 
     QString name() const { return mName; }

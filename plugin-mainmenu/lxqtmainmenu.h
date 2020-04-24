@@ -67,8 +67,6 @@ public:
 
     QWidget *widget() { return &mButton; }
 
-    bool isSeparate() const { return true; }
-
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 

@@ -118,8 +118,6 @@ public:
         return mPanel->calculatePopupWindowPos(this, windowSize);
     }
 
-    virtual bool isSeparate() const { return false;  }
-    virtual bool isExpandable() const { return false; }
 private:
     ILXQtPanel *mPanel;
 };

@@ -47,8 +47,6 @@ public:
     void settingsChanged() { mTaskBar->settingsChanged(); }
     void realign();
 
-    bool isSeparate() const { return true; }
-    bool isExpandable() const { return true; }
 private:
     LXQtTaskBar *mTaskBar;
 };

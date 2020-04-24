@@ -47,8 +47,6 @@ public:
     void realign();
     void settingsChanged();
 
-    bool isSeparate() const { return true; }
-
 private:
     LXQtTray *mWidget;
 

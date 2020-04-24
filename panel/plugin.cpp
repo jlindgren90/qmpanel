@@ -48,20 +48,6 @@
 #include <LXQt/Translator>
 #include <XdgIcon>
 
-// statically linked built-in plugins
-#include "../plugin-mainmenu/lxqtmainmenu.h" // mainmenu
-extern void * loadPluginTranslation_mainmenu_helper;
-#include "../plugin-quicklaunch/lxqtquicklaunchplugin.h" // quicklaunch
-extern void * loadPluginTranslation_quicklaunch_helper;
-#include "../plugin-spacer/spacer.h" // spacer
-extern void * loadPluginTranslation_spacer_helper;
-#include "../plugin-taskbar/lxqttaskbarplugin.h" // taskbar
-extern void * loadPluginTranslation_taskbar_helper;
-#include "../plugin-tray/lxqttrayplugin.h" // tray
-extern void * loadPluginTranslation_tray_helper;
-#include "../plugin-worldclock/lxqtworldclock.h" // worldclock
-extern void * loadPluginTranslation_worldclock_helper;
-
 QColor Plugin::mMoveMarkerColor= QColor(255, 0, 0, 255);
 
 /************************************************
@@ -143,24 +129,6 @@ void Plugin::showEvent(QShowEvent *)
 {
     if (mPluginWidget)
         mPluginWidget->adjustSize();
-}
-
-
-/************************************************
-
- ************************************************/
-bool Plugin::isSeparate() const
-{
-   return mPlugin->isSeparate();
-}
-
-
-/************************************************
-
- ************************************************/
-bool Plugin::isExpandable() const
-{
-    return mPlugin->isExpandable();
 }
 
 

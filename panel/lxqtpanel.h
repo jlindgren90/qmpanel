@@ -38,14 +38,13 @@
 #include "ilxqtpanel.h"
 #include "lxqtpanelglobals.h"
 
+class QHBoxLayout;
 class QMenu;
 class Plugin;
-class QAbstractItemModel;
 
 namespace LXQt {
 class Settings;
 }
-class LXQtPanelLayout;
 class ConfigPanelDialog;
 class PanelPluginsModel;
 class WindowNotifier;
@@ -189,7 +188,6 @@ public:
     static ILXQtPanel::Position strToPosition(const QString &str, ILXQtPanel::Position defaultValue);
 
     // Settings
-    int lineCount() const override { return mLineCount; } //!< Implement ILXQtPanel::lineCount().
     int panelSize() const { return mPanelSize; }
     int length() const { return mLength; }
     bool lengthInPercents() const { return mLengthInPercents; }
@@ -221,7 +219,6 @@ public slots:
      * @param save If true, saveSettings(true) will be called.
      */
     void setPanelSize(int value, bool save);
-    void setLineCount(int value, bool save); //!< \sa setPanelSize()
     void setLength(int length, bool inPercents, bool save); //!< \sa setPanelSize()
     void setPosition(int screen, ILXQtPanel::Position position, bool save); //!< \sa setPanelSize()
     void setAlignment(LXQtPanel::Alignment value, bool save); //!< \sa setPanelSize()
@@ -318,7 +315,7 @@ private:
      * @brief The LXQtPanelLayout of this panel. All the Plugins will be added
      * to the UI via this layout.
      */
-    LXQtPanelLayout* mLayout;
+    QHBoxLayout* mLayout;
     /**
      * @brief The LXQt::Settings instance as retrieved from
      * LXQtPanelApplication.
@@ -402,12 +399,6 @@ private:
      * \sa panelSize(), setPanelSize().
      */
     int mPanelSize;
-    /**
-     * @brief Stores the number of lines/rows of the panel.
-     *
-     * \sa ILXQtPanel::lineCount(), setLineCount().
-     */
-    int mLineCount;
 
     /**
      * @brief Stores the length of the panel, i.e. the width of a horizontal
