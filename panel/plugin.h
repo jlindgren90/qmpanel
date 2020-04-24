@@ -77,8 +77,6 @@ public slots:
     void realign();
 
 protected:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
     void showEvent(QShowEvent *event);
 
 private:

@@ -59,16 +59,6 @@ class LXQT_PANEL_API ILXQtPanelPlugin
 {
 public:
     /**
-      This enum describes the reason the plugin was activated.
-     **/
-    enum ActivationReason {
-        Unknown             = 0,    ///< Unknown reason
-        DoubleClick         = 2,    ///<	The plugin entry was double clicked
-        Trigger             = 3,    ///<	The plugin was clicked
-        MiddleClick         = 4     ///< The plugin was clicked with the middle mouse button
-    };
-
-    /**
      Constructs an ILXQtPanelPlugin object with the given startupInfo. You do not have to worry
      about the startupInfo parameters, ILXQtPanelPlugin processes the parameters itself.
      **/
@@ -105,14 +95,6 @@ public:
     The default implementation do nothing.
     **/
     virtual void settingsChanged() {}
-
-    /**
-    This function is called when the user activates the plugin. reason specifies the reason for activation.
-    ILXQtPanelPlugin::ActivationReason enumerates the various reasons.
-
-    The default implementation do nothing.
-     **/
-    virtual void activated(ActivationReason reason) {}
 
     /**
     This function is called when the panel geometry or lines count are changed.

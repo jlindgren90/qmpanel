@@ -53,7 +53,6 @@ public:
 
     virtual QWidget *widget() { return mMainWidget; }
     bool isSeparate() const { return true; }
-    void activated(ActivationReason reason);
 
     virtual void settingsChanged();
     virtual void realign();
@@ -61,14 +60,12 @@ public:
 private slots:
     void timeout();
     void wheelScrolled(int);
-    void deletePopup();
     void updateTimeText();
 
 private:
     QWidget *mMainWidget;
     LXQt::RotatedWidget* mRotatedWidget;
     ActiveLabel *mContent;
-    LXQtWorldClockPopup* mPopup;
 
     QTimer *mTimer;
     int mUpdateInterval;
@@ -80,7 +77,6 @@ private:
     QString mFormat;
 
     bool mAutoRotate;
-    QLabel *mPopupContent;
 
     QDateTime mShownTime;
 
@@ -88,7 +84,6 @@ private:
 
     void setTimeText();
     QString formatDateTime(const QDateTime &datetime, const QString &timeZoneName);
-    void updatePopupContent();
     bool formatHasTimeZone(QString format);
     QString preformat(const QString &format, const QTimeZone &timeZone, const QDateTime& dateTime);
 };

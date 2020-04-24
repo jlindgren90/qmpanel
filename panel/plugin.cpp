@@ -139,36 +139,6 @@ void Plugin::settingsChanged()
 /************************************************
 
  ************************************************/
-void Plugin::mousePressEvent(QMouseEvent *event)
-{
-    switch (event->button())
-    {
-    case Qt::LeftButton:
-        mPlugin->activated(ILXQtPanelPlugin::Trigger);
-        break;
-
-    case Qt::MidButton:
-        mPlugin->activated(ILXQtPanelPlugin::MiddleClick);
-        break;
-
-    default:
-        break;
-    }
-}
-
-
-/************************************************
-
- ************************************************/
-void Plugin::mouseDoubleClickEvent(QMouseEvent*)
-{
-    mPlugin->activated(ILXQtPanelPlugin::DoubleClick);
-}
-
-
-/************************************************
-
- ************************************************/
 void Plugin::showEvent(QShowEvent *)
 {
     if (mPluginWidget)

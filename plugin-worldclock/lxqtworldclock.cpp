@@ -43,11 +43,9 @@
 LXQtWorldClock::LXQtWorldClock(ILXQtPanel *lxqtPanel):
     QObject(),
     ILXQtPanelPlugin(lxqtPanel),
-    mPopup(NULL),
     mTimer(new QTimer(this)),
     mUpdateInterval(1),
-    mAutoRotate(true),
-    mPopupContent(NULL)
+    mAutoRotate(true)
 {
     mMainWidget = new QWidget();
     mContent = new ActiveLabel();
@@ -137,8 +135,6 @@ void LXQtWorldClock::updateTimeText()
         if (old_size != mContent->sizeHint())
             mRotatedWidget->adjustContentSize();
         mRotatedWidget->update();
-        updatePopupContent();
-
     }
 }
 
@@ -344,13 +340,6 @@ void LXQtWorldClock::settingsChanged()
         realign();
     }
 
-    if (mPopup)
-    {
-        updatePopupContent();
-        mPopup->adjustSize();
-        mPopup->setGeometry(calculatePopupWindowPos(mPopup->size()));
-    }
-
     setTimeText();
 }
 
@@ -363,99 +352,11 @@ void LXQtWorldClock::wheelScrolled(int delta)
     }
 }
 
-void LXQtWorldClock::activated(ActivationReason reason)
-{
-    switch (reason)
-    {
-    case ILXQtPanelPlugin::Trigger:
-    case ILXQtPanelPlugin::MiddleClick:
-        break;
-
-    default:
-        return;
-    }
-
-    if (!mPopup)
-    {
-        mPopup = new LXQtWorldClockPopup(mContent);
-        connect(mPopup, SIGNAL(deactivated()), SLOT(deletePopup()));
-
-        if (reason == ILXQtPanelPlugin::Trigger)
-        {
-            mPopup->setObjectName(QLatin1String("WorldClockCalendar"));
-
-            mPopup->layout()->setContentsMargins(0, 0, 0, 0);
-            QCalendarWidget *calendarWidget = new QCalendarWidget(mPopup);
-            mPopup->layout()->addWidget(calendarWidget);
-
-            QString timeZoneName = mActiveTimeZone;
-            if (timeZoneName == QLatin1String("local"))
-                timeZoneName = QString::fromLatin1(QTimeZone::systemTimeZoneId());
-
-            QTimeZone timeZone(timeZoneName.toLatin1());
-            calendarWidget->setFirstDayOfWeek(QLocale(QLocale::AnyLanguage, timeZone.country()).firstDayOfWeek());
-            calendarWidget->setSelectedDate(QDateTime::currentDateTime().toTimeZone(timeZone).date());
-        }
-        else
-        {
-            mPopup->setObjectName(QLatin1String("WorldClockPopup"));
-
-            mPopupContent = new QLabel(mPopup);
-            mPopup->layout()->addWidget(mPopupContent);
-            mPopupContent->setAlignment(mContent->alignment());
-
-            updatePopupContent();
-        }
-
-        mPopup->adjustSize();
-        mPopup->setGeometry(calculatePopupWindowPos(mPopup->size()));
-
-        willShowWindow(mPopup);
-        mPopup->show();
-    }
-    else
-    {
-        deletePopup();
-    }
-}
-
-void LXQtWorldClock::deletePopup()
-{
-    mPopupContent = NULL;
-    mPopup->deleteLater();
-    mPopup = NULL;
-}
-
 QString LXQtWorldClock::formatDateTime(const QDateTime &datetime, const QString &timeZoneName)
 {
     QTimeZone timeZone(timeZoneName.toLatin1());
     QDateTime tzNow = datetime.toTimeZone(timeZone);
     return tzNow.toString(preformat(mFormat, timeZone, tzNow));
-}
-
-void LXQtWorldClock::updatePopupContent()
-{
-    if (mPopupContent)
-    {
-        QDateTime now = QDateTime::currentDateTime();
-        QStringList allTimeZones;
-        bool hasTimeZone = formatHasTimeZone(mFormat);
-
-        for (QString timeZoneName : qAsConst(mTimeZones))
-        {
-            if (timeZoneName == QLatin1String("local"))
-                timeZoneName = QString::fromLatin1(QTimeZone::systemTimeZoneId());
-
-            QString formatted = formatDateTime(now, timeZoneName);
-
-            if (!hasTimeZone)
-                formatted += QLatin1String("<br/>") + QString::fromLatin1(QTimeZone(timeZoneName.toLatin1()).id());
-
-            allTimeZones.append(formatted);
-        }
-
-        mPopupContent->setText(allTimeZones.join(QLatin1String("<hr/>")));
-    }
 }
 
 bool LXQtWorldClock::formatHasTimeZone(QString format)
