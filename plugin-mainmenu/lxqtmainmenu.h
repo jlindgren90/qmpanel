@@ -29,7 +29,7 @@
 #ifndef LXQT_MAINMENU_H
 #define LXQT_MAINMENU_H
 
-#include "../panel/ilxqtpanelplugin.h"
+#include "../panel/plugin.h"
 #include <XdgMenu>
 
 #include <QLabel>
@@ -58,7 +58,7 @@ namespace GlobalKeyShortcut
 class Action;
 }
 
-class LXQtMainMenu : public QObject, public ILXQtPanelPlugin
+class LXQtMainMenu : public Plugin
 {
     Q_OBJECT
 public:

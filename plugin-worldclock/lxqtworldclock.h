@@ -32,9 +32,9 @@
 #include <QLabel>
 #include <QTimer>
 
-#include "../panel/ilxqtpanelplugin.h"
+#include "../panel/plugin.h"
 
-class LXQtWorldClock : public ILXQtPanelPlugin
+class LXQtWorldClock : public Plugin
 {
 public:
     LXQtWorldClock(LXQtPanel * lxqtPanel);

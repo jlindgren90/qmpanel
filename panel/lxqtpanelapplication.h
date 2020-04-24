@@ -30,11 +30,7 @@
 #define LXQTPANELAPPLICATION_H
 
 #include <LXQt/Application>
-#include "ilxqtpanelplugin.h"
-
-class QScreen;
-
-class LXQtPanel;
+#include "lxqtpanel.h"
 
 /*!
  * \brief The LXQtPanelApplication class inherits from LXQt::Application and

@@ -28,7 +28,6 @@
 
 #include "lxqtpanel.h"
 #include "lxqtpanellimits.h"
-#include "ilxqtpanelplugin.h"
 #include "lxqtpanelapplication.h"
 #include "popupmenu.h"
 #include "plugin.h"
@@ -134,15 +133,15 @@ void LXQtPanel::show()
  ************************************************/
 void LXQtPanel::loadPlugins()
 {
-    mPlugins.append(new Plugin(new LXQtMainMenu(this), this));
-    mPlugins.append(new Plugin(new LXQtQuickLaunchPlugin(this), this));
-    mPlugins.append(new Plugin(new LXQtTaskBarPlugin(this), this));
-    mPlugins.append(new Plugin(new LXQtTrayPlugin(this), this));
-    mPlugins.append(new Plugin(new LXQtWorldClock(this), this));
+    mPlugins.append(new LXQtMainMenu(this));
+    mPlugins.append(new LXQtQuickLaunchPlugin(this));
+    mPlugins.append(new LXQtTaskBarPlugin(this));
+    mPlugins.append(new LXQtTrayPlugin(this));
+    mPlugins.append(new LXQtWorldClock(this));
 
     for (auto plugin : mPlugins)
     {
-        mLayout->addWidget(plugin);
+        mLayout->addWidget(plugin->widget());
         connect(this, &LXQtPanel::realigned, plugin, &Plugin::realign);
     }
 
@@ -257,14 +256,6 @@ void LXQtPanel::showEvent(QShowEvent *event)
     realign();
 }
 
-Plugin* LXQtPanel::findPlugin(const ILXQtPanelPlugin* iPlugin) const
-{
-    for (auto plug : mPlugins)
-        if (plug->iPlugin() == iPlugin)
-            return plug;
-    return nullptr;
-}
-
 /************************************************
 
  ************************************************/
@@ -298,18 +289,8 @@ QRect LXQtPanel::calculatePopupWindowPos(QPoint const & absolutePos, QSize const
 /************************************************
 
  ************************************************/
-QRect LXQtPanel::calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const QSize &windowSize) const
+QRect LXQtPanel::calculatePopupWindowPos(QWidget *widget, const QSize &windowSize) const
 {
-    Plugin *panel_plugin = findPlugin(plugin);
-    if (nullptr == panel_plugin)
-    {
-        qWarning() << Q_FUNC_INFO << "Wrong logic? Unable to find Plugin* for" << plugin << "known plugins follow...";
-        for (auto plug : mPlugins)
-            qWarning() << plug->iPlugin() << plug;
-
-        return QRect();
-    }
-
     // Note: assuming there are not contentMargins around the "BackgroundWidget" (LXQtPanelWidget)
-    return calculatePopupWindowPos(geometry().topLeft() + panel_plugin->geometry().topLeft(), windowSize);
+    return calculatePopupWindowPos(geometry().topLeft() + widget->geometry().topLeft(), windowSize);
 }

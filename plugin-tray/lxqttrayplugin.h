@@ -29,13 +29,13 @@
 #ifndef LXQTTRAYPLUGIN_H
 #define LXQTTRAYPLUGIN_H
 
-#include "../panel/ilxqtpanelplugin.h"
+#include "../panel/plugin.h"
 #include <QDebug>
 #include <QObject>
 #include <QX11Info>
 
 class LXQtTray;
-class LXQtTrayPlugin : public QObject, public ILXQtPanelPlugin
+class LXQtTrayPlugin : public Plugin
 {
     Q_OBJECT
 public:

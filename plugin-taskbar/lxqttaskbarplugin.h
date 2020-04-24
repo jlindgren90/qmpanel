@@ -29,12 +29,12 @@
 #ifndef LXQTTASKBARPLUGIN_H
 #define LXQTTASKBARPLUGIN_H
 
-#include "../panel/ilxqtpanelplugin.h"
+#include "../panel/plugin.h"
 #include "lxqttaskbar.h"
 #include <QDebug>
 class LXQtTaskBar;
 
-class LXQtTaskBarPlugin : public QObject, public ILXQtPanelPlugin
+class LXQtTaskBarPlugin : public Plugin
 {
     Q_OBJECT
 public:

@@ -30,8 +30,7 @@
 #include "lxqttray.h"
 
 LXQtTrayPlugin::LXQtTrayPlugin(LXQtPanel *lxqtPanel) :
-    QObject(),
-    ILXQtPanelPlugin(lxqtPanel),
+    Plugin(lxqtPanel),
     mWidget(new LXQtTray(this))
 {
 }

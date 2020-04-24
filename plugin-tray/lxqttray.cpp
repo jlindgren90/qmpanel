@@ -50,7 +50,7 @@
 
 #include "lxqttray.h"
 
-#include "../panel/ilxqtpanelplugin.h"
+#include "../panel/plugin.h"
 
 #define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
 #define _NET_SYSTEM_TRAY_ORIENTATION_VERT 1
@@ -66,7 +66,7 @@
 /************************************************
 
  ************************************************/
-LXQtTray::LXQtTray(ILXQtPanelPlugin *plugin, QWidget *parent):
+LXQtTray::LXQtTray(Plugin *plugin, QWidget *parent):
     QFrame(parent),
     mValid(false),
     mTrayId(0),

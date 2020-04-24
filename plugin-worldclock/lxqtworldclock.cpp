@@ -31,7 +31,7 @@
 #include <QDate>
 
 LXQtWorldClock::LXQtWorldClock(LXQtPanel * lxqtPanel)
-    : ILXQtPanelPlugin(lxqtPanel)
+    : Plugin(lxqtPanel)
 {
     mTimer.setInterval(10000);
     mTimer.start();

@@ -29,14 +29,10 @@
 #include "lxqttaskbarplugin.h"
 
 LXQtTaskBarPlugin::LXQtTaskBarPlugin(LXQtPanel *lxqtPanel):
-    QObject(),
-    ILXQtPanelPlugin(lxqtPanel)
-
+    Plugin(lxqtPanel)
 {
     mTaskBar = new LXQtTaskBar(this);
-
 }
-
 
 LXQtTaskBarPlugin::~LXQtTaskBarPlugin()
 {

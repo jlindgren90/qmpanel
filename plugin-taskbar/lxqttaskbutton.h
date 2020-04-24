@@ -39,7 +39,7 @@ class QPalette;
 class QMimeData;
 class LXQtTaskGroup;
 class LXQtTaskBar;
-class ILXQtPanelPlugin;
+class Plugin;
 
 class LeftAlignedTextStyle : public QProxyStyle
 {
@@ -107,14 +107,14 @@ protected:
     void setWindowId(WId wid) {mWindow = wid;}
     virtual QMimeData * mimeData();
 
-    inline ILXQtPanelPlugin * plugin() const { return mPlugin; }
+    inline Plugin * plugin() const { return mPlugin; }
 
 private:
     WId mWindow;
     bool mUrgencyHint;
     Qt::Corner mOrigin;
     LXQtTaskBar * mParentTaskBar;
-    ILXQtPanelPlugin * mPlugin;
+    Plugin * mPlugin;
     int mIconSize;
 };
 

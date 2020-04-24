@@ -32,7 +32,7 @@
 #ifndef LXQTTASKBAR_H
 #define LXQTTASKBAR_H
 
-#include "../panel/ilxqtpanelplugin.h"
+#include "../panel/plugin.h"
 #include "lxqttaskgroup.h"
 #include "lxqttaskbutton.h"
 
@@ -57,7 +57,7 @@ class LXQtTaskBar : public QFrame
     Q_OBJECT
 
 public:
-    explicit LXQtTaskBar(ILXQtPanelPlugin *plugin, QWidget* parent = 0);
+    explicit LXQtTaskBar(Plugin *plugin, QWidget* parent = 0);
     virtual ~LXQtTaskBar();
 
     void realign();
@@ -75,7 +75,7 @@ public:
     bool isShowGroupOnHover() const { return mShowGroupOnHover; }
     bool isIconByClass() const { return mIconByClass; }
     inline LXQtPanel * panel() const { return mPlugin->panel(); }
-    inline ILXQtPanelPlugin * plugin() const { return mPlugin; }
+    inline Plugin * plugin() const { return mPlugin; }
 
 public slots:
     void settingsChanged();
@@ -137,7 +137,7 @@ private:
     void changeEvent(QEvent* event);
     void resizeEvent(QResizeEvent *event);
 
-    ILXQtPanelPlugin *mPlugin;
+    Plugin *mPlugin;
     QWidget *mPlaceHolder;
     LeftAlignedTextStyle *mStyle;
 };

@@ -25,65 +25,28 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
-#include <QFrame>
-#include <QString>
-#include <QPointer>
-#include <LXQt/Settings>
-#include "lxqtpanelglobals.h"
+#include "lxqtpanel.h"
 
-class QPluginLoader;
-class QSettings;
-class ILXQtPanelPlugin;
-class ILXQtPanelPluginLibrary;
-class LXQtPanel;
-class QMenu;
-
-
-class LXQT_PANEL_API Plugin : public QFrame
+class Plugin : public QObject
 {
-    Q_OBJECT
-
 public:
-    explicit Plugin(ILXQtPanelPlugin *plugin, LXQtPanel *panel);
-    ~Plugin();
+    explicit Plugin(LXQtPanel * panel) : mPanel(panel) {}
 
-    const ILXQtPanelPlugin * iPlugin() const { return mPlugin; }
+    virtual QWidget * widget() = 0;
+    virtual void realign() {}
 
-    QWidget *widget() { return mPluginWidget; }
+    LXQtPanel * panel() const { return mPanel; }
 
-    QString name() const { return mName; }
-
-    virtual bool eventFilter(QObject * watched, QEvent * event);
-
-    // For QSS properties ..................
-    static QColor moveMarkerColor() { return mMoveMarkerColor; }
-    static void setMoveMarkerColor(QColor color) { mMoveMarkerColor = color; }
-
-public slots:
-    void realign();
-
-protected:
-    void showEvent(QShowEvent *event);
+    QRect calculatePopupWindowPos(const QSize & windowSize)
+    {
+        return mPanel->calculatePopupWindowPos(widget(), windowSize);
+    }
 
 private:
-    void watchWidgets(QObject * const widget);
-    void unwatchWidgets(QObject * const widget);
-
-    ILXQtPanelPlugin *mPlugin;
-    QWidget *mPluginWidget;
-    LXQtPanel *mPanel;
-    static QColor mMoveMarkerColor;
-    QString mName;
-    QPointer<QDialog> mConfigDialog; //!< plugin's config dialog (if any)
-
-private slots:
-    void settingsChanged();
-
+    LXQtPanel * mPanel;
 };
-
 
 #endif // PLUGIN_H

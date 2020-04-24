@@ -31,14 +31,14 @@
 #ifndef LXQTTASKGROUP_H
 #define LXQTTASKGROUP_H
 
-#include "../panel/ilxqtpanelplugin.h"
+#include "../panel/plugin.h"
 #include "lxqttaskbar.h"
 #include "lxqtgrouppopup.h"
 #include "lxqttaskbutton.h"
 #include <KF5/KWindowSystem/kwindowsystem.h>
 
 class QVBoxLayout;
-class ILXQtPanelPlugin;
+class Plugin;
 
 class LXQtGroupPopup;
 class LXQtMasterPopup;

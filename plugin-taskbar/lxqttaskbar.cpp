@@ -53,7 +53,7 @@ using namespace LXQt;
 /************************************************
 
 ************************************************/
-LXQtTaskBar::LXQtTaskBar(ILXQtPanelPlugin *plugin, QWidget *parent) :
+LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     QFrame(parent),
     mSignalMapper(new QSignalMapper(this)),
     mButtonStyle(Qt::ToolButtonTextBesideIcon),

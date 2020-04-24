@@ -40,7 +40,6 @@
 class QHBoxLayout;
 class QMenu;
 class Plugin;
-class ILXQtPanelPlugin;
 
 namespace LXQt {
 class Settings;
@@ -93,16 +92,7 @@ public:
     virtual ~LXQtPanel();
 
     QRect calculatePopupWindowPos(QPoint const & absolutePos, QSize const & windowSize) const;
-    QRect calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const QSize &windowSize) const;
-
-    /**
-     * @brief Searches for a Plugin in the Plugins-list of this panel. Takes
-     * an ILXQtPanelPlugin as parameter and returns the corresponding Plugin.
-     * @param iPlugin ILXQtPanelPlugin that we are looking for.
-     * @return The corresponding Plugin if it is loaded in this panel, nullptr
-     * otherwise.
-     */
-    Plugin *findPlugin(const ILXQtPanelPlugin *iPlugin) const;
+    QRect calculatePopupWindowPos(QWidget *widget, const QSize &windowSize) const;
 
 public slots:
     /**

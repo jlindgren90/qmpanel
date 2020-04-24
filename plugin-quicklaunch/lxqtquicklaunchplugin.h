@@ -28,14 +28,14 @@
 #ifndef LXQTQUICKLAUNCHPLUGIN_H
 #define LXQTQUICKLAUNCHPLUGIN_H
 
-#include "../panel/ilxqtpanelplugin.h"
+#include "../panel/plugin.h"
 #include "lxqtquicklaunch.h"
 
-class LXQtQuickLaunchPlugin : public ILXQtPanelPlugin
+class LXQtQuickLaunchPlugin : public Plugin
 {
 public:
     explicit LXQtQuickLaunchPlugin(LXQtPanel * lxqtPanel)
-        : ILXQtPanelPlugin(lxqtPanel), mWidget(new LXQtQuickLaunch)
+        : Plugin(lxqtPanel), mWidget(new LXQtQuickLaunch)
     {
     }
 
