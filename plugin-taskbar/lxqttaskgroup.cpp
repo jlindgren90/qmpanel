@@ -512,6 +512,9 @@ void LXQtTaskGroup::enterEvent(QEvent *event)
 {
     QToolButton::enterEvent(event);
 
+    if (sDraggging)
+        return;
+
     if (parentTaskBar()->isShowGroupOnHover())
         setPopupVisible(true);
 }
@@ -534,6 +537,10 @@ void LXQtTaskGroup::dragEnterEvent(QDragEnterEvent *event)
  ************************************************/
 void LXQtTaskGroup::dragLeaveEvent(QDragLeaveEvent *event)
 {
+    // if draggind something into the taskgroup or the taskgroups' popup,
+    // do not close the popup
+    if (!sDraggging)
+        setPopupVisible(false);
     LXQtTaskButton::dragLeaveEvent(event);
 }
 

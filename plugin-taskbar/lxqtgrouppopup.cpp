@@ -168,5 +168,17 @@ void LXQtGroupPopup::show()
 
 void LXQtGroupPopup::closeTimerSlot()
 {
-    close();
+    bool button_has_dnd_hover = false;
+    QLayout* l = layout();
+    for (int i = 0; l->count() > i; ++i)
+    {
+        LXQtTaskButton const * const button = dynamic_cast<LXQtTaskButton const *>(l->itemAt(i)->widget());
+        if (0 != button && button->hasDragAndDropHover())
+        {
+            button_has_dnd_hover = true;
+            break;
+        }
+    }
+    if (!button_has_dnd_hover)
+        close();
 }

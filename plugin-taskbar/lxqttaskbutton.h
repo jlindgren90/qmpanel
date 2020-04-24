@@ -80,6 +80,9 @@ public:
 
     void refreshIconGeometry(QRect const & geom);
     static QString mimeDataFormat() { return QLatin1String("lxqt/lxqttaskbutton"); }
+    /*! \return true if this buttom received DragEnter event (and no DragLeave event yet)
+     * */
+    bool hasDragAndDropHover() const;
 
 public slots:
     void raiseApplication();
@@ -99,23 +102,41 @@ public slots:
     void updateIcon();
 
 protected:
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dragMoveEvent(QDragMoveEvent * event);
+    virtual void dragLeaveEvent(QDragLeaveEvent *event);
+    virtual void dropEvent(QDropEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
     virtual void contextMenuEvent(QContextMenuEvent *event);
     void paintEvent(QPaintEvent *);
 
     void setWindowId(WId wid) {mWindow = wid;}
     virtual QMimeData * mimeData();
+    static bool sDraggging;
 
     inline Plugin * plugin() const { return mPlugin; }
 
 private:
     WId mWindow;
     bool mUrgencyHint;
+    QPoint mDragStartPosition;
     Qt::Corner mOrigin;
     LXQtTaskBar * mParentTaskBar;
     Plugin * mPlugin;
     int mIconSize;
+
+    // Timer for when draggind something into a button (the button's window
+    // must be activated so that the use can continue dragging to the window
+    QTimer * mDNDTimer;
+
+private slots:
+    void activateWithDraggable();
+
+signals:
+    void dropped(QObject * dragSource, QPoint const & pos);
+    void dragging(QObject * dragSource, QPoint const & pos);
 };
 
 typedef QHash<WId,LXQtTaskButton*> LXQtTaskButtonHash;

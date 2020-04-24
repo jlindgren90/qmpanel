@@ -288,6 +288,9 @@ void LXQtTaskBar::addWindow(WId window)
         connect(group, SIGNAL(groupBecomeEmpty(QString)), this, SLOT(groupBecomeEmptySlot()));
         connect(group, SIGNAL(visibilityChanged(bool)), this, SLOT(refreshPlaceholderVisibility()));
         connect(group, &LXQtTaskGroup::popupShown, this, &LXQtTaskBar::popupShown);
+        connect(group, &LXQtTaskButton::dragging, this, [this] (QObject * dragSource, QPoint const & pos) {
+            buttonMove(qobject_cast<LXQtTaskGroup *>(sender()), qobject_cast<LXQtTaskGroup *>(dragSource), pos);
+        });
 
         mLayout->addWidget(group);
         group->setToolButtonsStyle(mButtonStyle);
