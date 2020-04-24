@@ -39,9 +39,6 @@
 #include <QTimer>
 #include <QKeySequence>
 
-#include "menustyle.h"
-
-
 class QMenu;
 class QWidgetAction;
 class QLineEdit;
@@ -71,14 +68,12 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
-    void setMenuFontSize();
     void setButtonIcon();
 
 private:
     QToolButton mButton;
     QString mLogDir;
     QMenu* mMenu;
-    MenuStyle mTopMenuStyle;
     QWidgetAction * mSearchEditAction;
     QLineEdit * mSearchEdit;
     QWidgetAction * mSearchViewAction;

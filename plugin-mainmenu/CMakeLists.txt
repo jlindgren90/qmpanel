@@ -3,13 +3,11 @@ set(PLUGIN "mainmenu")
 set(HEADERS
     actionview.h
     lxqtmainmenu.h
-    menustyle.h
 )
 
 set(SOURCES
     actionview.cpp
     lxqtmainmenu.cpp
-    menustyle.cpp
 )
 
 set(LIBRARIES

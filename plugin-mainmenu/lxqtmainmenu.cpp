@@ -128,13 +128,7 @@ void LXQtMainMenu::showMenu()
     // Solution is to execute menu 1ms later using timer
     mMenu->popup(calculatePopupWindowPos(mMenu->sizeHint()).topLeft());
     if (mFilterMenu || mFilterShow)
-    {
-        //Note: part of the workadound for https://bugreports.qt.io/browse/QTBUG-52021
-        mSearchEdit->setReadOnly(false);
-        //the setReadOnly also changes the cursor, override it back to normal
-        mSearchEdit->unsetCursor();
         mSearchEdit->setFocus();
-    }
 }
 
 /************************************************
@@ -169,8 +163,6 @@ void LXQtMainMenu::settingsChanged()
             return;
         }
     }
-
-    setMenuFontSize();
 
     //clear the search to not leaving the menu in wrong state
     mSearchEdit->setText(QString{});
@@ -320,11 +312,6 @@ void LXQtMainMenu::buildMenu()
     mMenu = new XdgMenuWidget(mXdgMenu, "", &mButton);
     mMenu->setObjectName("TopLevelMainMenu");
     setTranslucentMenus(mMenu);
-    // Note: the QWidget::ensurePolished() workarounds problem with transparent
-    // QLineEdit (mSearchEditAction) in menu with Breeze style
-    // https://bugs.kde.org/show_bug.cgi?id=368048
-    mMenu->ensurePolished();
-    mMenu->setStyle(&mTopMenuStyle);
 
     mMenu->addSeparator();
 
@@ -336,12 +323,7 @@ void LXQtMainMenu::buildMenu()
     mMenu->addAction(mSearchViewAction);
     mMenu->addAction(mSearchEditAction);
     connect(mMenu, &QMenu::hovered, this, &LXQtMainMenu::setSearchFocus);
-    //Note: setting readOnly to true to avoid wake-ups upon the Qt's internal "blink" cursor timer
-    //(if the readOnly is not set, the "blink" timer is active also in case the menu is not shown ->
-    //QWidgetLineControl::updateNeeded is performed w/o any need)
-    //https://bugreports.qt.io/browse/QTBUG-52021
     connect(mMenu, &QMenu::aboutToHide, [this] {
-        mSearchEdit->setReadOnly(true);
         if (mFilterClear)
             mSearchEdit->clear();
     });
@@ -350,44 +332,7 @@ void LXQtMainMenu::buildMenu()
     mSearchView->fillActions(mMenu);
 
     searchTextChanged(mSearchEdit->text());
-    setMenuFontSize();
 }
-
-/************************************************
-
- ************************************************/
-void LXQtMainMenu::setMenuFontSize()
-{
-    if (!mMenu)
-        return;
-
-    QFont menuFont = mButton.font();
-    bool customFont = false;
-
-    if (mMenu->font() != menuFont)
-    {
-        mMenu->setFont(menuFont);
-        const QList<QMenu*> subMenuList = mMenu->findChildren<QMenu*>();
-        for (QMenu* const subMenu : subMenuList)
-        {
-            subMenu->setFont(menuFont);
-        }
-        mSearchEdit->setFont(menuFont);
-        mSearchView->setFont(menuFont);
-    }
-
-    // icon size the same as the font height if a custom font is selected,
-    // otherwise use the default size
-    int icon_size = (customFont ? QFontMetrics(menuFont).height()
-                                : MenuStyle::DEFAULT_ICON_SIZE);
-    mTopMenuStyle.setIconSize(icon_size);
-
-    // get the size back from the style (this will resolve DEFAULT_ICON_SIZE
-    // to an actual pixel size if necessary)
-    icon_size = mTopMenuStyle.pixelMetric(QStyle::PM_SmallIconSize);
-    mSearchView->setIconSize(QSize{icon_size, icon_size});
-}
-
 
 /************************************************
 
@@ -412,16 +357,7 @@ struct MatchAction
 
 bool LXQtMainMenu::eventFilter(QObject *obj, QEvent *event)
 {
-    if(obj == mButton.parentWidget())
-    {
-        // the application is given a new QStyle
-        if(event->type() == QEvent::StyleChange)
-        {
-            setMenuFontSize();
-            setButtonIcon();
-        }
-    }
-    else if(QMenu* menu = qobject_cast<QMenu*>(obj))
+    if(QMenu* menu = qobject_cast<QMenu*>(obj))
     {
         if(event->type() == QEvent::KeyPress)
         {
