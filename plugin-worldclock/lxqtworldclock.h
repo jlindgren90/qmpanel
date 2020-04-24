@@ -29,98 +29,23 @@
 #ifndef LXQT_PANEL_WORLDCLOCK_H
 #define LXQT_PANEL_WORLDCLOCK_H
 
-#include <QTimeZone>
-
-#include <QDialog>
 #include <QLabel>
-
-#include <LXQt/RotatedWidget>
+#include <QTimer>
 
 #include "../panel/ilxqtpanelplugin.h"
 
-
-class ActiveLabel;
-class QTimer;
-class LXQtWorldClockPopup;
-
-
-class LXQtWorldClock : public QObject, public ILXQtPanelPlugin
+class LXQtWorldClock : public ILXQtPanelPlugin
 {
-    Q_OBJECT
 public:
-    LXQtWorldClock(ILXQtPanel *lxqtPanel);
-    ~LXQtWorldClock();
+    LXQtWorldClock(ILXQtPanel * lxqtPanel);
 
-    virtual QWidget *widget() { return mMainWidget; }
-    bool isSeparate() const { return true; }
-
-    virtual void settingsChanged();
-    virtual void realign();
-
-private slots:
-    void timeout();
-    void wheelScrolled(int);
-    void updateTimeText();
+    virtual QWidget * widget() { return &mContent; }
 
 private:
-    QWidget *mMainWidget;
-    LXQt::RotatedWidget* mRotatedWidget;
-    ActiveLabel *mContent;
+    void updateTimeText();
 
-    QTimer *mTimer;
-    int mUpdateInterval;
-
-    QStringList mTimeZones;
-    QMap<QString, QString> mTimeZoneCustomNames;
-    QString mDefaultTimeZone;
-    QString mActiveTimeZone;
-    QString mFormat;
-
-    bool mAutoRotate;
-
-    QDateTime mShownTime;
-
-    void restartTimer();
-
-    void setTimeText();
-    QString formatDateTime(const QDateTime &datetime, const QString &timeZoneName);
-    bool formatHasTimeZone(QString format);
-    QString preformat(const QString &format, const QTimeZone &timeZone, const QDateTime& dateTime);
-};
-
-
-class ActiveLabel : public QLabel
-{
-Q_OBJECT
-
-public:
-    explicit ActiveLabel(QWidget * = NULL);
-
-signals:
-    void wheelScrolled(int);
-    void leftMouseButtonClicked();
-    void middleMouseButtonClicked();
-
-protected:
-    void wheelEvent(QWheelEvent *);
-    void mouseReleaseEvent(QMouseEvent* event);
-};
-
-class LXQtWorldClockPopup : public QDialog
-{
-    Q_OBJECT
-
-public:
-    LXQtWorldClockPopup(QWidget *parent = 0);
-
-    void show();
-
-signals:
-    void deactivated();
-
-protected:
-    virtual bool event(QEvent* );
-
+    QLabel mContent;
+    QTimer mTimer;
 };
 
 #endif // LXQT_PANEL_WORLDCLOCK_H
