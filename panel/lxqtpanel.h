@@ -140,7 +140,6 @@ public:
     static bool canPlacedOn(int screenNum);
 
     // Settings
-    int panelSize() const { return mPanelSize; }
     int screenNum() const { return mScreenNum; }
 
 public slots:
@@ -166,7 +165,6 @@ public slots:
      * @param value The value that should be set.
      * @param save If true, saveSettings(true) will be called.
      */
-    void setPanelSize(int value, bool save);
     void setPosition(int screen, bool save); //!< \sa setPanelSize()
 
     /**
@@ -334,16 +332,6 @@ private:
      * @return The height/width of the panel.
      */
     int getReserveDimension();
-
-    /**
-     * @brief Stores the size of the panel, i.e. the height of a horizontal
-     * panel or the width of a vertical panel in pixels. If the panel is
-     * hidden (which is achieved by making the panel very thin), this value
-     * is unchanged. So this value stores the size of the non-hidden panel.
-     *
-     * \sa panelSize(), setPanelSize().
-     */
-    int mPanelSize;
 
     /**
      * @brief Returns the index of the screen on which this panel should be

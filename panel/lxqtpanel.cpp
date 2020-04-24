@@ -89,7 +89,6 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     QFrame(parent),
     mSettings(settings),
     mConfigGroup(configGroup),
-    mPanelSize(0),
     mScreenNum(0), //whatever (avoid conditional on uninitialized value)
     mActualScreenNum(0)
 {
@@ -165,9 +164,6 @@ void LXQtPanel::readSettings()
     // Read settings ......................................
     mSettings->beginGroup(mConfigGroup);
 
-    // By default we are using size & count from theme.
-    setPanelSize(mSettings->value(CFG_KEY_PANELSIZE, PANEL_DEFAULT_SIZE).toInt(), false);
-
     mScreenNum = mSettings->value(CFG_KEY_SCREENNUM, QApplication::desktop()->primaryScreen()).toInt();
     setPosition(mScreenNum, false);
 
@@ -235,17 +231,12 @@ void LXQtPanel::loadPlugins()
 /************************************************
 
  ************************************************/
-int LXQtPanel::getReserveDimension()
-{
-    return qMax(PANEL_MINIMUM_SIZE, mPanelSize);
-}
-
 void LXQtPanel::setPanelGeometry(bool animate)
 {
     const QRect currentScreen = QApplication::desktop()->screenGeometry(mActualScreenNum);
     QRect rect;
 
-    rect.setHeight(qMax(PANEL_MINIMUM_SIZE, mPanelSize));
+    rect.setHeight(sizeHint().height());
     rect.setWidth(currentScreen.width());
     rect.moveLeft(currentScreen.left());
     rect.moveBottom(currentScreen.bottom());
@@ -295,7 +286,7 @@ void LXQtPanel::updateWmStrut()
                                     /* Left   */  0, 0, 0,
                                     /* Right  */  0, 0, 0,
                                     /* Top    */  0, 0, 0,
-                                    /* Bottom */  wholeScreen.bottom() - rect.bottom() + getReserveDimension(), rect.left(), rect.right()
+                                    /* Bottom */  wholeScreen.bottom() - rect.bottom() + height(), rect.left(), rect.right()
                                    );
 }
 
@@ -332,19 +323,6 @@ int LXQtPanel::findAvailableScreen()
             return i;
 
     return 0;
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::setPanelSize(int value, bool save)
-{
-    if (mPanelSize != value)
-    {
-        mPanelSize = value;
-        realign();
-    }
 }
 
 
