@@ -250,7 +250,6 @@ void LXQtPanelApplication::screenDestroyed(QObject* screenObj)
             // the screen containing the panel is destroyed
             // delete and then re-create the panel ourselves
             QString name = panel->name();
-            panel->saveSettings(false);
             delete panel; // delete the panel, so Qt does not have a chance to set a new screen to it.
             mPanels.removeAll(panel);
             reloadNeeded = true;

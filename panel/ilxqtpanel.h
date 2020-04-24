@@ -56,11 +56,6 @@ public:
     virtual Position position() const = 0;
 
     /**
-     * @brief Returns the edge length of the icons that are shown on the panel
-     * in pixels. The icons are square.
-     */
-    virtual int iconSize() const = 0;
-    /**
      * @brief Returns the number of lines/rows of this panel.
      */
     virtual int lineCount() const = 0;

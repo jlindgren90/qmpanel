@@ -451,7 +451,6 @@ void LXQtTaskGroup::refreshIconsGeometry()
     for(LXQtTaskButton *but : qAsConst(mButtonHash))
     {
         but->refreshIconGeometry(rect);
-        but->setIconSize(QSize(plugin()->panel()->iconSize(), plugin()->panel()->iconSize()));
     }
 }
 

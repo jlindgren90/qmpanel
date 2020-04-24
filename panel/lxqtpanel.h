@@ -197,23 +197,17 @@ public:
     static ILXQtPanel::Position strToPosition(const QString &str, ILXQtPanel::Position defaultValue);
 
     // Settings
-    int iconSize() const override { return mIconSize; } //!< Implement ILXQtPanel::iconSize().
     int lineCount() const override { return mLineCount; } //!< Implement ILXQtPanel::lineCount().
     int panelSize() const { return mPanelSize; }
     int length() const { return mLength; }
     bool lengthInPercents() const { return mLengthInPercents; }
     LXQtPanel::Alignment alignment() const { return mAlignment; }
     int screenNum() const { return mScreenNum; }
-    QColor fontColor() const { return mFontColor; }
-    QColor backgroundColor() const { return mBackgroundColor; }
-    QString backgroundImage() const { return mBackgroundImage; }
-    int opacity() const { return mOpacity; }
     int reserveSpace() const { return mReserveSpace; }
     bool hidable() const { return mHidable; }
     bool visibleMargin() const { return mVisibleMargin; }
     int animationTime() const { return mAnimationTime; }
     int showDelay() const { return mShowDelayTimer.interval(); }
-    QString iconTheme() const;
 
 public slots:
     /**
@@ -268,31 +262,16 @@ public slots:
      * @param save If true, saveSettings(true) will be called.
      */
     void setPanelSize(int value, bool save);
-    void setIconSize(int value, bool save); //!< \sa setPanelSize()
     void setLineCount(int value, bool save); //!< \sa setPanelSize()
     void setLength(int length, bool inPercents, bool save); //!< \sa setPanelSize()
     void setPosition(int screen, ILXQtPanel::Position position, bool save); //!< \sa setPanelSize()
     void setAlignment(LXQtPanel::Alignment value, bool save); //!< \sa setPanelSize()
-    void setFontColor(QColor color, bool save); //!< \sa setPanelSize()
-    void setBackgroundColor(QColor color, bool save); //!< \sa setPanelSize()
-    void setBackgroundImage(QString path, bool save); //!< \sa setPanelSize()
-    void setOpacity(int opacity, bool save); //!< \sa setPanelSize()
     void setReserveSpace(bool reserveSpace, bool save); //!< \sa setPanelSize()
     void setHidable(bool hidable, bool save); //!< \sa setPanelSize()
     void setVisibleMargin(bool visibleMargin, bool save); //!< \sa setPanelSize()
     void setAnimationTime(int animationTime, bool save); //!< \sa setPanelSize()
     void setShowDelay(int showDelay, bool save); //!< \sa setPanelSize()
-    void setIconTheme(const QString& iconTheme);
 
-    /**
-     * @brief Saves the current configuration, i.e. writes the current
-     * configuration varibles to mSettings.
-     * @param later Determines if the settings are written immediately or
-     * after a short delay. If later==true, the QTimer mDelaySave is started.
-     * As soon as this timer times out, saveSettings(false) will be called. If
-     * later==false, settings will be written.
-     */
-    void saveSettings(bool later=false);
     /**
      * @brief Checks if the panel can be placed on the current screen at the
      * current position. If it can not, it will be moved on another screen
@@ -474,12 +453,6 @@ private:
      */
     int mPanelSize;
     /**
-     * @brief Stores the edge length of the panel icons in pixels.
-     *
-     * \sa ILXQtPanel::iconSize(), setIconSize().
-     */
-    int mIconSize;
-    /**
      * @brief Stores the number of lines/rows of the panel.
      *
      * \sa ILXQtPanel::lineCount(), setLineCount().
@@ -585,15 +558,6 @@ private:
      */
     QTimer mShowDelayTimer;
 
-    QColor mFontColor; //!< Font color that is used in the style sheet.
-    QColor mBackgroundColor; //!< Background color that is used in the style sheet.
-    QString mBackgroundImage; //!< Background image that is used in the style sheet.
-    /**
-     * @brief Determines the opacity of the background color. The value
-     * should be in the range from 0 to 100. This will not affect the opacity
-     * of a background image.
-     */
-    int mOpacity;
     /*!
      * \brief Flag if the panel should reserve the space under it as not usable
      * for "normal" windows. Usable for not 100% wide/hight or hiddable panels,
@@ -612,16 +576,6 @@ private:
      * @brief Flag for providing the configuration options in panel's context menu
      */
     bool mLockPanel;
-
-    /**
-     * @brief Updates the style sheet for the panel. First, the stylesheet is
-     * created from the preferences. Then, it is set via
-     * QWidget::setStyleSheet().
-     */
-    void updateStyleSheet();
-
-    // settings should be kept private for security
-    LXQt::Settings *settings() const { return mSettings; }
 };
 
 

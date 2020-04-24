@@ -86,7 +86,7 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtTaskBar * taskbar, QWidget 
     mOrigin(Qt::TopLeftCorner),
     mParentTaskBar(taskbar),
     mPlugin(mParentTaskBar->plugin()),
-    mIconSize(mPlugin->panel()->iconSize()),
+    mIconSize(style()->pixelMetric(QStyle::PM_ToolBarIconSize)),
     mDNDTimer(new QTimer(this))
 {
     Q_ASSERT(taskbar);
@@ -170,26 +170,6 @@ void LXQtTaskButton::refreshIconGeometry(QRect const & geom)
         nrect.size.width = geom.width();
         info.setIconGeometry(nrect);
     }
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskButton::changeEvent(QEvent *event)
-{
-    if (event->type() == QEvent::StyleChange)
-    {
-        // When the icon size changes, the panel doesn't emit any specific
-        // signal, but it triggers a stylesheet update, which we can detect
-        int newIconSize = mPlugin->panel()->iconSize();
-        if (newIconSize != mIconSize)
-        {
-            mIconSize = newIconSize;
-            updateIcon();
-        }
-    }
-
-    QToolButton::changeEvent(event);
 }
 
 /************************************************

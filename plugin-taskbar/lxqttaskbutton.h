@@ -103,7 +103,6 @@ public slots:
     void updateIcon();
 
 protected:
-    virtual void changeEvent(QEvent *event);
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dragMoveEvent(QDragMoveEvent * event);
     virtual void dragLeaveEvent(QDragLeaveEvent *event);

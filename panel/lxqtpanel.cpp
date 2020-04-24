@@ -130,7 +130,6 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     mConfigGroup(configGroup),
     mStandaloneWindows{new WindowNotifier},
     mPanelSize(0),
-    mIconSize(0),
     mLineCount(0),
     mLength(0),
     mAlignment(AlignmentLeft),
@@ -170,8 +169,6 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     setAttribute(Qt::WA_X11NetWmWindowTypeDock);
     //Enables tooltips for inactive windows.
     setAttribute(Qt::WA_AlwaysShowToolTips);
-    //Indicates that the widget should have a translucent background, i.e., any non-opaque regions of the widgets will be translucent because the widget will have an alpha channel. Setting this ...
-    setAttribute(Qt::WA_TranslucentBackground);
     //Allows data from drag and drop operations to be dropped onto the widget (see QWidget::setAcceptDrops()).
     setAttribute(Qt::WA_AcceptDrops);
 
@@ -253,7 +250,6 @@ void LXQtPanel::readSettings()
 
     // By default we are using size & count from theme.
     setPanelSize(mSettings->value(CFG_KEY_PANELSIZE, PANEL_DEFAULT_SIZE).toInt(), false);
-    setIconSize(mSettings->value(CFG_KEY_ICONSIZE, PANEL_DEFAULT_ICON_SIZE).toInt(), false);
     setLineCount(mSettings->value(CFG_KEY_LINECNT, PANEL_DEFAULT_LINE_COUNT).toInt(), false);
 
     setLength(mSettings->value(CFG_KEY_LENGTH, 100).toInt(),
@@ -267,64 +263,9 @@ void LXQtPanel::readSettings()
 
     setAlignment(Alignment(mSettings->value(CFG_KEY_ALIGNMENT, mAlignment).toInt()), false);
 
-    QColor color = mSettings->value(CFG_KEY_FONTCOLOR, "").value<QColor>();
-    if (color.isValid())
-        setFontColor(color, true);
-
-    setOpacity(mSettings->value(CFG_KEY_OPACITY, 100).toInt(), true);
     mReserveSpace = mSettings->value(CFG_KEY_RESERVESPACE, true).toBool();
-    color = mSettings->value(CFG_KEY_BACKGROUNDCOLOR, "").value<QColor>();
-    if (color.isValid())
-        setBackgroundColor(color, true);
-
-    QString image = mSettings->value(CFG_KEY_BACKGROUNDIMAGE, "").toString();
-    if (!image.isEmpty())
-        setBackgroundImage(image, false);
 
     mLockPanel = mSettings->value(CFG_KEY_LOCKPANEL, false).toBool();
-
-    mSettings->endGroup();
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::saveSettings(bool later)
-{
-    mDelaySave.stop();
-    if (later)
-    {
-        mDelaySave.start();
-        return;
-    }
-
-    mSettings->beginGroup(mConfigGroup);
-
-    mSettings->setValue(CFG_KEY_PANELSIZE, mPanelSize);
-    mSettings->setValue(CFG_KEY_ICONSIZE, mIconSize);
-    mSettings->setValue(CFG_KEY_LINECNT, mLineCount);
-
-    mSettings->setValue(CFG_KEY_LENGTH, mLength);
-    mSettings->setValue(CFG_KEY_PERCENT, mLengthInPercents);
-
-    mSettings->setValue(CFG_KEY_SCREENNUM, mScreenNum);
-    mSettings->setValue(CFG_KEY_POSITION, positionToStr(mPosition));
-
-    mSettings->setValue(CFG_KEY_ALIGNMENT, mAlignment);
-
-    mSettings->setValue(CFG_KEY_FONTCOLOR, mFontColor.isValid() ? mFontColor : QColor());
-    mSettings->setValue(CFG_KEY_BACKGROUNDCOLOR, mBackgroundColor.isValid() ? mBackgroundColor : QColor());
-    mSettings->setValue(CFG_KEY_BACKGROUNDIMAGE, QFileInfo(mBackgroundImage).exists() ? mBackgroundImage : QString());
-    mSettings->setValue(CFG_KEY_OPACITY, mOpacity);
-    mSettings->setValue(CFG_KEY_RESERVESPACE, mReserveSpace);
-
-    mSettings->setValue(CFG_KEY_HIDABLE, mHidable);
-    mSettings->setValue(CFG_KEY_VISIBLE_MARGIN, mVisibleMargin);
-    mSettings->setValue(CFG_KEY_ANIMATION, mAnimationTime);
-    mSettings->setValue(CFG_KEY_SHOW_DELAY, mShowDelayTimer.interval());
-
-    mSettings->setValue(CFG_KEY_LOCKPANEL, mLockPanel);
 
     mSettings->endGroup();
 }
@@ -718,66 +659,11 @@ int LXQtPanel::findAvailableScreen(LXQtPanel::Position position)
 /************************************************
 
  ************************************************/
-void LXQtPanel::updateStyleSheet()
-{
-    QStringList sheet;
-    sheet << QString("Plugin > QAbstractButton, LXQtTray { qproperty-iconSize: %1px %1px; }").arg(mIconSize);
-    sheet << QString("Plugin > * > QAbstractButton, TrayIcon { qproperty-iconSize: %1px %1px; }").arg(mIconSize);
-
-    if (mFontColor.isValid())
-        sheet << QString("Plugin * { color: " + mFontColor.name() + "; }");
-
-    QString object = LXQtPanelWidget->objectName();
-
-    if (mBackgroundColor.isValid())
-    {
-        QString color = QString("%1, %2, %3, %4")
-            .arg(mBackgroundColor.red())
-            .arg(mBackgroundColor.green())
-            .arg(mBackgroundColor.blue())
-            .arg((float) mOpacity / 100);
-        sheet << QString("LXQtPanel #BackgroundWidget { background-color: rgba(" + color + "); }");
-    }
-
-    if (QFileInfo(mBackgroundImage).exists())
-        sheet << QString("LXQtPanel #BackgroundWidget { background-image: url('" + mBackgroundImage + "');}");
-
-    setStyleSheet(sheet.join("\n"));
-}
-
-
-
-/************************************************
-
- ************************************************/
 void LXQtPanel::setPanelSize(int value, bool save)
 {
     if (mPanelSize != value)
     {
         mPanelSize = value;
-        realign();
-
-        if (save)
-            saveSettings(true);
-    }
-}
-
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::setIconSize(int value, bool save)
-{
-    if (mIconSize != value)
-    {
-        mIconSize = value;
-        updateStyleSheet();
-        mLayout->setLineSize(mIconSize);
-
-        if (save)
-            saveSettings(true);
-
         realign();
     }
 }
@@ -795,9 +681,6 @@ void LXQtPanel::setLineCount(int value, bool save)
         mLayout->setLineCount(mLineCount);
         mLayout->setEnabled(true);
 
-        if (save)
-            saveSettings(true);
-
         realign();
     }
 }
@@ -814,9 +697,6 @@ void LXQtPanel::setLength(int length, bool inPercents, bool save)
 
     mLength = length;
     mLengthInPercents = inPercents;
-
-    if (save)
-        saveSettings(true);
 
     realign();
 }
@@ -838,7 +718,6 @@ void LXQtPanel::setPosition(int screen, ILXQtPanel::Position position, bool save
     if (save)
     {
         mScreenNum = screen;
-        saveSettings(true);
     }
 
     // Qt 5 adds a new class QScreen and add API for setting the screen of a QWindow.
@@ -876,59 +755,7 @@ void LXQtPanel::setAlignment(Alignment value, bool save)
 
     mAlignment = value;
 
-    if (save)
-        saveSettings(true);
-
     realign();
-}
-
-/************************************************
- *
- ************************************************/
-void LXQtPanel::setFontColor(QColor color, bool save)
-{
-    mFontColor = color;
-    updateStyleSheet();
-
-    if (save)
-        saveSettings(true);
-}
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::setBackgroundColor(QColor color, bool save)
-{
-    mBackgroundColor = color;
-    updateStyleSheet();
-
-    if (save)
-        saveSettings(true);
-}
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::setBackgroundImage(QString path, bool save)
-{
-    mBackgroundImage = path;
-    updateStyleSheet();
-
-    if (save)
-        saveSettings(true);
-}
-
-
-/************************************************
- *
- ************************************************/
-void LXQtPanel::setOpacity(int opacity, bool save)
-{
-    mOpacity = opacity;
-    updateStyleSheet();
-
-    if (save)
-        saveSettings(true);
 }
 
 
@@ -941,9 +768,6 @@ void LXQtPanel::setReserveSpace(bool reserveSpace, bool save)
         return;
 
     mReserveSpace = reserveSpace;
-
-    if (save)
-        saveSettings(true);
 
     updateWmStrut();
 }
@@ -1191,9 +1015,6 @@ void LXQtPanel::setHidable(bool hidable, bool save)
 
     mHidable = hidable;
 
-    if (save)
-        saveSettings(true);
-
     realign();
 }
 
@@ -1204,9 +1025,6 @@ void LXQtPanel::setVisibleMargin(bool visibleMargin, bool save)
 
     mVisibleMargin = visibleMargin;
 
-    if (save)
-        saveSettings(true);
-
     realign();
 }
 
@@ -1216,9 +1034,6 @@ void LXQtPanel::setAnimationTime(int animationTime, bool save)
         return;
 
     mAnimationTime = animationTime;
-
-    if (save)
-        saveSettings(true);
 }
 
 void LXQtPanel::setShowDelay(int showDelay, bool save)
@@ -1227,18 +1042,4 @@ void LXQtPanel::setShowDelay(int showDelay, bool save)
         return;
 
     mShowDelayTimer.setInterval(showDelay);
-
-    if (save)
-        saveSettings(true);
-}
-
-QString LXQtPanel::iconTheme() const
-{
-    return mSettings->value("iconTheme").toString();
-}
-
-void LXQtPanel::setIconTheme(const QString& iconTheme)
-{
-    LXQtPanelApplication *a = reinterpret_cast<LXQtPanelApplication*>(qApp);
-    a->setIconTheme(iconTheme);
 }
