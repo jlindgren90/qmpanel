@@ -25,20 +25,18 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef LXQTPANEL_H
 #define LXQTPANEL_H
 
+#include <QHBoxLayout>
 #include <QPointer>
 #include <QWidget>
 
-class QHBoxLayout;
-class QScreen;
 class Plugin;
 
-/*! \brief The LXQtPanel class provides a single lxqt-panel. All LXQtPanel
- * instances should be created and handled by LXQtPanelApplication. In turn,
- * all Plugins should be created and handled by LXQtPanels.
+/*! \brief The LXQtPanel class provides a single lxqt-panel. The LXQtPanel
+ * instance should be created and handled by LXQtPanelApplication. In turn,
+ * all Plugins should be created and handled by the LXQtPanel.
  *
  * LXQtPanel is just the panel, it does not incorporate any functionality.
  * Each function of the panel is implemented by Plugins, even the mainmenu
@@ -47,16 +45,9 @@ class Plugin;
  * incorporate the functions of the panel. Without the Plugins, the panel
  * is quite useless because it is just a box occupying space on the screen.
  *
- * LXQtPanel itself is a window (QFrame/QWidget) and this class is mainly
+ * LXQtPanel itself is a window (QWidget) and this class is mainly
  * responsible for handling the size and position of this window on the
- * screen(s) as well as the different settings. The handling of the plugins
- * is outsourced in PanelPluginsModel and LXQtPanelLayout. PanelPluginsModel
- * is responsible for loading/creating and handling the plugins.
- * LXQtPanelLayout is inherited from QLayout and set as layout to the
- * background of LXQtPanel, so LXQtPanelLayout is responsible for the
- * layout of all the Plugins.
- *
- * \sa LXQtPanelApplication, Plugin, PanelPluginsModel, LXQtPanelLayout.
+ * screen.
  */
 class LXQtPanel : public QWidget
 {
@@ -64,32 +55,17 @@ class LXQtPanel : public QWidget
 
 public:
     /**
-     * @brief Creates and initializes the LXQtPanel. Performs the following
-     * steps:
-     * 1. Sets Qt window title, flags, attributes.
-     * 2. Creates the panel layout.
-     * 3. Prepares the timers.
-     * 4. Connects signals and slots.
-     * 5. Reads the settings for this panel.
-     * 6. Optionally moves the panel to a valid screen (position-dependent).
-     * 7. Loads the Plugins.
-     * 8. Shows the panel, even if it is hidable (but then, starts the timer).
-     * @param configGroup The name of the panel which is used as identifier
-     * in the config file.
-     * @param settings The settings instance of this lxqt panel application.
-     * @param parent Parent QWidget, can be omitted.
+     * @brief Creates and initializes the LXQtPanel.
      */
-    LXQtPanel(QWidget *parent = 0);
-    virtual ~LXQtPanel();
+    LXQtPanel(QWidget * parent = 0);
 
-    QRect calculatePopupWindowPos(QPoint const & absolutePos, QSize const & windowSize) const;
-    QRect calculatePopupWindowPos(QWidget *widget, const QSize &windowSize) const;
+    QRect calculatePopupWindowPos(QPoint const & absolutePos,
+                                  QSize const & windowSize) const;
+    QRect calculatePopupWindowPos(QWidget * widget,
+                                  const QSize & windowSize) const;
 
-public slots:
     /**
-     * @brief Shows the QWidget and makes it visible on all desktops. This
-     * method is NOT related to showPanel(), hidePanel() and hidePanelWork()
-     * which handle the LXQt hiding by resizing the panel.
+     * @brief Shows the QWidget and makes it visible on all desktops.
      */
     void show();
 
@@ -105,14 +81,13 @@ signals:
 protected:
     /**
      * @brief Overrides QObject::event(QEvent * e). Some functions of
-     * the panel will be triggered by these events, e.g. showing/hiding
-     * the panel or showing the context menu.
+     * the panel will be triggered by these events.
      * @param event The event that was received.
      * @return "QObject::event(QEvent *e) should return true if the event e
      * was recognized and processed." This is done by passing the event to
-     * QFrame::event(QEvent *e) at the end.
+     * QWidget::event(QEvent *e) at the end.
      */
-    bool event(QEvent *event) override;
+    bool event(QEvent * event) override;
     /**
      * @brief Overrides QWidget::showEvent(QShowEvent * event). This
      * method is called when a widget (in this case: the LXQtPanel) is
@@ -121,33 +96,18 @@ protected:
      * will be shown. Then, LXQtPanel will call realign().
      * @param event The QShowEvent sent by Qt.
      */
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent * event) override;
 
-private slots:
+private:
     /**
      * @brief Recalculates the geometry of the panel and reserves the
      * window manager strut, i.e. it calls setPanelGeometry() and
      * updateWmStrut().
-     * Two signals will be connected to this slot:
-     * 1. QDesktopWidget::workAreaResized(int screen) which will be emitted
-     * when the work area available (on screen) changes.
-     * 2. LXQt::Application::themeChanged(), i.e. when the user changes
-     * the theme.
      */
     void realign();
 
-private:
     QPointer<QScreen> mScreen;
-    /**
-     * @brief The LXQtPanelLayout of this panel. All the Plugins will be added
-     * to the UI via this layout.
-     */
-    QHBoxLayout* mLayout;
-    /**
-     * @brief Pointer to the PanelPluginsModel which will store all the Plugins
-     * that are loaded.
-     */
-    QList<Plugin *> mPlugins;
+    QHBoxLayout mLayout;
 
     /**
      * @brief Update the window manager struts _NET_WM_PARTIAL_STRUT and
@@ -157,25 +117,19 @@ private:
      * should take this reserved area into account when constraining window
      * positions - maximized windows, for example, should not cover that
      * area."
-     * \sa http://standards.freedesktop.org/wm-spec/wm-spec-latest.html#NETWMSTRUT
      */
     void updateWmStrut();
 
     /**
-     * @brief Loads the plugins, i.e. creates a new PanelPluginsModel.
-     * Connects the signals and slots and adds all the plugins to the
-     * layout.
+     * @brief Loads the plugins and adds them to the layout.
      */
     void loadPlugins();
 
     /**
      * @brief Calculates and sets the geometry (i.e. the position and the size
-     * on the screen) of the panel. Considers alignment, position, if the panel
-     * is hidden and if its geometry should be set with animation.
-     * \param animate flag if showing/hiding the panel should be animated.
+     * on the screen) of the panel.
      */
     void setPanelGeometry();
 };
-
 
 #endif // LXQTPANEL_H
