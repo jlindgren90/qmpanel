@@ -27,37 +27,18 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "lxqtquicklaunch.h"
-#include "quicklaunchbutton.h"
-#include "quicklaunchaction.h"
-#include "../panel/ilxqtpanelplugin.h"
-#include <QDesktopServices>
-#include <QDragEnterEvent>
-#include <QFileIconProvider>
-#include <QFileInfo>
-#include <QLabel>
-#include <QMessageBox>
-#include <QToolButton>
-#include <QUrl>
+
 #include <QDebug>
+#include <QHBoxLayout>
+#include <QToolButton>
+#include <XdgAction>
 #include <XdgDesktopFile>
-#include <XdgIcon>
-#include <LXQt/GridLayout>
 
-LXQtQuickLaunch::LXQtQuickLaunch(ILXQtPanelPlugin *plugin, QWidget* parent) :
-    QFrame(parent),
-    mPlugin(plugin),
-    mPlaceHolder(0)
+LXQtQuickLaunch::LXQtQuickLaunch(QWidget * parent) : QFrame(parent)
 {
-    setAcceptDrops(true);
-
-    mLayout = new LXQt::GridLayout(this);
-    setLayout(mLayout);
-
-    QString desktop;
-    QString file;
-    QString execname;
-    QString exec;
-    QString icon;
+    auto layout = new QHBoxLayout(this);
+    layout->setMargin(0);
+    layout->setSpacing(0);
 
     /* TODO: make this configurable */
     const QStringList apps = {
@@ -66,10 +47,9 @@ LXQtQuickLaunch::LXQtQuickLaunch(ILXQtPanelPlugin *plugin, QWidget* parent) :
         "/usr/share/applications/thunderbird.desktop",
         "/usr/share/applications/firefox.desktop",
         "/usr/share/applications/audacious.desktop",
-        "/usr/share/applications/org.qt-project.qtcreator.desktop"
-    };
+        "/usr/share/applications/org.qt-project.qtcreator.desktop"};
 
-    for (const QString &desktop : apps)
+    for (const QString & desktop : apps)
     {
         XdgDesktopFile xdg;
         if (!xdg.load(desktop))
@@ -83,83 +63,9 @@ LXQtQuickLaunch::LXQtQuickLaunch(ILXQtPanelPlugin *plugin, QWidget* parent) :
             continue;
         }
 
-        addButton(new QuickLaunchAction(&xdg, this));
-    } // for
-
-    if (mLayout->isEmpty())
-        showPlaceHolder();
-
-    realign();
-}
-
-
-LXQtQuickLaunch::~LXQtQuickLaunch()
-{
-}
-
-
-int LXQtQuickLaunch::indexOfButton(QuickLaunchButton* button) const
-{
-    return mLayout->indexOf(button);
-}
-
-
-int LXQtQuickLaunch::countOfButtons() const
-{
-    return mLayout->count();
-}
-
-
-void LXQtQuickLaunch::realign()
-{
-    mLayout->setEnabled(false);
-    ILXQtPanel *panel = mPlugin->panel();
-
-    if (mPlaceHolder)
-    {
-        mLayout->setColumnCount(1);
-        mLayout->setRowCount(1);
+        auto button = new QToolButton(this);
+        button->setAutoRaise(true);
+        button->setDefaultAction(new XdgAction(&xdg, this));
+        layout->addWidget(button);
     }
-    else
-    {
-        if (panel->isHorizontal())
-        {
-            mLayout->setRowCount(panel->lineCount());
-            mLayout->setColumnCount(0);
-        }
-        else
-        {
-            mLayout->setColumnCount(panel->lineCount());
-            mLayout->setRowCount(0);
-        }
-    }
-    mLayout->setEnabled(true);
-}
-
-
-void LXQtQuickLaunch::addButton(QuickLaunchAction* action)
-{
-    mLayout->setEnabled(false);
-    QuickLaunchButton* btn = new QuickLaunchButton(action, mPlugin, this);
-    mLayout->addWidget(btn);
-
-    mLayout->removeWidget(mPlaceHolder);
-    delete mPlaceHolder;
-    mPlaceHolder = 0;
-    mLayout->setEnabled(true);
-    realign();
-}
-
-
-void LXQtQuickLaunch::showPlaceHolder()
-{
-    if (!mPlaceHolder)
-    {
-        mPlaceHolder = new QLabel(this);
-        mPlaceHolder->setAlignment(Qt::AlignCenter);
-        mPlaceHolder->setObjectName("QuickLaunchPlaceHolder");
-        mPlaceHolder->setText(tr("Drop application\nicons here"));
-    }
-
-    mLayout->addWidget(mPlaceHolder);
 }

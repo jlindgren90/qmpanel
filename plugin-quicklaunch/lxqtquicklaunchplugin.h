@@ -29,28 +29,23 @@
 #define LXQTQUICKLAUNCHPLUGIN_H
 
 #include "../panel/ilxqtpanelplugin.h"
-#include <QObject>
+#include "lxqtquicklaunch.h"
 
-
-class LXQtQuickLaunch;
-
-class LXQtQuickLaunchPlugin: public QObject, public ILXQtPanelPlugin
+class LXQtQuickLaunchPlugin : public ILXQtPanelPlugin
 {
-    Q_OBJECT
 public:
-    explicit LXQtQuickLaunchPlugin(ILXQtPanel *lxqtPanel);
-    ~LXQtQuickLaunchPlugin();
+    explicit LXQtQuickLaunchPlugin(ILXQtPanel * lxqtPanel)
+        : ILXQtPanelPlugin(lxqtPanel), mWidget(new LXQtQuickLaunch)
+    {
+    }
 
-    virtual QWidget *widget();
-    virtual QString themeId() const { return "QuickLaunch"; }
-    virtual Flags flags() const { return NeedsHandle; }
+    ~LXQtQuickLaunchPlugin() { delete mWidget; }
 
-    void realign();
-
-    bool isSeparate() const { return true; }
+    QString themeId() const override { return "QuickLaunch"; }
+    QWidget * widget() override { return mWidget; }
 
 private:
-    LXQtQuickLaunch *mWidget;
+    LXQtQuickLaunch * mWidget;
 };
 
 #endif // LXQTQUICKLAUNCHPLUGIN_H

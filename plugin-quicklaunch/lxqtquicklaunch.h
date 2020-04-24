@@ -26,52 +26,18 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef LXQTQUICKLAUNCH_H
 #define LXQTQUICKLAUNCH_H
 
 #include "../panel/lxqtpanel.h"
-#include <QHash>
-#include <QString>
-
-
-class XdgDesktopFile;
-class QuickLaunchAction;
-class QDragEnterEvent;
-class QuickLaunchButton;
-class QSettings;
-class QLabel;
-
-namespace LXQt {
-class GridLayout;
-}
-
 
 /*! \brief Loader for "quick launcher" icons in the panel.
 \author Petr Vanek <petr@scribus.info>
 */
 class LXQtQuickLaunch : public QFrame
 {
-    Q_OBJECT
-
 public:
-    LXQtQuickLaunch(ILXQtPanelPlugin *plugin, QWidget* parent = 0);
-    ~LXQtQuickLaunch();
-
-    int indexOfButton(QuickLaunchButton* button) const;
-    int countOfButtons() const;
-
-    void realign();
-
-private:
-    LXQt::GridLayout *mLayout;
-    ILXQtPanelPlugin *mPlugin;
-    QLabel *mPlaceHolder;
-
-    void showPlaceHolder();
-
-private slots:
-    void addButton(QuickLaunchAction* action);
+    LXQtQuickLaunch(QWidget * parent = 0);
 };
 
 #endif
