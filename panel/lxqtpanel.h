@@ -34,9 +34,7 @@
 
 class Plugin;
 
-/*! \brief The LXQtPanel class provides a single lxqt-panel. The LXQtPanel
- * instance should be created and handled by LXQtPanelApplication. In turn,
- * all Plugins should be created and handled by the LXQtPanel.
+/*! \brief The LXQtPanel class provides a single lxqt-panel.
  *
  * LXQtPanel is just the panel, it does not incorporate any functionality.
  * Each function of the panel is implemented by Plugins, even the mainmenu

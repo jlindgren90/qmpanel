@@ -25,19 +25,14 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
-#include "lxqtpanelapplication.h"
-
-/*! The lxqt-panel is the panel of LXQt.
-  Usage: lxqt-panel [CONFIG_ID]
-    CONFIG_ID      Section name in config file ~/.config/lxqt-panel/panel.conf
-                   (default main)
- */
+#include <QApplication>
+#include "lxqtpanel.h"
 
 int main(int argc, char *argv[])
 {
-    LXQtPanelApplication app(argc, argv);
+    QApplication app(argc, argv);
     app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+    LXQtPanel panel;
 
     return app.exec();
 }

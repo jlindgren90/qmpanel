@@ -2,14 +2,12 @@ set(PROJECT lxqt-panel)
 
 set(PRIV_HEADERS
     lxqtpanel.h
-    lxqtpanelapplication.h
     plugin.h
 )
 
 set(SOURCES
     main.cpp
     lxqtpanel.cpp
-    lxqtpanelapplication.cpp
 )
 
 set(LIBRARIES
