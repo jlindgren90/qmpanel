@@ -40,9 +40,9 @@
 #include <QWheelEvent>
 
 
-LXQtWorldClock::LXQtWorldClock(const ILXQtPanelPluginStartupInfo &startupInfo):
+LXQtWorldClock::LXQtWorldClock(ILXQtPanel *lxqtPanel):
     QObject(),
-    ILXQtPanelPlugin(startupInfo),
+    ILXQtPanelPlugin(lxqtPanel),
     mPopup(NULL),
     mTimer(new QTimer(this)),
     mUpdateInterval(1),

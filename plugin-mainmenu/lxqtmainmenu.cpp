@@ -47,9 +47,9 @@
 
 #define DEFAULT_SHORTCUT "Alt+F1"
 
-LXQtMainMenu::LXQtMainMenu(const ILXQtPanelPluginStartupInfo &startupInfo):
+LXQtMainMenu::LXQtMainMenu(ILXQtPanel *lxqtPanel):
     QObject(),
-    ILXQtPanelPlugin(startupInfo),
+    ILXQtPanelPlugin(lxqtPanel),
     mMenu(0),
     mSearchEditAction{new QWidgetAction{this}},
     mSearchViewAction{new QWidgetAction{this}},

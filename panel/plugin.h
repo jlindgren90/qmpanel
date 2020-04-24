@@ -32,7 +32,6 @@
 #include <QFrame>
 #include <QString>
 #include <QPointer>
-#include <LXQt/PluginInfo>
 #include <LXQt/Settings>
 #include "ilxqtpanel.h"
 #include "lxqtpanelglobals.h"
@@ -56,11 +55,9 @@ public:
         AlignRight
     };
 
-
-    explicit Plugin(const QString &type, LXQtPanel *panel);
+    explicit Plugin(ILXQtPanelPlugin *plugin, LXQtPanel *panel);
     ~Plugin();
 
-    bool isLoaded() const { return mPlugin != 0; }
     Alignment alignment() const { return mAlignment; }
     void setAlignment(Alignment alignment);
 
@@ -101,13 +98,9 @@ protected:
     void showEvent(QShowEvent *event);
 
 private:
-    bool loadLib(ILXQtPanelPluginLibrary const * pluginLib);
-    bool loadModule(const QString &libraryName);
-    ILXQtPanelPluginLibrary const * findStaticPlugin(const QString &libraryName);
     void watchWidgets(QObject * const widget);
     void unwatchWidgets(QObject * const widget);
 
-    QPluginLoader *mPluginLoader;
     ILXQtPanelPlugin *mPlugin;
     QWidget *mPluginWidget;
     Alignment mAlignment;

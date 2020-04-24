@@ -39,7 +39,7 @@ class LXQtTrayPlugin : public QObject, public ILXQtPanelPlugin
 {
     Q_OBJECT
 public:
-    explicit LXQtTrayPlugin(const ILXQtPanelPluginStartupInfo &startupInfo);
+    explicit LXQtTrayPlugin(ILXQtPanel *lxqtPanel);
     ~LXQtTrayPlugin();
 
     virtual QWidget *widget();
@@ -54,23 +54,6 @@ public:
 private:
     LXQtTray *mWidget;
 
-};
-
-class LXQtTrayPluginLibrary: public QObject, public ILXQtPanelPluginLibrary
-{
-    Q_OBJECT
-    // Q_PLUGIN_METADATA(IID "lxqt.org/Panel/PluginInterface/3.0")
-    Q_INTERFACES(ILXQtPanelPluginLibrary)
-public:
-    ILXQtPanelPlugin *instance(const ILXQtPanelPluginStartupInfo &startupInfo) const
-    {
-        // Currently only X11 supported
-        if (!QX11Info::connection()) {
-            qWarning() << "Currently tray plugin supports X11 only. Skipping.";
-            return nullptr;
-        }
-        return new LXQtTrayPlugin(startupInfo);
-    }
 };
 
 #endif // LXQTTRAYPLUGIN_H

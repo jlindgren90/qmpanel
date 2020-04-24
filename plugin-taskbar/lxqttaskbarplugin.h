@@ -39,7 +39,7 @@ class LXQtTaskBarPlugin : public QObject, public ILXQtPanelPlugin
 {
     Q_OBJECT
 public:
-    LXQtTaskBarPlugin(const ILXQtPanelPluginStartupInfo &startupInfo);
+    LXQtTaskBarPlugin(ILXQtPanel *lxqtPanel);
     ~LXQtTaskBarPlugin();
 
     QString themeId() const { return "TaskBar"; }
@@ -54,15 +54,6 @@ public:
     bool isExpandable() const { return true; }
 private:
     LXQtTaskBar *mTaskBar;
-};
-
-class LXQtTaskBarPluginLibrary: public QObject, public ILXQtPanelPluginLibrary
-{
-    Q_OBJECT
-    // Q_PLUGIN_METADATA(IID "lxqt.org/Panel/PluginInterface/3.0")
-    Q_INTERFACES(ILXQtPanelPluginLibrary)
-public:
-    ILXQtPanelPlugin *instance(const ILXQtPanelPluginStartupInfo &startupInfo) const { return new LXQtTaskBarPlugin(startupInfo);}
 };
 
 #endif // LXQTTASKBARPLUGIN_H

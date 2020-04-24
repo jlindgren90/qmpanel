@@ -55,7 +55,7 @@ class Spacer :  public QObject, public ILXQtPanelPlugin
     Q_OBJECT
 
 public:
-    Spacer(const ILXQtPanelPluginStartupInfo &startupInfo);
+    Spacer(ILXQtPanel *lxqtPanel);
 
     virtual QWidget *widget() override { return &mSpacer; }
     virtual QString themeId() const override { return QStringLiteral("Spacer"); }
@@ -77,15 +77,6 @@ private:
     SpacerWidget mSpacer;
     int mSize;
     bool mExpandable;
-};
-
-class SpacerPluginLibrary: public QObject, public ILXQtPanelPluginLibrary
-{
-    Q_OBJECT
-    // Q_PLUGIN_METADATA(IID "lxqt.org/Panel/PluginInterface/3.0")
-    Q_INTERFACES(ILXQtPanelPluginLibrary)
-public:
-    ILXQtPanelPlugin *instance(const ILXQtPanelPluginStartupInfo &startupInfo) const { return new Spacer(startupInfo);}
 };
 
 #endif

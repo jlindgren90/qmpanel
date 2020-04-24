@@ -33,10 +33,16 @@
 #include "lxqtpanellayout.h"
 #include "popupmenu.h"
 #include "plugin.h"
-#include "panelpluginsmodel.h"
 #include "windownotifier.h"
-#include <LXQt/PluginInfo>
 
+#include "../plugin-mainmenu/lxqtmainmenu.h"
+#include "../plugin-quicklaunch/lxqtquicklaunchplugin.h"
+#include "../plugin-spacer/spacer.h"
+#include "../plugin-taskbar/lxqttaskbarplugin.h"
+#include "../plugin-tray/lxqttrayplugin.h"
+#include "../plugin-worldclock/lxqtworldclock.h"
+
+#include <QFileInfo>
 #include <QScreen>
 #include <QWindow>
 #include <QX11Info>
@@ -122,7 +128,6 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     QFrame(parent),
     mSettings(settings),
     mConfigGroup(configGroup),
-    mPlugins{nullptr},
     mStandaloneWindows{new WindowNotifier},
     mPanelSize(0),
     mIconSize(0),
@@ -296,9 +301,6 @@ void LXQtPanel::saveSettings(bool later)
 
     mSettings->beginGroup(mConfigGroup);
 
-    //Note: save/load of plugin names is completely handled by mPlugins object
-    //mSettings->setValue(CFG_KEY_PLUGINS, mPlugins->pluginNames());
-
     mSettings->setValue(CFG_KEY_PANELSIZE, mPanelSize);
     mSettings->setValue(CFG_KEY_ICONSIZE, mIconSize);
     mSettings->setValue(CFG_KEY_LINECNT, mLineCount);
@@ -381,16 +383,21 @@ QStringList pluginDesktopDirs()
  ************************************************/
 void LXQtPanel::loadPlugins()
 {
-    QString names_key(mConfigGroup);
-    names_key += '/';
-    names_key += QLatin1String(CFG_KEY_PLUGINS);
-    mPlugins.reset(new PanelPluginsModel(this, names_key, pluginDesktopDirs()));
+    /* TODO: make this configurable */
+    mPlugins.append(new Plugin(new LXQtMainMenu(this), this));
+    mPlugins.append(new Plugin(new LXQtQuickLaunchPlugin(this), this));
+    mPlugins.append(new Plugin(new LXQtTaskBarPlugin(this), this));
+    mPlugins.append(new Plugin(new Spacer(this), this));
+    mPlugins.append(new Plugin(new LXQtTrayPlugin(this), this));
+    mPlugins.append(new Plugin(new Spacer(this), this));
+    mPlugins.append(new Plugin(new LXQtWorldClock(this), this));
+    mPlugins.append(new Plugin(new Spacer(this), this));
 
-    const auto plugins = mPlugins->plugins();
-    for (auto const & plugin : plugins)
+    for (auto plugin : mPlugins)
     {
         mLayout->addPlugin(plugin);
         connect(plugin, &Plugin::dragLeft, [this] { mShowDelayTimer.stop(); hidePanel(); });
+        connect(this, &LXQtPanel::realigned, plugin, &Plugin::realign);
     }
 }
 
@@ -1098,8 +1105,7 @@ void LXQtPanel::showPopupMenu(Plugin *plugin)
 
 Plugin* LXQtPanel::findPlugin(const ILXQtPanelPlugin* iPlugin) const
 {
-    const auto plugins = mPlugins->plugins();
-    for (auto const & plug : plugins)
+    for (auto plug : mPlugins)
         if (plug->iPlugin() == iPlugin)
             return plug;
     return nullptr;
@@ -1162,8 +1168,7 @@ QRect LXQtPanel::calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const Q
     if (nullptr == panel_plugin)
     {
         qWarning() << Q_FUNC_INFO << "Wrong logic? Unable to find Plugin* for" << plugin << "known plugins follow...";
-        const auto plugins = mPlugins->plugins();
-        for (auto const & plug : plugins)
+        for (auto plug : mPlugins)
             qWarning() << plug->iPlugin() << plug;
 
         return QRect();

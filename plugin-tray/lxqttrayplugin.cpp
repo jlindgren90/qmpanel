@@ -29,9 +29,9 @@
 #include "lxqttrayplugin.h"
 #include "lxqttray.h"
 
-LXQtTrayPlugin::LXQtTrayPlugin(const ILXQtPanelPluginStartupInfo &startupInfo) :
+LXQtTrayPlugin::LXQtTrayPlugin(ILXQtPanel *lxqtPanel) :
     QObject(),
-    ILXQtPanelPlugin(startupInfo),
+    ILXQtPanelPlugin(lxqtPanel),
     mWidget(new LXQtTray(this))
 {
 }

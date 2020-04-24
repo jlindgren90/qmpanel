@@ -48,7 +48,7 @@ class LXQtWorldClock : public QObject, public ILXQtPanelPlugin
 {
     Q_OBJECT
 public:
-    LXQtWorldClock(const ILXQtPanelPluginStartupInfo &startupInfo);
+    LXQtWorldClock(ILXQtPanel *lxqtPanel);
     ~LXQtWorldClock();
 
     virtual QWidget *widget() { return mMainWidget; }
@@ -128,18 +128,6 @@ signals:
 protected:
     virtual bool event(QEvent* );
 
-};
-
-class LXQtWorldClockLibrary: public QObject, public ILXQtPanelPluginLibrary
-{
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "lxqt.org/Panel/PluginInterface/3.0")
-    Q_INTERFACES(ILXQtPanelPluginLibrary)
-public:
-    ILXQtPanelPlugin *instance(const ILXQtPanelPluginStartupInfo &startupInfo) const
-    {
-        return new LXQtWorldClock(startupInfo);
-    }
 };
 
 #endif // LXQT_PANEL_WORLDCLOCK_H

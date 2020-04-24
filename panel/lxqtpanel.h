@@ -44,7 +44,6 @@ class QAbstractItemModel;
 
 namespace LXQt {
 class Settings;
-class PluginInfo;
 }
 class LXQtPanelLayout;
 class ConfigPanelDialog;
@@ -417,7 +416,7 @@ private:
      * @brief Pointer to the PanelPluginsModel which will store all the Plugins
      * that are loaded.
      */
-    QScopedPointer<PanelPluginsModel> mPlugins;
+    QList<Plugin *> mPlugins;
     /**
      * @brief object for storing info if some standalone window is shown
      * (for preventing hide)

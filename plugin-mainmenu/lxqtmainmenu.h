@@ -62,7 +62,7 @@ class LXQtMainMenu : public QObject, public ILXQtPanelPlugin
 {
     Q_OBJECT
 public:
-    LXQtMainMenu(const ILXQtPanelPluginStartupInfo &startupInfo);
+    LXQtMainMenu(ILXQtPanel *lxqtPanel);
     ~LXQtMainMenu();
 
     QString themeId() const { return "MainMenu"; }
@@ -112,15 +112,6 @@ private slots:
     void showHideMenu();
     void searchTextChanged(QString const & text);
     void setSearchFocus(QAction *action);
-};
-
-class LXQtMainMenuPluginLibrary: public QObject, public ILXQtPanelPluginLibrary
-{
-    Q_OBJECT
-    // Q_PLUGIN_METADATA(IID "lxqt.org/Panel/PluginInterface/3.0")
-    Q_INTERFACES(ILXQtPanelPluginLibrary)
-public:
-    ILXQtPanelPlugin *instance(const ILXQtPanelPluginStartupInfo &startupInfo) const { return new LXQtMainMenu(startupInfo);}
 };
 
 #endif

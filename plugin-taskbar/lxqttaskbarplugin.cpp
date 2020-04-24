@@ -28,9 +28,9 @@
 
 #include "lxqttaskbarplugin.h"
 
-LXQtTaskBarPlugin::LXQtTaskBarPlugin(const ILXQtPanelPluginStartupInfo &startupInfo):
+LXQtTaskBarPlugin::LXQtTaskBarPlugin(ILXQtPanel *lxqtPanel):
     QObject(),
-    ILXQtPanelPlugin(startupInfo)
+    ILXQtPanelPlugin(lxqtPanel)
 
 {
     mTaskBar = new LXQtTaskBar(this);
