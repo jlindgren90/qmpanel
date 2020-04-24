@@ -39,12 +39,12 @@ class LXQtWorldClock : public Plugin
 public:
     LXQtWorldClock(LXQtPanel * lxqtPanel);
 
-    virtual QWidget * widget() { return &mContent; }
+    QWidget * widget() override { return &mLabel; }
 
 private:
-    void updateTimeText();
+    void updateLabel();
 
-    QLabel mContent;
+    QLabel mLabel;
     QTimer mTimer;
 };
 

@@ -31,7 +31,7 @@
 #include "plugin.h"
 
 #include "../plugin-mainmenu/lxqtmainmenu.h"
-#include "../plugin-quicklaunch/lxqtquicklaunchplugin.h"
+#include "../plugin-quicklaunch/lxqtquicklaunch.h"
 #include "../plugin-taskbar/lxqttaskbarplugin.h"
 #include "../plugin-tray/lxqttrayplugin.h"
 #include "../plugin-worldclock/lxqtworldclock.h"
@@ -122,7 +122,7 @@ void LXQtPanel::show()
 void LXQtPanel::loadPlugins()
 {
     mPlugins.append(new LXQtMainMenu(this));
-    mPlugins.append(new LXQtQuickLaunchPlugin(this));
+    mPlugins.append(new LXQtQuickLaunch(this));
     mPlugins.append(new LXQtTaskBarPlugin(this));
     mPlugins.append(new LXQtTrayPlugin(this));
     mPlugins.append(new LXQtWorldClock(this));

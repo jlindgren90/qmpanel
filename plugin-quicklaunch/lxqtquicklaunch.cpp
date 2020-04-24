@@ -29,16 +29,15 @@
 #include "lxqtquicklaunch.h"
 
 #include <QDebug>
-#include <QHBoxLayout>
 #include <QToolButton>
 #include <XdgAction>
-#include <XdgDesktopFile>
 
-LXQtQuickLaunch::LXQtQuickLaunch(QWidget * parent) : QWidget(parent)
+LXQtQuickLaunch::LXQtQuickLaunch(LXQtPanel * lxqtPanel) :
+    Plugin(lxqtPanel),
+    mLayout(&mWidget)
 {
-    auto layout = new QHBoxLayout(this);
-    layout->setMargin(0);
-    layout->setSpacing(0);
+    mLayout.setMargin(0);
+    mLayout.setSpacing(0);
 
     /* TODO: make this configurable */
     const QStringList apps = {
@@ -63,9 +62,9 @@ LXQtQuickLaunch::LXQtQuickLaunch(QWidget * parent) : QWidget(parent)
             continue;
         }
 
-        auto button = new QToolButton(this);
+        auto button = new QToolButton(&mWidget);
         button->setAutoRaise(true);
         button->setDefaultAction(new XdgAction(&xdg, this));
-        layout->addWidget(button);
+        mLayout.addWidget(button);
     }
 }

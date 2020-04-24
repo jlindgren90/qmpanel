@@ -1,7 +1,6 @@
 set(PLUGIN "quicklaunch")
 
 set(HEADERS
-    lxqtquicklaunchplugin.h
     lxqtquicklaunch.h
 )
 

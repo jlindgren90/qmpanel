@@ -36,13 +36,13 @@ LXQtWorldClock::LXQtWorldClock(LXQtPanel * lxqtPanel)
     mTimer.setInterval(10000);
     mTimer.start();
 
-    QObject::connect(&mTimer, &QTimer::timeout, [this]() { updateTimeText(); });
+    QObject::connect(&mTimer, &QTimer::timeout, [this]() { updateLabel(); });
 
-    updateTimeText();
+    updateLabel();
 }
 
-void LXQtWorldClock::updateTimeText()
+void LXQtWorldClock::updateLabel()
 {
-    mContent.setText(
+    mLabel.setText(
         QDateTime::currentDateTime().toString("ddd MMM d, h:mm a"));
 }

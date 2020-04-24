@@ -29,15 +29,20 @@
 #ifndef LXQTQUICKLAUNCH_H
 #define LXQTQUICKLAUNCH_H
 
-#include "../panel/lxqtpanel.h"
+#include <QHBoxLayout>
 
-/*! \brief Loader for "quick launcher" icons in the panel.
-\author Petr Vanek <petr@scribus.info>
-*/
-class LXQtQuickLaunch : public QWidget
+#include "../panel/plugin.h"
+
+class LXQtQuickLaunch : public Plugin
 {
 public:
-    LXQtQuickLaunch(QWidget * parent = 0);
+    explicit LXQtQuickLaunch(LXQtPanel * lxqtPanel);
+
+    QWidget * widget() override { return &mWidget; }
+
+private:
+    QWidget mWidget;
+    QHBoxLayout mLayout;
 };
 
 #endif
