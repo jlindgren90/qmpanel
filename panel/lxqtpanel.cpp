@@ -132,7 +132,7 @@ void LXQtPanel::setPanelGeometry()
     }
 
     QRect rect = screen->geometry();
-    rect.moveTop(rect.top() + rect.height() - sizeHint().height());
+    rect.setTop(rect.bottom() + 1 - sizeHint().height());
 
     if (rect != geometry())
     {
