@@ -59,7 +59,6 @@ LXQtTaskGroup::LXQtTaskGroup(const QString &groupName, WId window, LXQtTaskBar *
     connect(this, SIGNAL(clicked(bool)), this, SLOT(onClicked(bool)));
     connect(KWindowSystem::self(), SIGNAL(currentDesktopChanged(int)), this, SLOT(onDesktopChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(onActiveWindowChanged(WId)));
-    connect(parent, &LXQtTaskBar::buttonRotationRefreshed, this, &LXQtTaskGroup::setAutoRotation);
     connect(parent, &LXQtTaskBar::refreshIconGeometry, this, &LXQtTaskGroup::refreshIconsGeometry);
     connect(parent, &LXQtTaskBar::buttonStyleRefreshed, this, &LXQtTaskGroup::setToolButtonsStyle);
     connect(parent, &LXQtTaskBar::showOnlySettingChanged, this, &LXQtTaskGroup::refreshVisibility);
@@ -357,20 +356,8 @@ void LXQtTaskGroup::recalculateFrameIfVisible()
     if (mPopup->isVisible())
     {
         recalculateFrameSize();
-        if (plugin()->panel()->position() == ILXQtPanel::PositionBottom)
-            recalculateFramePosition();
+        recalculateFramePosition();
     }
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskGroup::setAutoRotation(bool value, ILXQtPanel::Position position)
-{
-    for (LXQtTaskButton *button : qAsConst(mButtonHash))
-        button->setAutoRotation(false, position);
-
-    LXQtTaskButton::setAutoRotation(value, position);
 }
 
 /************************************************
@@ -477,7 +464,7 @@ QSize LXQtTaskGroup::recalculateFrameSize()
 int LXQtTaskGroup::recalculateFrameHeight() const
 {
     int cont = visibleButtonsCount();
-    int h = !plugin()->panel()->isHorizontal() && parentTaskBar()->isAutoRotate() ? width() : height();
+    int h = height();
     return cont * h + (cont + 1) * mPopup->spacing();
 }
 
@@ -501,21 +488,7 @@ QPoint LXQtTaskGroup::recalculateFramePosition()
 {
     // Set position
     int x_offset = 0, y_offset = 0;
-    switch (plugin()->panel()->position())
-    {
-    case ILXQtPanel::PositionTop:
-        y_offset += height();
-        break;
-    case ILXQtPanel::PositionBottom:
-        y_offset = -recalculateFrameHeight();
-        break;
-    case ILXQtPanel::PositionLeft:
-        x_offset += width();
-        break;
-    case ILXQtPanel::PositionRight:
-        x_offset = -recalculateFrameWidth();
-        break;
-    }
+    y_offset = -recalculateFrameHeight();
 
     QPoint pos = mapToGlobal(QPoint(x_offset, y_offset));
     mPopup->move(pos);
@@ -539,9 +512,6 @@ void LXQtTaskGroup::enterEvent(QEvent *event)
 {
     QToolButton::enterEvent(event);
 
-    if (sDraggging)
-        return;
-
     if (parentTaskBar()->isShowGroupOnHover())
         setPopupVisible(true);
 }
@@ -564,10 +534,6 @@ void LXQtTaskGroup::dragEnterEvent(QDragEnterEvent *event)
  ************************************************/
 void LXQtTaskGroup::dragLeaveEvent(QDragLeaveEvent *event)
 {
-    // if draggind something into the taskgroup or the taskgroups' popup,
-    // do not close the popup
-    if (!sDraggging)
-        setPopupVisible(false);
     LXQtTaskButton::dragLeaveEvent(event);
 }
 

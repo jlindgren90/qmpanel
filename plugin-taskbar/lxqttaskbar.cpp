@@ -190,24 +190,12 @@ void LXQtTaskBar::buttonMove(LXQtTaskGroup * dst, LXQtTaskGroup * src, QPoint co
         QRect occupied = mLayout->occupiedGeometry();
         QRect last_empty_row{occupied};
         const QRect last_item_geometry = mLayout->itemAt(size - 1)->geometry();
-        if (mPlugin->panel()->isHorizontal())
+        if (isRightToLeft())
         {
-            if (isRightToLeft())
-            {
-                last_empty_row.setTopRight(last_item_geometry.topLeft());
-            } else
-            {
-                last_empty_row.setTopLeft(last_item_geometry.topRight());
-            }
+            last_empty_row.setTopRight(last_item_geometry.topLeft());
         } else
         {
-            if (isRightToLeft())
-            {
-                last_empty_row.setTopRight(last_item_geometry.topRight());
-            } else
-            {
-                last_empty_row.setTopLeft(last_item_geometry.topLeft());
-            }
+            last_empty_row.setTopLeft(last_item_geometry.topRight());
         }
         if (occupied.contains(pos) && !last_empty_row.contains(pos))
             return;
@@ -300,9 +288,6 @@ void LXQtTaskBar::addWindow(WId window)
         connect(group, SIGNAL(groupBecomeEmpty(QString)), this, SLOT(groupBecomeEmptySlot()));
         connect(group, SIGNAL(visibilityChanged(bool)), this, SLOT(refreshPlaceholderVisibility()));
         connect(group, &LXQtTaskGroup::popupShown, this, &LXQtTaskBar::popupShown);
-        connect(group, &LXQtTaskButton::dragging, this, [this] (QObject * dragSource, QPoint const & pos) {
-            buttonMove(qobject_cast<LXQtTaskGroup *>(sender()), qobject_cast<LXQtTaskGroup *>(dragSource), pos);
-        });
 
         mLayout->addWidget(group);
         group->setToolButtonsStyle(mButtonStyle);
@@ -386,17 +371,6 @@ void LXQtTaskBar::onWindowRemoved(WId window)
     {
         removeWindow(pos);
     }
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::refreshButtonRotation()
-{
-    bool autoRotate = mAutoRotate && (mButtonStyle != Qt::ToolButtonIconOnly);
-
-    ILXQtPanel::Position panelPosition = mPlugin->panel()->position();
-    emit buttonRotationRefreshed(autoRotate, panelPosition);
 }
 
 /************************************************
@@ -498,50 +472,16 @@ void LXQtTaskBar::settingsChanged()
 void LXQtTaskBar::realign()
 {
     mLayout->setEnabled(false);
-    refreshButtonRotation();
 
-    ILXQtPanel *panel = mPlugin->panel();
     QSize maxSize = QSize(mButtonWidth, mButtonHeight);
     QSize minSize = QSize(0, 0);
 
-    bool rotated = false;
-
-    if (panel->isHorizontal())
-    {
-        mLayout->setRowCount(1);
-        mLayout->setColumnCount(0);
-    }
-    else
-    {
-        mLayout->setRowCount(0);
-
-        if (mButtonStyle == Qt::ToolButtonIconOnly)
-        {
-            // Vertical + Icons
-            mLayout->setColumnCount(1);
-        }
-        else
-        {
-            rotated = mAutoRotate && (panel->position() == ILXQtPanel::PositionLeft || panel->position() == ILXQtPanel::PositionRight);
-
-            // Vertical + Text
-            if (rotated)
-            {
-                maxSize.rwidth()  = mButtonHeight;
-                maxSize.rheight() = mButtonWidth;
-
-                mLayout->setColumnCount(1);
-            }
-            else
-            {
-                mLayout->setColumnCount(1);
-            }
-        }
-    }
+    mLayout->setRowCount(1);
+    mLayout->setColumnCount(0);
 
     mLayout->setCellMinimumSize(minSize);
     mLayout->setCellMaximumSize(maxSize);
-    mLayout->setDirection(rotated ? LXQt::GridLayout::TopToBottom : LXQt::GridLayout::LeftToRight);
+    mLayout->setDirection(LXQt::GridLayout::LeftToRight);
     mLayout->setEnabled(true);
 
     //our placement on screen could have been changed

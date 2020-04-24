@@ -155,18 +155,8 @@ bool LXQtTray::nativeEventFilter(const QByteArray &eventType, void *message, lon
 void LXQtTray::realign()
 {
     mLayout->setEnabled(false);
-    ILXQtPanel *panel = mPlugin->panel();
-
-    if (panel->isHorizontal())
-    {
-        mLayout->setRowCount(1);
-        mLayout->setColumnCount(0);
-    }
-    else
-    {
-        mLayout->setColumnCount(1);
-        mLayout->setRowCount(0);
-    }
+    mLayout->setRowCount(1);
+    mLayout->setColumnCount(0);
     mLayout->setEnabled(true);
 }
 

@@ -83,42 +83,6 @@
 #define CFG_KEY_LOCKPANEL          "lockPanel"
 
 /************************************************
- Returns the Position by the string.
- String is one of "Top", "Left", "Bottom", "Right", string is not case sensitive.
- If the string is not correct, returns defaultValue.
- ************************************************/
-ILXQtPanel::Position LXQtPanel::strToPosition(const QString& str, ILXQtPanel::Position defaultValue)
-{
-    if (str.toUpper() == "TOP")    return LXQtPanel::PositionTop;
-    if (str.toUpper() == "LEFT")   return LXQtPanel::PositionLeft;
-    if (str.toUpper() == "RIGHT")  return LXQtPanel::PositionRight;
-    if (str.toUpper() == "BOTTOM") return LXQtPanel::PositionBottom;
-    return defaultValue;
-}
-
-
-/************************************************
- Return  string representation of the position
- ************************************************/
-QString LXQtPanel::positionToStr(ILXQtPanel::Position position)
-{
-    switch (position)
-    {
-    case LXQtPanel::PositionTop:
-        return QString("Top");
-    case LXQtPanel::PositionLeft:
-        return QString("Left");
-    case LXQtPanel::PositionRight:
-        return QString("Right");
-    case LXQtPanel::PositionBottom:
-        return QString("Bottom");
-    }
-
-    return QString();
-}
-
-
-/************************************************
 
  ************************************************/
 LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidget *parent) :
@@ -127,11 +91,8 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     mConfigGroup(configGroup),
     mPanelSize(0),
     mLength(0),
-    mAlignment(AlignmentLeft),
-    mPosition(ILXQtPanel::PositionBottom),
     mScreenNum(0), //whatever (avoid conditional on uninitialized value)
     mActualScreenNum(0),
-    mReserveSpace(true),
     mAnimation(nullptr),
     mLockPanel(false)
 {
@@ -215,13 +176,7 @@ void LXQtPanel::readSettings()
               false);
 
     mScreenNum = mSettings->value(CFG_KEY_SCREENNUM, QApplication::desktop()->primaryScreen()).toInt();
-    setPosition(mScreenNum,
-                strToPosition(mSettings->value(CFG_KEY_POSITION).toString(), PositionBottom),
-                false);
-
-    setAlignment(Alignment(mSettings->value(CFG_KEY_ALIGNMENT, mAlignment).toInt()), false);
-
-    mReserveSpace = mSettings->value(CFG_KEY_RESERVESPACE, true).toBool();
+    setPosition(mScreenNum, false);
 
     mLockPanel = mSettings->value(CFG_KEY_LOCKPANEL, false).toBool();
 
@@ -234,8 +189,8 @@ void LXQtPanel::readSettings()
  ************************************************/
 void LXQtPanel::ensureVisible()
 {
-    if (!canPlacedOn(mScreenNum, mPosition))
-        setPosition(findAvailableScreen(mPosition), mPosition, false);
+    if (!canPlacedOn(mScreenNum))
+        setPosition(findAvailableScreen(), false);
     else
         mActualScreenNum = mScreenNum;
 
@@ -313,90 +268,21 @@ void LXQtPanel::setPanelGeometry(bool animate)
     const QRect currentScreen = QApplication::desktop()->screenGeometry(mActualScreenNum);
     QRect rect;
 
-    if (isHorizontal())
-    {
-        // Horiz panel ***************************
-        rect.setHeight(qMax(PANEL_MINIMUM_SIZE, mPanelSize));
-        if (mLengthInPercents)
-            rect.setWidth(currentScreen.width() * mLength / 100.0);
-        else
-        {
-            if (mLength <= 0)
-                rect.setWidth(currentScreen.width() + mLength);
-            else
-                rect.setWidth(mLength);
-        }
-
-        rect.setWidth(qMax(rect.size().width(), mLayout->minimumSize().width()));
-
-        // Horiz ......................
-        switch (mAlignment)
-        {
-        case LXQtPanel::AlignmentLeft:
-            rect.moveLeft(currentScreen.left());
-            break;
-
-        case LXQtPanel::AlignmentCenter:
-            rect.moveCenter(currentScreen.center());
-            break;
-
-        case LXQtPanel::AlignmentRight:
-            rect.moveRight(currentScreen.right());
-            break;
-        }
-
-        // Vert .......................
-        if (mPosition == ILXQtPanel::PositionTop)
-        {
-            rect.moveTop(currentScreen.top());
-        }
-        else
-        {
-            rect.moveBottom(currentScreen.bottom());
-        }
-    }
+    rect.setHeight(qMax(PANEL_MINIMUM_SIZE, mPanelSize));
+    if (mLengthInPercents)
+        rect.setWidth(currentScreen.width() * mLength / 100.0);
     else
     {
-        // Vert panel ***************************
-        rect.setWidth(qMax(PANEL_MINIMUM_SIZE, mPanelSize));
-        if (mLengthInPercents)
-            rect.setHeight(currentScreen.height() * mLength / 100.0);
+        if (mLength <= 0)
+            rect.setWidth(currentScreen.width() + mLength);
         else
-        {
-            if (mLength <= 0)
-                rect.setHeight(currentScreen.height() + mLength);
-            else
-                rect.setHeight(mLength);
-        }
-
-        rect.setHeight(qMax(rect.size().height(), mLayout->minimumSize().height()));
-
-        // Vert .......................
-        switch (mAlignment)
-        {
-        case LXQtPanel::AlignmentLeft:
-            rect.moveTop(currentScreen.top());
-            break;
-
-        case LXQtPanel::AlignmentCenter:
-            rect.moveCenter(currentScreen.center());
-            break;
-
-        case LXQtPanel::AlignmentRight:
-            rect.moveBottom(currentScreen.bottom());
-            break;
-        }
-
-        // Horiz ......................
-        if (mPosition == ILXQtPanel::PositionLeft)
-        {
-            rect.moveLeft(currentScreen.left());
-        }
-        else
-        {
-            rect.moveRight(currentScreen.right());
-        }
+            rect.setWidth(mLength);
     }
+
+    rect.setWidth(qMax(rect.size().width(), mLayout->minimumSize().width()));
+    rect.moveLeft(currentScreen.left());
+    rect.moveBottom(currentScreen.bottom());
+
     if (rect != geometry())
     {
         setFixedSize(rect.size());
@@ -414,16 +300,6 @@ void LXQtPanel::realign()
 {
     if (!isVisible())
         return;
-#if 0
-    qDebug() << "** Realign *********************";
-    qDebug() << "PanelSize:   " << mPanelSize;
-    qDebug() << "IconSize:      " << mIconSize;
-    qDebug() << "LineCount:     " << mLineCount;
-    qDebug() << "Length:        " << mLength << (mLengthInPercents ? "%" : "px");
-    qDebug() << "Alignment:     " << (mAlignment == 0 ? "center" : (mAlignment < 0 ? "left" : "right"));
-    qDebug() << "Position:      " << positionToStr(mPosition) << "on" << mScreenNum;
-    qDebug() << "Plugins count: " << mPlugins.count();
-#endif
 
     setPanelGeometry();
 
@@ -441,63 +317,19 @@ void LXQtPanel::updateWmStrut()
     if(wid == 0 || !isVisible())
         return;
 
-    if (mReserveSpace)
-    {
-        const QRect wholeScreen = QApplication::desktop()->geometry();
-        const QRect rect = geometry();
-        // NOTE: https://standards.freedesktop.org/wm-spec/wm-spec-latest.html
-        // Quote from the EWMH spec: " Note that the strut is relative to the screen edge, and not the edge of the xinerama monitor."
-        // So, we use the geometry of the whole screen to calculate the strut rather than using the geometry of individual monitors.
-        // Though the spec only mention Xinerama and did not mention XRandR, the rule should still be applied.
-        // At least openbox is implemented like this.
-        switch (mPosition)
-        {
-        case LXQtPanel::PositionTop:
-            KWindowSystem::setExtendedStrut(wid,
-                                            /* Left   */  0, 0, 0,
-                                            /* Right  */  0, 0, 0,
-                                            /* Top    */  rect.top() + getReserveDimension(), rect.left(), rect.right(),
-                                            /* Bottom */  0, 0, 0
-                                           );
-            break;
-
-        case LXQtPanel::PositionBottom:
-            KWindowSystem::setExtendedStrut(wid,
-                                            /* Left   */  0, 0, 0,
-                                            /* Right  */  0, 0, 0,
-                                            /* Top    */  0, 0, 0,
-                                            /* Bottom */  wholeScreen.bottom() - rect.bottom() + getReserveDimension(), rect.left(), rect.right()
-                                           );
-            break;
-
-        case LXQtPanel::PositionLeft:
-            KWindowSystem::setExtendedStrut(wid,
-                                            /* Left   */  rect.left() + getReserveDimension(), rect.top(), rect.bottom(),
-                                            /* Right  */  0, 0, 0,
-                                            /* Top    */  0, 0, 0,
-                                            /* Bottom */  0, 0, 0
-                                           );
-
-            break;
-
-        case LXQtPanel::PositionRight:
-            KWindowSystem::setExtendedStrut(wid,
-                                            /* Left   */  0, 0, 0,
-                                            /* Right  */  wholeScreen.right() - rect.right() + getReserveDimension(), rect.top(), rect.bottom(),
-                                            /* Top    */  0, 0, 0,
-                                            /* Bottom */  0, 0, 0
-                                           );
-            break;
-    }
-    } else
-    {
-        KWindowSystem::setExtendedStrut(wid,
-                                        /* Left   */  0, 0, 0,
-                                        /* Right  */  0, 0, 0,
-                                        /* Top    */  0, 0, 0,
-                                        /* Bottom */  0, 0, 0
-                                       );
-    }
+    const QRect wholeScreen = QApplication::desktop()->geometry();
+    const QRect rect = geometry();
+    // NOTE: https://standards.freedesktop.org/wm-spec/wm-spec-latest.html
+    // Quote from the EWMH spec: " Note that the strut is relative to the screen edge, and not the edge of the xinerama monitor."
+    // So, we use the geometry of the whole screen to calculate the strut rather than using the geometry of individual monitors.
+    // Though the spec only mention Xinerama and did not mention XRandR, the rule should still be applied.
+    // At least openbox is implemented like this.
+    KWindowSystem::setExtendedStrut(wid,
+                                    /* Left   */  0, 0, 0,
+                                    /* Right  */  0, 0, 0,
+                                    /* Top    */  0, 0, 0,
+                                    /* Bottom */  wholeScreen.bottom() - rect.bottom() + getReserveDimension(), rect.left(), rect.right()
+                                   );
 }
 
 
@@ -506,54 +338,30 @@ void LXQtPanel::updateWmStrut()
   This function checks if the panel can be placed on the display
   @screenNum on @position.
  ************************************************/
-bool LXQtPanel::canPlacedOn(int screenNum, LXQtPanel::Position position)
+bool LXQtPanel::canPlacedOn(int screenNum)
 {
     QDesktopWidget* dw = QApplication::desktop();
 
-    switch (position)
-    {
-    case LXQtPanel::PositionTop:
-        for (int i = 0; i < dw->screenCount(); ++i)
-            if (dw->screenGeometry(i).bottom() < dw->screenGeometry(screenNum).top())
-                return false;
-        return true;
-
-    case LXQtPanel::PositionBottom:
-        for (int i = 0; i < dw->screenCount(); ++i)
-            if (dw->screenGeometry(i).top() > dw->screenGeometry(screenNum).bottom())
-                return false;
-        return true;
-
-    case LXQtPanel::PositionLeft:
-        for (int i = 0; i < dw->screenCount(); ++i)
-            if (dw->screenGeometry(i).right() < dw->screenGeometry(screenNum).left())
-                return false;
-        return true;
-
-    case LXQtPanel::PositionRight:
-        for (int i = 0; i < dw->screenCount(); ++i)
-            if (dw->screenGeometry(i).left() > dw->screenGeometry(screenNum).right())
-                return false;
-        return true;
-    }
-
-    return false;
+    for (int i = 0; i < dw->screenCount(); ++i)
+        if (dw->screenGeometry(i).top() > dw->screenGeometry(screenNum).bottom())
+            return false;
+    return true;
 }
 
 
 /************************************************
 
  ************************************************/
-int LXQtPanel::findAvailableScreen(LXQtPanel::Position position)
+int LXQtPanel::findAvailableScreen()
 {
     int current = mScreenNum;
 
     for (int i = current; i < QApplication::desktop()->screenCount(); ++i)
-        if (canPlacedOn(i, position))
+        if (canPlacedOn(i))
             return i;
 
     for (int i = 0; i < current; ++i)
-        if (canPlacedOn(i, position))
+        if (canPlacedOn(i))
             return i;
 
     return 0;
@@ -592,14 +400,12 @@ void LXQtPanel::setLength(int length, bool inPercents, bool save)
 /************************************************
 
  ************************************************/
-void LXQtPanel::setPosition(int screen, ILXQtPanel::Position position, bool save)
+void LXQtPanel::setPosition(int screen, bool save)
 {
-    if (mScreenNum == screen &&
-            mPosition == position)
+    if (mScreenNum == screen)
         return;
 
     mActualScreenNum = screen;
-    mPosition = position;
 
     if (save)
     {
@@ -629,33 +435,6 @@ void LXQtPanel::setPosition(int screen, ILXQtPanel::Position position, bool save
     }
 
     realign();
-}
-
-/************************************************
- *
- ************************************************/
-void LXQtPanel::setAlignment(Alignment value, bool save)
-{
-    if (mAlignment == value)
-        return;
-
-    mAlignment = value;
-
-    realign();
-}
-
-
-/************************************************
- *
- ************************************************/
-void LXQtPanel::setReserveSpace(bool reserveSpace, bool save)
-{
-    if (mReserveSpace == reserveSpace)
-        return;
-
-    mReserveSpace = reserveSpace;
-
-    updateWmStrut();
 }
 
 
@@ -731,26 +510,8 @@ Plugin* LXQtPanel::findPlugin(const ILXQtPanelPlugin* iPlugin) const
  ************************************************/
 QRect LXQtPanel::calculatePopupWindowPos(QPoint const & absolutePos, QSize const & windowSize) const
 {
-    int x = absolutePos.x(), y = absolutePos.y();
-
-    switch (position())
-    {
-    case ILXQtPanel::PositionTop:
-        y = globalGeometry().bottom();
-        break;
-
-    case ILXQtPanel::PositionBottom:
-        y = globalGeometry().top() - windowSize.height();
-        break;
-
-    case ILXQtPanel::PositionLeft:
-        x = globalGeometry().right();
-        break;
-
-    case ILXQtPanel::PositionRight:
-        x = globalGeometry().left() - windowSize.width();
-        break;
-    }
+    int x = absolutePos.x();
+    int y = globalGeometry().top() - windowSize.height();
 
     QRect res(QPoint(x, y), windowSize);
 
@@ -793,14 +554,6 @@ QRect LXQtPanel::calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const Q
     return calculatePopupWindowPos(globalGeometry().topLeft() + panel_plugin->geometry().topLeft(), windowSize);
 }
 
-
-/************************************************
-
- ************************************************/
-QString LXQtPanel::qssPosition() const
-{
-    return positionToStr(position());
-}
 
 /************************************************
 

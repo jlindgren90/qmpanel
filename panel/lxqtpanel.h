@@ -45,9 +45,6 @@ class Plugin;
 namespace LXQt {
 class Settings;
 }
-class ConfigPanelDialog;
-class PanelPluginsModel;
-class WindowNotifier;
 
 /*! \brief The LXQtPanel class provides a single lxqt-panel. All LXQtPanel
  * instances should be created and handled by LXQtPanelApplication. In turn,
@@ -75,21 +72,7 @@ class LXQT_PANEL_API LXQtPanel : public QFrame, public ILXQtPanel
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString position READ qssPosition)
-
 public:
-    /**
-     * @brief Stores how the panel should be aligned. Obviously, this applies
-     * only if the panel does not occupy 100 % of the available space. If the
-     * panel is vertical, AlignmentLeft means align to the top border of the
-     * screen, AlignmentRight means align to the bottom.
-     */
-    enum Alignment {
-        AlignmentLeft   = -1, //!< Align the panel to the left or top
-        AlignmentCenter =  0, //!< Center the panel
-        AlignmentRight  =  1 //!< Align the panel to the right or bottom
-    };
-
     /**
      * @brief Creates and initializes the LXQtPanel. Performs the following
      * steps:
@@ -123,7 +106,6 @@ public:
     void readSettings();
 
     // ILXQtPanel overrides ........
-    ILXQtPanel::Position position() const override { return mPosition; }
     QRect globalGeometry() const override;
     QRect calculatePopupWindowPos(QPoint const & absolutePos, QSize const & windowSize) const override;
     QRect calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const QSize &windowSize) const override;
@@ -137,14 +119,6 @@ public:
      * otherwise.
      */
     Plugin *findPlugin(const ILXQtPanelPlugin *iPlugin) const;
-
-    // For QSS properties ..................
-    /**
-     * @brief Returns the position as string
-     *
-     * \sa positionToStr().
-     */
-    QString qssPosition() const;
 
     /**
      * @brief Checks if this LXQtPanel can be placed at a given position
@@ -163,37 +137,13 @@ public:
      *
      * \sa findAvailableScreen(), mScreenNum, mActualScreenNum.
      */
-    static bool canPlacedOn(int screenNum, LXQtPanel::Position position);
-    /**
-     * @brief Returns a string representation of the given position. This
-     * string is human-readable and can be used in config files.
-     * @param position position that should be converted to a string.
-     * @return the string representation of the given position, i.e.
-     * "Top", "Left", "Right" or "Bottom".
-     *
-     * \sa strToPosition()
-     */
-    static QString positionToStr(ILXQtPanel::Position position);
-    /**
-     * @brief Returns an ILXQtPanel::Position from the given string. This can
-     * be used to retrieve ILXQtPanel::Position values from the config files.
-     * @param str string that should be converted to ILXQtPanel::Position
-     * @param defaultValue value that will be returned if the string can not
-     * be converted to an ILXQtPanel::Position.
-     * @return ILXQtPanel::Position that was determined from str or
-     * defaultValue if str could not be converted.
-     *
-     * \sa positionToStr()
-     */
-    static ILXQtPanel::Position strToPosition(const QString &str, ILXQtPanel::Position defaultValue);
+    static bool canPlacedOn(int screenNum);
 
     // Settings
     int panelSize() const { return mPanelSize; }
     int length() const { return mLength; }
     bool lengthInPercents() const { return mLengthInPercents; }
-    LXQtPanel::Alignment alignment() const { return mAlignment; }
     int screenNum() const { return mScreenNum; }
-    int reserveSpace() const { return mReserveSpace; }
 
 public slots:
     /**
@@ -220,9 +170,7 @@ public slots:
      */
     void setPanelSize(int value, bool save);
     void setLength(int length, bool inPercents, bool save); //!< \sa setPanelSize()
-    void setPosition(int screen, ILXQtPanel::Position position, bool save); //!< \sa setPanelSize()
-    void setAlignment(LXQtPanel::Alignment value, bool save); //!< \sa setPanelSize()
-    void setReserveSpace(bool reserveSpace, bool save); //!< \sa setPanelSize()
+    void setPosition(int screen, bool save); //!< \sa setPanelSize()
 
     /**
      * @brief Checks if the panel can be placed on the current screen at the
@@ -350,7 +298,7 @@ private:
      *
      * \sa canPlacedOn(), mScreenNum, mActualScreenNum.
      */
-    int findAvailableScreen(LXQtPanel::Position position);
+    int findAvailableScreen();
     /**
      * @brief Update the window manager struts _NET_WM_PARTIAL_STRUT and
      * _NET_WM_STRUT for this widget. "The purpose of struts is to reserve
@@ -418,18 +366,6 @@ private:
     bool mLengthInPercents;
 
     /**
-     * @brief Stores how this panel is aligned. The meaning of this value
-     * differs for horizontal and vertical panels.
-     *
-     * \sa Alignment.
-     */
-    Alignment mAlignment;
-
-    /**
-     * @brief Stores the position where the panel is shown
-     */
-    ILXQtPanel::Position mPosition;
-    /**
      * @brief Returns the index of the screen on which this panel should be
      * shown. This is the user configured value which can differ from the
      * screen that the panel is actually shown on. If the panel can not be
@@ -449,15 +385,6 @@ private:
      * \sa mScreenNum, canPlacedOn(), findAvailableScreen().
      */
     int mActualScreenNum;
-
-    /*!
-     * \brief Flag if the panel should reserve the space under it as not usable
-     * for "normal" windows. Usable for not 100% wide/hight or hiddable panels,
-     * if user wants maximized windows go under the panel.
-     *
-     * \sa updateWmStrut()
-     */
-    bool mReserveSpace;
 
     /**
      * @brief The animation used for showing/hiding an auto-hiding panel.

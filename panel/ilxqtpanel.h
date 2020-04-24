@@ -40,29 +40,6 @@ class LXQT_PANEL_API ILXQtPanel
 {
 public:
     /**
-     * @brief Specifies the position of the panel on screen.
-     */
-    enum Position{
-        PositionBottom, //!< The bottom side of the screen.
-        PositionTop,    //!< The top side of the screen.
-        PositionLeft,   //!< The left side of the screen.
-        PositionRight   //!< The right side of the screen.
-    };
-
-    /**
-     * @brief Returns the position of the panel. Possible values for the
-     * return value are described by the Position enum.
-     */
-    virtual Position position() const = 0;
-
-    /**
-     * @brief Helper function for convenient direction/alignment checking.
-     * @return True if the panel is on the top or the bottom of the
-     * screen; otherwise returns false.
-     */
-    bool isHorizontal() const { return position() == PositionBottom || position() == PositionTop; }
-
-    /**
      * @brief Helper method that returns the global screen coordinates of the
      * panel, so you do not need to use QWidget::mapToGlobal() by yourself.
      * @return The QRect where the panel is located in global screen

@@ -83,7 +83,6 @@ public slots:
     void settingsChanged();
 
 signals:
-    void buttonRotationRefreshed(bool autoRotate, ILXQtPanel::Position position);
     void buttonStyleRefreshed(Qt::ToolButtonStyle buttonStyle);
     void refreshIconGeometry();
     void showOnlySettingChanged();
@@ -96,7 +95,6 @@ protected:
 
 private slots:
     void refreshTaskList();
-    void refreshButtonRotation();
     void refreshPlaceholderVisibility();
     void groupBecomeEmptySlot();
     void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
