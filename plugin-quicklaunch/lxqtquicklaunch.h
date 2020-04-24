@@ -34,7 +34,7 @@
 /*! \brief Loader for "quick launcher" icons in the panel.
 \author Petr Vanek <petr@scribus.info>
 */
-class LXQtQuickLaunch : public QFrame
+class LXQtQuickLaunch : public QWidget
 {
 public:
     LXQtQuickLaunch(QWidget * parent = 0);

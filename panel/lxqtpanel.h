@@ -29,21 +29,13 @@
 #ifndef LXQTPANEL_H
 #define LXQTPANEL_H
 
-#include <QFrame>
-#include <QString>
-#include <QTimer>
-#include <QPropertyAnimation>
 #include <QPointer>
-#include <LXQt/Settings>
+#include <QWidget>
 #include "lxqtpanelglobals.h"
 
 class QHBoxLayout;
-class QMenu;
+class QScreen;
 class Plugin;
-
-namespace LXQt {
-class Settings;
-}
 
 /*! \brief The LXQtPanel class provides a single lxqt-panel. All LXQtPanel
  * instances should be created and handled by LXQtPanelApplication. In turn,
@@ -67,7 +59,7 @@ class Settings;
  *
  * \sa LXQtPanelApplication, Plugin, PanelPluginsModel, LXQtPanelLayout.
  */
-class LXQT_PANEL_API LXQtPanel : public QFrame
+class LXQT_PANEL_API LXQtPanel : public QWidget
 {
     Q_OBJECT
 
@@ -153,13 +145,6 @@ private:
      */
     QHBoxLayout* mLayout;
     /**
-     * @brief The background widget for the panel. This background widget will
-     * have the background color or the background image if any of these is
-     * set. This background widget will have the LXQtPanelLayout mLayout which
-     * will in turn contain all the Plugins.
-     */
-    QFrame *LXQtPanelWidget;
-    /**
      * @brief Pointer to the PanelPluginsModel which will store all the Plugins
      * that are loaded.
      */
@@ -191,11 +176,6 @@ private:
      * \param animate flag if showing/hiding the panel should be animated.
      */
     void setPanelGeometry();
-    /**
-     * @brief Sets the contents margins of the panel according to its position
-     * and hiddenness. All margins are zero for visible panels.
-     */
-    void setMargins();
 };
 
 

@@ -4,7 +4,6 @@ set(PRIV_HEADERS
     lxqtpanel.h
     lxqtpanelapplication.h
     plugin.h
-    lxqtpanellimits.h
     popupmenu.h
 )
 

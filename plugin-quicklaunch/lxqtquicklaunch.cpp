@@ -34,7 +34,7 @@
 #include <XdgAction>
 #include <XdgDesktopFile>
 
-LXQtQuickLaunch::LXQtQuickLaunch(QWidget * parent) : QFrame(parent)
+LXQtQuickLaunch::LXQtQuickLaunch(QWidget * parent) : QWidget(parent)
 {
     auto layout = new QHBoxLayout(this);
     layout->setMargin(0);

@@ -27,7 +27,6 @@
 
 
 #include "lxqtpanel.h"
-#include "lxqtpanellimits.h"
 #include "lxqtpanelapplication.h"
 #include "popupmenu.h"
 #include "plugin.h"
@@ -58,7 +57,7 @@
 
  ************************************************/
 LXQtPanel::LXQtPanel(QWidget *parent) :
-    QFrame(parent)
+    QWidget(parent)
 {
     //You can find information about the flags and widget attributes in your
     //Qt documentation or at https://doc.qt.io/qt-5/qt.html
@@ -88,17 +87,7 @@ LXQtPanel::LXQtPanel(QWidget *parent) :
     //Allows data from drag and drop operations to be dropped onto the widget (see QWidget::setAcceptDrops()).
     setAttribute(Qt::WA_AcceptDrops);
 
-    setWindowTitle("LXQt Panel");
-
-    //LXQtPanel (inherits QFrame) -> lav (QGridLayout) -> LXQtPanelWidget (QFrame) -> LXQtPanelLayout
-    LXQtPanelWidget = new QFrame(this);
-    LXQtPanelWidget->setObjectName("BackgroundWidget");
-    QGridLayout* lav = new QGridLayout();
-    lav->setContentsMargins(0, 0, 0, 0);
-    setLayout(lav);
-    this->layout()->addWidget(LXQtPanelWidget);
-
-    mLayout = new QHBoxLayout(LXQtPanelWidget);
+    mLayout = new QHBoxLayout(this);
     mLayout->setMargin(0);
     mLayout->setSpacing(0);
 
@@ -181,14 +170,8 @@ void LXQtPanel::setPanelGeometry()
     if (rect != geometry())
     {
         setFixedSize(rect.size());
-        setMargins();
         setGeometry(rect);
     }
-}
-
-void LXQtPanel::setMargins()
-{
-    mLayout->setContentsMargins(0, 0, 0, 0);
 }
 
 void LXQtPanel::realign()
@@ -243,7 +226,7 @@ bool LXQtPanel::event(QEvent *event)
         break;
     }
 
-    return QFrame::event(event);
+    return QWidget::event(event);
 }
 
 /************************************************
@@ -252,7 +235,7 @@ bool LXQtPanel::event(QEvent *event)
 
 void LXQtPanel::showEvent(QShowEvent *event)
 {
-    QFrame::showEvent(event);
+    QWidget::showEvent(event);
     realign();
 }
 

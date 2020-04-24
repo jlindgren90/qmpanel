@@ -34,6 +34,7 @@
 #include <QBitmap>
 #include <QStyle>
 #include <QScreen>
+#include <QTimer>
 
 #include "../panel/lxqtpanel.h"
 #include "trayicon.h"
