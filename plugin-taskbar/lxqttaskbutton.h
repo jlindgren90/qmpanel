@@ -33,13 +33,13 @@
 
 #include <QToolButton>
 #include <QProxyStyle>
-#include "../panel/ilxqtpanel.h"
 
 class QPainter;
 class QPalette;
 class QMimeData;
 class LXQtTaskGroup;
 class LXQtTaskBar;
+class ILXQtPanelPlugin;
 
 class LeftAlignedTextStyle : public QProxyStyle
 {

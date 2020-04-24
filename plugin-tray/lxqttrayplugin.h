@@ -39,7 +39,7 @@ class LXQtTrayPlugin : public QObject, public ILXQtPanelPlugin
 {
     Q_OBJECT
 public:
-    explicit LXQtTrayPlugin(ILXQtPanel *lxqtPanel);
+    explicit LXQtTrayPlugin(LXQtPanel *lxqtPanel);
     ~LXQtTrayPlugin();
 
     virtual QWidget *widget();

@@ -30,7 +30,6 @@
 
 #include <QFrame>
 #include <QAbstractNativeEventFilter>
-#include "../panel/ilxqtpanel.h"
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <xcb/xcb_event.h>

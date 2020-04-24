@@ -33,7 +33,6 @@
 #include <QString>
 #include <QPointer>
 #include <LXQt/Settings>
-#include "ilxqtpanel.h"
 #include "lxqtpanelglobals.h"
 
 class QPluginLoader;
@@ -48,13 +47,7 @@ class LXQT_PANEL_API Plugin : public QFrame
 {
     Q_OBJECT
 
-    Q_PROPERTY(QColor moveMarkerColor READ moveMarkerColor WRITE setMoveMarkerColor)
 public:
-    enum Alignment {
-        AlignLeft,
-        AlignRight
-    };
-
     explicit Plugin(ILXQtPanelPlugin *plugin, LXQtPanel *panel);
     ~Plugin();
 

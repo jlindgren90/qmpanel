@@ -35,12 +35,12 @@
 #include <QPropertyAnimation>
 #include <QPointer>
 #include <LXQt/Settings>
-#include "ilxqtpanel.h"
 #include "lxqtpanelglobals.h"
 
 class QHBoxLayout;
 class QMenu;
 class Plugin;
+class ILXQtPanelPlugin;
 
 namespace LXQt {
 class Settings;
@@ -68,7 +68,7 @@ class Settings;
  *
  * \sa LXQtPanelApplication, Plugin, PanelPluginsModel, LXQtPanelLayout.
  */
-class LXQT_PANEL_API LXQtPanel : public QFrame, public ILXQtPanel
+class LXQT_PANEL_API LXQtPanel : public QFrame
 {
     Q_OBJECT
 
@@ -92,11 +92,8 @@ public:
     LXQtPanel(QWidget *parent = 0);
     virtual ~LXQtPanel();
 
-    // ILXQtPanel overrides ........
-    QRect globalGeometry() const override;
-    QRect calculatePopupWindowPos(QPoint const & absolutePos, QSize const & windowSize) const override;
-    QRect calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const QSize &windowSize) const override;
-    // ........ end of ILXQtPanel overrides
+    QRect calculatePopupWindowPos(QPoint const & absolutePos, QSize const & windowSize) const;
+    QRect calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const QSize &windowSize) const;
 
     /**
      * @brief Searches for a Plugin in the Plugins-list of this panel. Takes

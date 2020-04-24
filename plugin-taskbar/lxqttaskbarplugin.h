@@ -29,7 +29,6 @@
 #ifndef LXQTTASKBARPLUGIN_H
 #define LXQTTASKBARPLUGIN_H
 
-#include "../panel/ilxqtpanel.h"
 #include "../panel/ilxqtpanelplugin.h"
 #include "lxqttaskbar.h"
 #include <QDebug>
@@ -39,7 +38,7 @@ class LXQtTaskBarPlugin : public QObject, public ILXQtPanelPlugin
 {
     Q_OBJECT
 public:
-    LXQtTaskBarPlugin(ILXQtPanel *lxqtPanel);
+    LXQtTaskBarPlugin(LXQtPanel *lxqtPanel);
     ~LXQtTaskBarPlugin();
 
     QWidget *widget() { return mTaskBar; }

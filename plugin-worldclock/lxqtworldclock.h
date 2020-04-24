@@ -37,7 +37,7 @@
 class LXQtWorldClock : public ILXQtPanelPlugin
 {
 public:
-    LXQtWorldClock(ILXQtPanel * lxqtPanel);
+    LXQtWorldClock(LXQtPanel * lxqtPanel);
 
     virtual QWidget * widget() { return &mContent; }
 

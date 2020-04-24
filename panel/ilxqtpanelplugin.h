@@ -30,8 +30,7 @@
 #define ILXQTPANELPLUGIN_H
 
 #include <QtPlugin>
-#include "ilxqtpanel.h"
-#include "lxqtpanelglobals.h"
+#include "lxqtpanel.h"
 
 /**
 LXQt panel plugins are standalone sharedlibraries
@@ -62,7 +61,7 @@ public:
      Constructs an ILXQtPanelPlugin object with the given startupInfo. You do not have to worry
      about the startupInfo parameters, ILXQtPanelPlugin processes the parameters itself.
      **/
-    ILXQtPanelPlugin(ILXQtPanel *lxqtPanel):
+    ILXQtPanelPlugin(LXQtPanel *lxqtPanel):
         mPanel(lxqtPanel) {}
 
     /**
@@ -107,7 +106,7 @@ public:
     /**
     Returns the panel object.
      **/
-    ILXQtPanel *panel() const { return mPanel; }
+    LXQtPanel *panel() const { return mPanel; }
 
     /**
      Helper functions for calculating global screen position of some popup window with windowSize size.
@@ -119,7 +118,7 @@ public:
     }
 
 private:
-    ILXQtPanel *mPanel;
+    LXQtPanel *mPanel;
 };
 
 #endif // ILXQTPANELPLUGIN_H

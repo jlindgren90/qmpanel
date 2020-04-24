@@ -12,7 +12,6 @@ set(PRIV_HEADERS
 set(PUB_HEADERS
     lxqtpanelglobals.h
     ilxqtpanelplugin.h
-    ilxqtpanel.h
 )
 
 set(SOURCES

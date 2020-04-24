@@ -47,7 +47,7 @@
 
 #define DEFAULT_SHORTCUT "Alt+F1"
 
-LXQtMainMenu::LXQtMainMenu(ILXQtPanel *lxqtPanel):
+LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
     QObject(),
     ILXQtPanelPlugin(lxqtPanel),
     mMenu(0),

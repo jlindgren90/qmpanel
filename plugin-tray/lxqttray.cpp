@@ -37,9 +37,7 @@
 #include <algorithm>
 #include <vector>
 #include "trayicon.h"
-#include "../panel/ilxqtpanel.h"
 #include <LXQt/GridLayout>
-#include "lxqttray.h"
 #include "xfitman.h"
 
 #include <X11/Xlib.h>
@@ -50,7 +48,7 @@
 #include <xcb/xcb.h>
 #include <xcb/damage.h>
 
-#undef Bool // defined as int in X11/Xlib.h
+#include "lxqttray.h"
 
 #include "../panel/ilxqtpanelplugin.h"
 

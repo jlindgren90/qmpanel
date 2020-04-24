@@ -62,7 +62,7 @@ class LXQtMainMenu : public QObject, public ILXQtPanelPlugin
 {
     Q_OBJECT
 public:
-    LXQtMainMenu(ILXQtPanel *lxqtPanel);
+    LXQtMainMenu(LXQtPanel *lxqtPanel);
     ~LXQtMainMenu();
 
     QWidget *widget() { return &mButton; }

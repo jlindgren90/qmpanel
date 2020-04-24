@@ -31,7 +31,6 @@
 #ifndef LXQTTASKGROUP_H
 #define LXQTTASKGROUP_H
 
-#include "../panel/ilxqtpanel.h"
 #include "../panel/ilxqtpanelplugin.h"
 #include "lxqttaskbar.h"
 #include "lxqtgrouppopup.h"

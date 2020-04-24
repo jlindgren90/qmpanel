@@ -28,7 +28,7 @@
 
 #include "lxqttaskbarplugin.h"
 
-LXQtTaskBarPlugin::LXQtTaskBarPlugin(ILXQtPanel *lxqtPanel):
+LXQtTaskBarPlugin::LXQtTaskBarPlugin(LXQtPanel *lxqtPanel):
     QObject(),
     ILXQtPanelPlugin(lxqtPanel)
 

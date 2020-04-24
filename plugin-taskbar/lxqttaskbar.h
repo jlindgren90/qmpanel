@@ -32,7 +32,6 @@
 #ifndef LXQTTASKBAR_H
 #define LXQTTASKBAR_H
 
-#include "../panel/ilxqtpanel.h"
 #include "../panel/ilxqtpanelplugin.h"
 #include "lxqttaskgroup.h"
 #include "lxqttaskbutton.h"
@@ -41,7 +40,6 @@
 #include <QBoxLayout>
 #include <QMap>
 #include <lxqt-globalkeys.h>
-#include "../panel/ilxqtpanel.h"
 #include <KWindowSystem/KWindowSystem>
 #include <KWindowSystem/KWindowInfo>
 #include <KWindowSystem/NETWM>
@@ -76,7 +74,7 @@ public:
     bool isGroupingEnabled() const { return mGroupingEnabled; }
     bool isShowGroupOnHover() const { return mShowGroupOnHover; }
     bool isIconByClass() const { return mIconByClass; }
-    inline ILXQtPanel * panel() const { return mPlugin->panel(); }
+    inline LXQtPanel * panel() const { return mPlugin->panel(); }
     inline ILXQtPanelPlugin * plugin() const { return mPlugin; }
 
 public slots:

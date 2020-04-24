@@ -232,16 +232,6 @@ void LXQtPanel::updateWmStrut()
 /************************************************
 
  ************************************************/
-QRect LXQtPanel::globalGeometry() const
-{
-    // panel is the the top-most widget/window, no calculation needed
-    return geometry();
-}
-
-
-/************************************************
-
- ************************************************/
 bool LXQtPanel::event(QEvent *event)
 {
     switch (event->type())
@@ -281,7 +271,7 @@ Plugin* LXQtPanel::findPlugin(const ILXQtPanelPlugin* iPlugin) const
 QRect LXQtPanel::calculatePopupWindowPos(QPoint const & absolutePos, QSize const & windowSize) const
 {
     int x = absolutePos.x();
-    int y = globalGeometry().top() - windowSize.height();
+    int y = geometry().top() - windowSize.height();
 
     QRect res(QPoint(x, y), windowSize);
 
@@ -321,5 +311,5 @@ QRect LXQtPanel::calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const Q
     }
 
     // Note: assuming there are not contentMargins around the "BackgroundWidget" (LXQtPanelWidget)
-    return calculatePopupWindowPos(globalGeometry().topLeft() + panel_plugin->geometry().topLeft(), windowSize);
+    return calculatePopupWindowPos(geometry().topLeft() + panel_plugin->geometry().topLeft(), windowSize);
 }

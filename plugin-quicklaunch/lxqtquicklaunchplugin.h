@@ -34,7 +34,7 @@
 class LXQtQuickLaunchPlugin : public ILXQtPanelPlugin
 {
 public:
-    explicit LXQtQuickLaunchPlugin(ILXQtPanel * lxqtPanel)
+    explicit LXQtQuickLaunchPlugin(LXQtPanel * lxqtPanel)
         : ILXQtPanelPlugin(lxqtPanel), mWidget(new LXQtQuickLaunch)
     {
     }

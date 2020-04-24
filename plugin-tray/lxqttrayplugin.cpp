@@ -29,7 +29,7 @@
 #include "lxqttrayplugin.h"
 #include "lxqttray.h"
 
-LXQtTrayPlugin::LXQtTrayPlugin(ILXQtPanel *lxqtPanel) :
+LXQtTrayPlugin::LXQtTrayPlugin(LXQtPanel *lxqtPanel) :
     QObject(),
     ILXQtPanelPlugin(lxqtPanel),
     mWidget(new LXQtTray(this))
