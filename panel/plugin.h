@@ -33,7 +33,7 @@
 class Plugin : public QObject
 {
 public:
-    explicit Plugin(LXQtPanel * panel) : mPanel(panel) {}
+    explicit Plugin(LXQtPanel * panel) : QObject(panel), mPanel(panel) {}
 
     virtual QWidget * widget() = 0;
     virtual void realign() {}
