@@ -78,7 +78,6 @@ private:
     QLineEdit * mSearchEdit;
     QWidgetAction * mSearchViewAction;
     ActionView * mSearchView;
-    QAction * mMakeDirtyAction;
     bool mHeavyMenuChanges; //!< flag for filtering some mMenu events while heavy changes are performed
 
     XdgMenu mXdgMenu;

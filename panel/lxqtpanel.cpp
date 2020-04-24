@@ -79,7 +79,7 @@ LXQtPanel::LXQtPanel(QWidget * parent) : QWidget(parent), mLayout(this)
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
 
-    connect(qApp, &QGuiApplication::primaryScreenChanged, this,
+    connect(qApp, &QApplication::primaryScreenChanged, this,
             &LXQtPanel::realign);
 
     loadPlugins();
@@ -207,7 +207,7 @@ QRect LXQtPanel::calculatePopupWindowPos(QPoint const & absolutePos,
     int y = geometry().top() - windowSize.height();
 
     QRect res(QPoint(x, y), windowSize);
-    QRect screen = QGuiApplication::primaryScreen()->geometry();
+    QRect screen = QApplication::primaryScreen()->geometry();
 
     if (res.right() > screen.right())
         res.moveRight(screen.right());

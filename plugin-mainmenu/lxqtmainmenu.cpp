@@ -52,7 +52,6 @@ LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
     mMenu(0),
     mSearchEditAction{new QWidgetAction{this}},
     mSearchViewAction{new QWidgetAction{this}},
-    mMakeDirtyAction{new QAction{this}},
     mHeavyMenuChanges(false)
 {
     mDelayedPopup.setSingleShot(true);
@@ -184,10 +183,9 @@ void LXQtMainMenu::searchTextChanged(QString const & text)
         mSearchView->setFilter(filter);
     mSearchView->setVisible(shown);
     mSearchViewAction->setVisible(shown);
-    //TODO: how to force the menu to recalculate it's size in a more elegant way?
-    mMenu->addAction(mMakeDirtyAction);
-    mMenu->removeAction(mMakeDirtyAction);
     mHeavyMenuChanges = false;
+    // force the menu to recalculate its size
+    QApplication::postEvent(mMenu, new QEvent(QEvent::StyleChange));
 }
 
 /************************************************
@@ -267,36 +265,8 @@ struct MatchAction
 
 bool LXQtMainMenu::eventFilter(QObject *obj, QEvent *event)
 {
-    if(QMenu* menu = qobject_cast<QMenu*>(obj))
+    if(qobject_cast<QMenu*>(obj))
     {
-        if(event->type() == QEvent::KeyPress)
-        {
-            // if our shortcut key is pressed while the menu is open, close the menu
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-            if (keyEvent->modifiers() & ~Qt::ShiftModifier)
-            {
-                mHideTimer.start();
-                mMenu->hide(); // close the app menu
-                return true;
-            }
-            else // go to the menu item which starts with the pressed key if there is an active action.
-            {
-                QString key = keyEvent->text();
-                if(key.isEmpty())
-                    return false;
-                QAction* action = menu->activeAction();
-                if(action !=0) {
-                    QList<QAction*> actions = menu->actions();
-                    QList<QAction*>::iterator it = qFind(actions.begin(), actions.end(), action);
-                    it = std::find_if(it + 1, actions.end(), MatchAction(key));
-                    if(it == actions.end())
-                        it = std::find_if(actions.begin(), it, MatchAction(key));
-                    if(it != actions.end())
-                        menu->setActiveAction(*it);
-                }
-            }
-        }
-
         if (obj == mMenu)
         {
             if (event->type() == QEvent::Resize)
