@@ -79,11 +79,6 @@ private:
     QWidgetAction * mSearchViewAction;
     ActionView * mSearchView;
     QAction * mMakeDirtyAction;
-    bool mFilterMenu; //!< searching should perform hiding nonmatching items in menu
-    bool mFilterShow; //!< searching should list matching items in top menu
-    bool mFilterStartOfWord; //!< search should match from start of word only
-    bool mFilterClear; //!< search field should be cleared upon showing the menu
-    bool mFilterShowHideMenu; //!< while searching all (original) menu entries should be hidden
     bool mHeavyMenuChanges; //!< flag for filtering some mMenu events while heavy changes are performed
 
     XdgMenu mXdgMenu;

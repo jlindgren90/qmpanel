@@ -53,11 +53,6 @@ LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
     mSearchEditAction{new QWidgetAction{this}},
     mSearchViewAction{new QWidgetAction{this}},
     mMakeDirtyAction{new QAction{this}},
-    mFilterMenu(true),
-    mFilterShow(true),
-    mFilterStartOfWord(false),
-    mFilterClear(false),
-    mFilterShowHideMenu(true),
     mHeavyMenuChanges(false)
 {
     mDelayedPopup.setSingleShot(true);
@@ -124,11 +119,8 @@ void LXQtMainMenu::showMenu()
     if (!mMenu)
         return;
 
-    // Just using Qt`s activateWindow() won't work on some WMs like Kwin.
-    // Solution is to execute menu 1ms later using timer
     mMenu->popup(calculatePopupWindowPos(mMenu->sizeHint()).topLeft());
-    if (mFilterMenu || mFilterShow)
-        mSearchEdit->setFocus();
+    mSearchEdit->setFocus();
 }
 
 /************************************************
@@ -142,8 +134,6 @@ void LXQtMainMenu::settingsChanged()
     mLogDir = "";
 
     QString menu_file = "/home/john/.config/menus/programs.menu"; /* TODO: rework menu */
-    if (menu_file.isEmpty())
-        menu_file = XdgMenu::getMenuFileName();
 
     if (mMenuFile != menu_file)
     {
@@ -164,62 +154,8 @@ void LXQtMainMenu::settingsChanged()
         }
     }
 
-    //clear the search to not leaving the menu in wrong state
-    mSearchEdit->setText(QString{});
-    mFilterMenu = true;
-    mFilterShow = true;
-    mFilterStartOfWord = true;
-    mFilterClear = true;
-    mFilterShowHideMenu = true;
-    if (mMenu)
-    {
-        mSearchEdit->setVisible(mFilterMenu || mFilterShow);
-        mSearchEditAction->setVisible(mFilterMenu || mFilterShow);
-        if (mFilterClear && !mMenu->isVisible())
-            mSearchEdit->clear();
-    }
     mSearchView->setMaxItemsToShow(10);
     mSearchView->setMaxItemWidth(300); /* TODO: scale by DPI */
-
-    realign();
-}
-
-static bool filterMenu(QMenu * menu, const StringFilter& filter)
-{
-    bool has_visible = false;
-    const auto actions = menu->actions();
-    for (auto const & action : actions)
-    {
-        if (QMenu * sub_menu = action->menu())
-        {
-            action->setVisible(filterMenu(sub_menu, filter)/*recursion*/);
-            has_visible |= action->isVisible();
-        } else if (nullptr != qobject_cast<QWidgetAction *>(action))
-        {
-            //our searching widget
-            has_visible = true;
-        } else if (!action->isSeparator())
-        {
-            //real menu action -> app
-            bool visible(filter.searchStr().isEmpty() || filter.isMatch(action->text()) || filter.isMatch(action->toolTip()));
-            if(!visible)
-            {
-                if (XdgAction * xdgAction = qobject_cast<XdgAction *>(action))
-                {
-                    const XdgDesktopFile& df = xdgAction->desktopFile();
-                    QStringList list = df.expandExecString();
-                    if (!list.isEmpty())
-                    {
-                        if (filter.isMatch(list.at(0)))
-                            visible = true;
-                    }
-                }
-            }
-            action->setVisible(visible);
-            has_visible |= action->isVisible();
-        }
-    }
-    return has_visible;
 }
 
 static void showHideMenuEntries(QMenu * menu, bool show)
@@ -235,43 +171,23 @@ static void showHideMenuEntries(QMenu * menu, bool show)
     }
 }
 
-static void setTranslucentMenus(QMenu * menu)
-{
-    menu->setAttribute(Qt::WA_TranslucentBackground);
-    const auto actions = menu->actions();
-    for (auto const & action : actions)
-    {
-        if (QMenu * sub_menu = action->menu())
-        {
-            setTranslucentMenus(sub_menu);
-        }
-    }
-}
-
 /************************************************
 
  ************************************************/
 void LXQtMainMenu::searchTextChanged(QString const & text)
 {
-    StringFilter filter(text, mFilterStartOfWord);
-    if (mFilterShow)
-    {
-        mHeavyMenuChanges = true;
-        const bool shown = !text.isEmpty();
-        if (mFilterShowHideMenu)
-            showHideMenuEntries(mMenu, !shown);
-        if (shown)
-            mSearchView->setFilter(filter);
-        mSearchView->setVisible(shown);
-        mSearchViewAction->setVisible(shown);
-        //TODO: how to force the menu to recalculate it's size in a more elegant way?
-        mMenu->addAction(mMakeDirtyAction);
-        mMenu->removeAction(mMakeDirtyAction);
-        mHeavyMenuChanges = false;
-    }
-    if (mFilterMenu && !(mFilterShow && mFilterShowHideMenu))
-        filterMenu(mMenu, filter);
-
+    StringFilter filter(text, true);
+    mHeavyMenuChanges = true;
+    const bool shown = !text.isEmpty();
+    showHideMenuEntries(mMenu, !shown);
+    if (shown)
+        mSearchView->setFilter(filter);
+    mSearchView->setVisible(shown);
+    mSearchViewAction->setVisible(shown);
+    //TODO: how to force the menu to recalculate it's size in a more elegant way?
+    mMenu->addAction(mMakeDirtyAction);
+    mMenu->removeAction(mMakeDirtyAction);
+    mHeavyMenuChanges = false;
 }
 
 /************************************************
@@ -279,13 +195,10 @@ void LXQtMainMenu::searchTextChanged(QString const & text)
  ************************************************/
 void LXQtMainMenu::setSearchFocus(QAction *action)
 {
-    if (mFilterMenu || mFilterShow)
-    {
-        if(action == mSearchEditAction)
-            mSearchEdit->setFocus();
-        else
-            mSearchEdit->clearFocus();
-    }
+    if(action == mSearchEditAction)
+        mSearchEdit->setFocus();
+    else
+        mSearchEdit->clearFocus();
 }
 
 static void menuInstallEventFilter(QMenu * menu, QObject * watcher)
@@ -310,8 +223,6 @@ void LXQtMainMenu::buildMenu()
         delete mMenu;
     }
     mMenu = new XdgMenuWidget(mXdgMenu, "", &mButton);
-    mMenu->setObjectName("TopLevelMainMenu");
-    setTranslucentMenus(mMenu);
 
     mMenu->addSeparator();
 
@@ -324,11 +235,10 @@ void LXQtMainMenu::buildMenu()
     mMenu->addAction(mSearchEditAction);
     connect(mMenu, &QMenu::hovered, this, &LXQtMainMenu::setSearchFocus);
     connect(mMenu, &QMenu::aboutToHide, [this] {
-        if (mFilterClear)
-            mSearchEdit->clear();
+        mSearchEdit->clear();
     });
-    mSearchEdit->setVisible(mFilterMenu || mFilterShow);
-    mSearchEditAction->setVisible(mFilterMenu || mFilterShow);
+    mSearchEdit->setVisible(true);
+    mSearchEditAction->setVisible(true);
     mSearchView->fillActions(mMenu);
 
     searchTextChanged(mSearchEdit->text());
