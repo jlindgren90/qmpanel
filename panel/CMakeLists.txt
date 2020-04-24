@@ -3,7 +3,6 @@ set(PROJECT lxqt-panel)
 set(PRIV_HEADERS
     lxqtpanel.h
     lxqtpanelapplication.h
-    lxqtpanelapplication_p.h
     plugin.h
     lxqtpanellimits.h
     popupmenu.h

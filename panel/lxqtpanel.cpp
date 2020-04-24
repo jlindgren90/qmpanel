@@ -55,42 +55,11 @@
 #include <KWindowSystem/KWindowSystem>
 #include <KWindowSystem/NETWM>
 
-// Turn on this to show the time required to load each plugin during startup
-// #define DEBUG_PLUGIN_LOADTIME
-#ifdef DEBUG_PLUGIN_LOADTIME
-#include <QElapsedTimer>
-#endif
-
-// Config keys and groups
-#define CFG_KEY_SCREENNUM          "desktop"
-#define CFG_KEY_POSITION           "position"
-#define CFG_KEY_PANELSIZE          "panelSize"
-#define CFG_KEY_ICONSIZE           "iconSize"
-#define CFG_KEY_LINECNT            "lineCount"
-#define CFG_KEY_LENGTH             "width"
-#define CFG_KEY_PERCENT            "width-percent"
-#define CFG_KEY_ALIGNMENT          "alignment"
-#define CFG_KEY_FONTCOLOR          "font-color"
-#define CFG_KEY_BACKGROUNDCOLOR    "background-color"
-#define CFG_KEY_BACKGROUNDIMAGE    "background-image"
-#define CFG_KEY_OPACITY            "opacity"
-#define CFG_KEY_RESERVESPACE       "reserve-space"
-#define CFG_KEY_PLUGINS            "plugins"
-#define CFG_KEY_HIDABLE            "hidable"
-#define CFG_KEY_VISIBLE_MARGIN     "visible-margin"
-#define CFG_KEY_ANIMATION          "animation-duration"
-#define CFG_KEY_SHOW_DELAY         "show-delay"
-#define CFG_KEY_LOCKPANEL          "lockPanel"
-
 /************************************************
 
  ************************************************/
-LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidget *parent) :
-    QFrame(parent),
-    mSettings(settings),
-    mConfigGroup(configGroup),
-    mScreenNum(0), //whatever (avoid conditional on uninitialized value)
-    mActualScreenNum(0)
+LXQtPanel::LXQtPanel(QWidget *parent) :
+    QFrame(parent)
 {
     //You can find information about the flags and widget attributes in your
     //Qt documentation or at https://doc.qt.io/qt-5/qt.html
@@ -121,7 +90,6 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     setAttribute(Qt::WA_AcceptDrops);
 
     setWindowTitle("LXQt Panel");
-    setObjectName(QString("LXQtPanel %1").arg(configGroup));
 
     //LXQtPanel (inherits QFrame) -> lav (QGridLayout) -> LXQtPanelWidget (QFrame) -> LXQtPanelLayout
     LXQtPanelWidget = new QFrame(this);
@@ -135,56 +103,12 @@ LXQtPanel::LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidg
     mLayout->setMargin(0);
     mLayout->setSpacing(0);
 
-    connect(QApplication::desktop(), &QDesktopWidget::resized, this, &LXQtPanel::ensureVisible);
-    connect(QApplication::desktop(), &QDesktopWidget::screenCountChanged, this, &LXQtPanel::ensureVisible);
-
-    // connecting to QDesktopWidget::workAreaResized shouldn't be necessary,
-    // as we've already connceted to QDesktopWidget::resized, but it actually
-    // is. Read mode on https://github.com/lxqt/lxqt-panel/pull/310
-    connect(QApplication::desktop(), &QDesktopWidget::workAreaResized,
-            this, &LXQtPanel::ensureVisible);
-
-    connect(LXQt::Settings::globalSettings(), SIGNAL(settingsChanged()), this, SLOT(update()));
-    connect(lxqtApp, SIGNAL(themeChanged()), this, SLOT(realign()));
-
-    readSettings();
-
-    ensureVisible();
+    connect(qApp, &QGuiApplication::primaryScreenChanged, this, &LXQtPanel::realign);
 
     loadPlugins();
 
     show();
 }
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::readSettings()
-{
-    // Read settings ......................................
-    mSettings->beginGroup(mConfigGroup);
-
-    mScreenNum = mSettings->value(CFG_KEY_SCREENNUM, QApplication::desktop()->primaryScreen()).toInt();
-    setPosition(mScreenNum, false);
-
-    mSettings->endGroup();
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::ensureVisible()
-{
-    if (!canPlacedOn(mScreenNum))
-        setPosition(findAvailableScreen(), false);
-    else
-        mActualScreenNum = mScreenNum;
-
-    // the screen size might be changed
-    realign();
-}
-
 
 /************************************************
 
@@ -231,9 +155,23 @@ void LXQtPanel::loadPlugins()
 /************************************************
 
  ************************************************/
-void LXQtPanel::setPanelGeometry(bool animate)
+void LXQtPanel::setPanelGeometry()
 {
-    const QRect currentScreen = QApplication::desktop()->screenGeometry(mActualScreenNum);
+    QScreen * screen = QApplication::primaryScreen();
+    if (mScreen != screen)
+    {
+        if (mScreen)
+        {
+            disconnect(mScreen, &QScreen::geometryChanged, this, &LXQtPanel::realign);
+            disconnect(mScreen, &QScreen::virtualGeometryChanged, this, &LXQtPanel::realign);
+        }
+
+        mScreen = screen;
+        connect(mScreen, &QScreen::geometryChanged, this, &LXQtPanel::realign);
+        connect(mScreen, &QScreen::virtualGeometryChanged, this, &LXQtPanel::realign);
+    }
+
+    const QRect currentScreen = screen->geometry();
     QRect rect;
 
     rect.setHeight(sizeHint().height());
@@ -275,7 +213,7 @@ void LXQtPanel::updateWmStrut()
     if(wid == 0 || !isVisible())
         return;
 
-    const QRect wholeScreen = QApplication::desktop()->geometry();
+    const QRect wholeScreen = mScreen->virtualGeometry();
     const QRect rect = geometry();
     // NOTE: https://standards.freedesktop.org/wm-spec/wm-spec-latest.html
     // Quote from the EWMH spec: " Note that the strut is relative to the screen edge, and not the edge of the xinerama monitor."
@@ -288,82 +226,6 @@ void LXQtPanel::updateWmStrut()
                                     /* Top    */  0, 0, 0,
                                     /* Bottom */  wholeScreen.bottom() - rect.bottom() + height(), rect.left(), rect.right()
                                    );
-}
-
-
-/************************************************
-  The panel can't be placed on boundary of two displays.
-  This function checks if the panel can be placed on the display
-  @screenNum on @position.
- ************************************************/
-bool LXQtPanel::canPlacedOn(int screenNum)
-{
-    QDesktopWidget* dw = QApplication::desktop();
-
-    for (int i = 0; i < dw->screenCount(); ++i)
-        if (dw->screenGeometry(i).top() > dw->screenGeometry(screenNum).bottom())
-            return false;
-    return true;
-}
-
-
-/************************************************
-
- ************************************************/
-int LXQtPanel::findAvailableScreen()
-{
-    int current = mScreenNum;
-
-    for (int i = current; i < QApplication::desktop()->screenCount(); ++i)
-        if (canPlacedOn(i))
-            return i;
-
-    for (int i = 0; i < current; ++i)
-        if (canPlacedOn(i))
-            return i;
-
-    return 0;
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::setPosition(int screen, bool save)
-{
-    if (mScreenNum == screen)
-        return;
-
-    mActualScreenNum = screen;
-
-    if (save)
-    {
-        mScreenNum = screen;
-    }
-
-    // Qt 5 adds a new class QScreen and add API for setting the screen of a QWindow.
-    // so we had better use it. However, without this, our program should still work
-    // as long as XRandR is used. Since XRandR combined all screens into a large virtual desktop
-    // every screen and their virtual siblings are actually on the same virtual desktop.
-    // So things still work if we don't set the screen correctly, but this is not the case
-    // for other backends, such as the upcoming wayland support. Hence it's better to set it.
-    if(windowHandle())
-    {
-        // QScreen* newScreen = qApp->screens().at(screen);
-        // QScreen* oldScreen = windowHandle()->screen();
-        // const bool shouldRecreate = windowHandle()->handle() && !(oldScreen && oldScreen->virtualSiblings().contains(newScreen));
-        // Q_ASSERT(shouldRecreate == false);
-
-        // NOTE: When you move a window to another screen, Qt 5 might recreate the window as needed
-        // But luckily, this never happen in XRandR, so Qt bug #40681 is not triggered here.
-        // (The only exception is when the old screen is destroyed, Qt always re-create the window and
-        // this corner case triggers #40681.)
-        // When using other kind of multihead settings, such as Xinerama, this might be different and
-        // unless Qt developers can fix their bug, we have no way to workaround that.
-        windowHandle()->setScreen(qApp->screens().at(screen));
-    }
-
-    realign();
 }
 
 
@@ -387,27 +249,6 @@ bool LXQtPanel::event(QEvent *event)
     case QEvent::LayoutRequest:
         emit realigned();
         break;
-
-    case QEvent::WinIdChange:
-    {
-        // qDebug() << "WinIdChange" << hex << effectiveWinId();
-        if(effectiveWinId() == 0)
-            break;
-
-        // Sometimes Qt needs to re-create the underlying window of the widget and
-        // the winId() may be changed at runtime. So we need to reset all X11 properties
-        // when this happens.
-        qDebug() << "WinIdChange" << hex << effectiveWinId() << "handle" << windowHandle() << windowHandle()->screen();
-
-        // Qt::WA_X11NetWmWindowTypeDock becomes ineffective in Qt 5
-        // See QTBUG-39887: https://bugreports.qt-project.org/browse/QTBUG-39887
-        // Let's use KWindowSystem for that
-        KWindowSystem::setType(effectiveWinId(), NET::Dock);
-
-        updateWmStrut(); // reserve screen space for the panel
-        KWindowSystem::setOnAllDesktops(effectiveWinId(), true);
-        break;
-    }
 
     default:
         break;
@@ -481,32 +322,4 @@ QRect LXQtPanel::calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const Q
 
     // Note: assuming there are not contentMargins around the "BackgroundWidget" (LXQtPanelWidget)
     return calculatePopupWindowPos(globalGeometry().topLeft() + panel_plugin->geometry().topLeft(), windowSize);
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtPanel::userRequestForDeletion()
-{
-    const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this, tr("Remove Panel", "Dialog Title") ,
-            tr("Removing a panel can not be undone.\nDo you want to remove this panel?"),
-            QMessageBox::Yes | QMessageBox::No);
-
-    if (ret != QMessageBox::Yes) {
-        return;
-    }
-
-    mSettings->beginGroup(mConfigGroup);
-    const QStringList plugins = mSettings->value("plugins").toStringList();
-    mSettings->endGroup();
-
-    for(const QString& i : plugins)
-        if (!i.isEmpty())
-            mSettings->remove(i);
-
-    mSettings->remove(mConfigGroup);
-
-    emit deletedByUser(this);
 }

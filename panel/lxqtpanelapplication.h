@@ -35,7 +35,6 @@
 class QScreen;
 
 class LXQtPanel;
-class LXQtPanelApplicationPrivate;
 
 /*!
  * \brief The LXQtPanelApplication class inherits from LXQt::Application and
@@ -69,107 +68,9 @@ public:
     explicit LXQtPanelApplication(int& argc, char** argv);
     ~LXQtPanelApplication();
 
-    void setIconTheme(const QString &iconTheme);
-
-    /*!
-     * \brief Determines the number of LXQtPanel objects
-     * \return the current number of LXQtPanel objects
-     */
-    int count() const { return mPanels.count(); }
-
-public slots:
-    /*!
-     * \brief Adds a new LXQtPanel which consists of the following steps:
-     * 1. Create id/name.
-     * 2. Create the LXQtPanel: call addPanel(name).
-     * 3. Update the config file (add the new panel id to the list of panels).
-     * 4. Show the panel configuration dialog so that the user can add plugins.
-     *
-     * This method will create a new LXQtPanel with a new name and add this
-     * to the config file. So this should only be used while the application
-     * is running and the user decides to add a new panel. At application
-     * startup, addPanel() should be used instead.
-     *
-     * \note This slot will be used from the LXQtPanel right-click menu. As we
-     * can only add new panels from a visible panel, we should never run
-     * lxqt-panel without an LXQtPanel. Without a panel, we have just an
-     * invisible application.
-     */
-    void addNewPanel();
-
-signals:
-    /*!
-     * \brief Signal that re-emits the signal pluginAdded() from LXQtPanel.
-     */
-    void pluginAdded();
-    /*!
-     * \brief Signal that re-emits the signal pluginRemoved() from LXQtPanel.
-     */
-    void pluginRemoved();
-
 private:
-    /*!
-     * \brief Holds all the instances of LXQtPanel.
-     */
-    QList<LXQtPanel*> mPanels;
-    /*!
-     * \brief The global icon theme used by all apps (except for panels perhaps).
-     */
-    QString mGlobalIconTheme;
-    /*!
-     * \brief Creates a new LXQtPanel with the given name and connects the
-     * appropriate signals and slots.
-     * This method can be used at application startup.
-     * \param name Name of the LXQtPanel as it is used in the config file.
-     * \return The newly created LXQtPanel.
-     */
-    LXQtPanel* addPanel(const QString &name);
+    QPointer<LXQtPanel> mPanel;
 
-private slots:
-    /*!
-     * \brief Removes the given LXQtPanel which consists of the following
-     * steps:
-     * 1. Remove the panel from mPanels.
-     * 2. Remove the panel from the config file.
-     * 3. Schedule the QObject for deletion: QObject::deleteLater().
-     * \param panel LXQtPanel instance that should be removed.
-     */
-    void removePanel(LXQtPanel* panel);
-
-    /*!
-     * \brief Connects the QScreen::destroyed signal of a new screen to
-     * the screenDestroyed() slot so that we can handle this screens'
-     * destruction as soon as it happens.
-     * \param newScreen The QScreen that was created and added.
-     */
-    void handleScreenAdded(QScreen* newScreen);
-    /*!
-     * \brief Handles screen destruction. This is a workaround for a Qt bug.
-     * For further information, see the implementation notes.
-     * \param screenObj The QScreen that was destroyed.
-     */
-    void screenDestroyed(QObject* screenObj);
-    /*!
-     * \brief Reloads the panels. This is the second part of the workaround
-     * mentioned above.
-     */
-    void reloadPanelsAsNeeded();
-    /*!
-     * \brief Deletes all LXQtPanel instances that are stored in mPanels.
-     */
-    void cleanup();
-
-private:
-    /*!
-     * \brief mSettings is the LXQt::Settings object that is used for the
-     * current instance of lxqt-panel. Normally, this refers to the config file
-     * $HOME/.config/lxqt/panel.conf (on Unix systems). This behaviour can be
-     * changed with the -c command line option.
-     */
-
-    LXQtPanelApplicationPrivate *const d_ptr;
-
-    Q_DECLARE_PRIVATE(LXQtPanelApplication)
     Q_DISABLE_COPY(LXQtPanelApplication)
 };
 

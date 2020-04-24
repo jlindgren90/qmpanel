@@ -89,21 +89,8 @@ public:
      * @param settings The settings instance of this lxqt panel application.
      * @param parent Parent QWidget, can be omitted.
      */
-    LXQtPanel(const QString &configGroup, LXQt::Settings *settings, QWidget *parent = 0);
+    LXQtPanel(QWidget *parent = 0);
     virtual ~LXQtPanel();
-
-    /**
-     * @brief Returns the name of this panel which is also used as identifier
-     * in the config file.
-     */
-    QString name() { return mConfigGroup; }
-
-    /**
-     * @brief Reads all the necessary settings from mSettings and stores them
-     * in local variables. Additionally, calls necessary methods like realign()
-     * or updateStyleSheet() which need to get called after changing settings.
-     */
-    void readSettings();
 
     // ILXQtPanel overrides ........
     QRect globalGeometry() const override;
@@ -120,28 +107,6 @@ public:
      */
     Plugin *findPlugin(const ILXQtPanelPlugin *iPlugin) const;
 
-    /**
-     * @brief Checks if this LXQtPanel can be placed at a given position
-     * on the screen with the given screenNum. The condition for doing so
-     * is that the panel is not located between two screens.
-     *
-     * For example, if position is PositionRight, there should be no screen to
-     * the right of the given screen. That means that there should be no
-     * screen whose left border has a higher x-coordinate than the x-coordinate
-     * of the right border of the given screen. This method iterates over all
-     * screens and checks these conditions.
-     * @param screenNum screen index as it is used by QDesktopWidget methods
-     * @param position position where the panel should be placed
-     * @return true if this panel can be placed at the given position on the
-     * given screen.
-     *
-     * \sa findAvailableScreen(), mScreenNum, mActualScreenNum.
-     */
-    static bool canPlacedOn(int screenNum);
-
-    // Settings
-    int screenNum() const { return mScreenNum; }
-
 public slots:
     /**
      * @brief Shows the QWidget and makes it visible on all desktops. This
@@ -149,30 +114,6 @@ public slots:
      * which handle the LXQt hiding by resizing the panel.
      */
     void show();
-
-    // Settings
-    /**
-     * @brief All the setter methods are  designed similar:
-     * 1. Check if the given value is different from the current value. If not,
-     * do not do anything and return.
-     * 2. Set the value.
-     * 3. If parameter save is true, call saveSettings(true) to store the
-     * new settings on the disk.
-     * 4. If necessary, propagate the new value to child objects, e.g. to
-     * mLayout.
-     * 5. If necessary, call update methods like realign() or
-     * updateStyleSheet().
-     * @param value The value that should be set.
-     * @param save If true, saveSettings(true) will be called.
-     */
-    void setPosition(int screen, bool save); //!< \sa setPanelSize()
-
-    /**
-     * @brief Checks if the panel can be placed on the current screen at the
-     * current position. If it can not, it will be moved on another screen
-     * where the desired position is possible.
-     */
-    void ensureVisible();
 
 signals:
     /**
@@ -182,34 +123,6 @@ signals:
      * plugins so they can realign, too.
      */
     void realigned();
-    /**
-     * @brief This signal gets emitted at the end of
-     * userRequestForDeletion() which in turn gets called when the user
-     * decides to remove a panel. This signal is used by
-     * LXQtPanelApplication to get notified whenever an LXQtPanel should
-     * be removed.
-     * @param self This LXQtPanel. LXQtPanelApplication will use this
-     * parameter to identify the LXQtPanel that should be removed.
-     */
-    void deletedByUser(LXQtPanel *self);
-    /**
-     * @brief This signal is just a relay signal. The pluginAdded signal
-     * of the PanelPluginsModel (mPlugins) will be connected to this
-     * signal. Thereby, we can make this signal of a private member
-     * available as a public signal.
-     * Currently, this signal is used by LXQtPanelApplication which
-     * will further re-emit this signal.
-     */
-    void pluginAdded();
-    /**
-     * @brief This signal is just a relay signal. The pluginRemoved signal
-     * of the PanelPluginsModel (mPlugins) will be connected to this
-     * signal. Thereby, we can make this signal of a private member
-     * available as a public signal.
-     * Currently, this signal is used by LXQtPanelApplication which
-     * will further re-emit this signal.
-     */
-    void pluginRemoved();
 
 protected:
     /**
@@ -244,26 +157,14 @@ private slots:
      * the theme.
      */
     void realign();
-    /**
-     * @brief Removes this panel's entries from the config file and emits
-     * the deletedByUser signal.
-     * The "Remove Panel" button in the panel's contex menu will
-     * be connected to this slot, so this method will be called whenever
-     * the user clicks "Remove Panel".
-     */
-    void userRequestForDeletion();
 
 private:
+    QPointer<QScreen> mScreen;
     /**
      * @brief The LXQtPanelLayout of this panel. All the Plugins will be added
      * to the UI via this layout.
      */
     QHBoxLayout* mLayout;
-    /**
-     * @brief The LXQt::Settings instance as retrieved from
-     * LXQtPanelApplication.
-     */
-    LXQt::Settings *mSettings;
     /**
      * @brief The background widget for the panel. This background widget will
      * have the background color or the background image if any of these is
@@ -272,28 +173,11 @@ private:
      */
     QFrame *LXQtPanelWidget;
     /**
-     * @brief The name of the panel which will also be used as an identifier
-     * for config files.
-     */
-    QString mConfigGroup;
-    /**
      * @brief Pointer to the PanelPluginsModel which will store all the Plugins
      * that are loaded.
      */
     QList<Plugin *> mPlugins;
 
-    /**
-     * @brief Returns the screen index of a screen on which this panel could
-     * be placed at the given position. If possible, the current screen index
-     * is preserved. So, if the panel can be placed on the current screen, the
-     * index of that screen will be returned.
-     * @param position position at which the panel should be placed.
-     * @return The current screen index if the panel can be placed on the
-     * current screen or the screen index of a screen that it can be placed on.
-     *
-     * \sa canPlacedOn(), mScreenNum, mActualScreenNum.
-     */
-    int findAvailableScreen();
     /**
      * @brief Update the window manager struts _NET_WM_PARTIAL_STRUT and
      * _NET_WM_STRUT for this widget. "The purpose of struts is to reserve
@@ -319,40 +203,12 @@ private:
      * is hidden and if its geometry should be set with animation.
      * \param animate flag if showing/hiding the panel should be animated.
      */
-    void setPanelGeometry(bool animate = false);
+    void setPanelGeometry();
     /**
      * @brief Sets the contents margins of the panel according to its position
      * and hiddenness. All margins are zero for visible panels.
      */
     void setMargins();
-    /**
-     * @brief Calculates the height of the panel if it is horizontal or the
-     * width if the panel is vertical. Considers if the panel is hidden and
-     * ensures that the result is at least PANEL_MINIMUM_SIZE.
-     * @return The height/width of the panel.
-     */
-    int getReserveDimension();
-
-    /**
-     * @brief Returns the index of the screen on which this panel should be
-     * shown. This is the user configured value which can differ from the
-     * screen that the panel is actually shown on. If the panel can not be
-     * shown on the configured screen, LXQtPanel will determine another
-     * screen. The screen that the panel is actually shown on is stored in
-     * mActualScreenNum.
-     *
-     * @return The index of the screen on which this panel should be shown.
-     *
-     * \sa mActualScreenNum, canPlacedOn(), findAvailableScreen().
-     */
-    int mScreenNum;
-    /**
-     * @brief screen that the panel is currently shown at (this could
-     * differ from mScreenNum).
-     *
-     * \sa mScreenNum, canPlacedOn(), findAvailableScreen().
-     */
-    int mActualScreenNum;
 };
 
 
