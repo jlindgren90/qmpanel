@@ -1,7 +1,6 @@
 set(PROJECT lxqt-panel)
 
 set(PRIV_HEADERS
-    windownotifier.h
     lxqtpanel.h
     lxqtpanelapplication.h
     lxqtpanelapplication_p.h
@@ -21,7 +20,6 @@ set(PUB_HEADERS
 
 set(SOURCES
     main.cpp
-    windownotifier.cpp
     lxqtpanel.cpp
     lxqtpanelapplication.cpp
     lxqtpanellayout.cpp

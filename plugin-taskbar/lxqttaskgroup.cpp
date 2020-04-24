@@ -87,7 +87,6 @@ void LXQtTaskGroup::contextMenuEvent(QContextMenuEvent *event)
         mPreventPopup = false;
     });
     menu->setGeometry(plugin()->panel()->calculatePopupWindowPos(mapToGlobal(event->pos()), menu->sizeHint()));
-    plugin()->willShowWindow(menu);
     menu->show();
 }
 
@@ -426,7 +425,6 @@ void LXQtTaskGroup::setPopupVisible(bool visible, bool fast)
             recalculateFramePosition();
         }
 
-        plugin()->willShowWindow(mPopup);
         mPopup->show();
         emit popupShown(this);
     }

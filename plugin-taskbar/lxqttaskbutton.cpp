@@ -660,7 +660,6 @@ void LXQtTaskButton::contextMenuEvent(QContextMenuEvent* event)
     a = menu->addAction(XdgIcon::fromTheme("process-stop"), tr("&Close"));
     connect(a, SIGNAL(triggered(bool)), this, SLOT(closeApplication()));
     menu->setGeometry(mParentTaskBar->panel()->calculatePopupWindowPos(mapToGlobal(event->pos()), menu->sizeHint()));
-    mPlugin->willShowWindow(menu);
     menu->show();
 }
 

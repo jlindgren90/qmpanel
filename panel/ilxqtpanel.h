@@ -94,27 +94,6 @@ public:
      * @return The global screen position where the popup window can be shown.
      */
     virtual QRect calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const QSize &windowSize) const = 0;
-
-    /*!
-     * \brief By calling this function, a plugin (or any other object) notifies the panel
-     * about showing a (standalone) window/menu -> the panel needs this to avoid "hiding" in case any
-     * standalone window is shown. The widget/window must be shown later than this notification call because
-     * the panel needs to observe its show/hide/close events.
-     *
-     * \param w the window that will be shown
-     *
-     */
-    virtual void willShowWindow(QWidget * w) = 0;
-
-    /*!
-     * \brief By calling this function, a plugin notifies the panel about change of it's "static"
-     * configuration
-     *
-     * \param plugin the changed plugin
-     *
-     * \sa ILXQtPanelPlugin::isSeparate(), ILXQtPanelPlugin::isExpandable
-     */
-    virtual void pluginFlagsChanged(const ILXQtPanelPlugin * plugin) = 0;
 };
 
 #endif // ILXQTPANEL_H

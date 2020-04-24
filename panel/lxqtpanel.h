@@ -78,12 +78,6 @@ class LXQT_PANEL_API LXQtPanel : public QFrame, public ILXQtPanel
 
     Q_PROPERTY(QString position READ qssPosition)
 
-    // for configuration dialog
-    friend class ConfigPanelWidget;
-    friend class ConfigPluginsWidget;
-    friend class ConfigPanelDialog;
-    friend class PanelPluginsModel;
-
 public:
     /**
      * @brief Stores how the panel should be aligned. Obviously, this applies
@@ -134,8 +128,6 @@ public:
     QRect globalGeometry() const override;
     QRect calculatePopupWindowPos(QPoint const & absolutePos, QSize const & windowSize) const override;
     QRect calculatePopupWindowPos(const ILXQtPanelPlugin *plugin, const QSize &windowSize) const override;
-    void willShowWindow(QWidget * w) override;
-    void pluginFlagsChanged(const ILXQtPanelPlugin * plugin) override;
     // ........ end of ILXQtPanel overrides
 
     /**
@@ -204,10 +196,6 @@ public:
     LXQtPanel::Alignment alignment() const { return mAlignment; }
     int screenNum() const { return mScreenNum; }
     int reserveSpace() const { return mReserveSpace; }
-    bool hidable() const { return mHidable; }
-    bool visibleMargin() const { return mVisibleMargin; }
-    int animationTime() const { return mAnimationTime; }
-    int showDelay() const { return mShowDelayTimer.interval(); }
 
 public slots:
     /**
@@ -216,35 +204,6 @@ public slots:
      * which handle the LXQt hiding by resizing the panel.
      */
     void show();
-    /**
-     * @brief Shows the panel (immediately) after it had been hidden before.
-     * Stops the QTimer mHideTimer. This it NOT the same as QWidget::show()
-     * because hiding the panel in LXQt is done by making it very thin. So
-     * this method in fact restores the original size of the panel.
-     * \param animate flag for the panel show-up animation disabling (\sa mAnimationTime).
-     *
-     * \sa mHidable, mHidden, mHideTimer, hidePanel(), hidePanelWork()
-     */
-    void showPanel(bool animate);
-    /**
-     * @brief Hides the panel (delayed) by starting the QTimer mHideTimer.
-     * When this timer times out, hidePanelWork() will be called. So this
-     * method is called when the cursor leaves the panel area but the panel
-     * will be hidden later.
-     *
-     * \sa mHidable, mHidden, mHideTimer, showPanel(), hidePanelWork()
-     */
-    void hidePanel();
-    /**
-     * @brief Actually hides the panel. Will be invoked when the QTimer
-     * mHideTimer times out. That timer will be started by showPanel(). This
-     * is NOT the same as QWidget::hide() because hiding the panel in LXQt is
-     * done by making the panel very thin. So this method in fact makes the
-     * panel very thin while the QWidget stays visible.
-     *
-     * \sa mHidable, mHidden, mHideTimer, showPanel(), hidePanel()
-     */
-    void hidePanelWork();
 
     // Settings
     /**
@@ -267,10 +226,6 @@ public slots:
     void setPosition(int screen, ILXQtPanel::Position position, bool save); //!< \sa setPanelSize()
     void setAlignment(LXQtPanel::Alignment value, bool save); //!< \sa setPanelSize()
     void setReserveSpace(bool reserveSpace, bool save); //!< \sa setPanelSize()
-    void setHidable(bool hidable, bool save); //!< \sa setPanelSize()
-    void setVisibleMargin(bool visibleMargin, bool save); //!< \sa setPanelSize()
-    void setAnimationTime(int animationTime, bool save); //!< \sa setPanelSize()
-    void setShowDelay(int showDelay, bool save); //!< \sa setPanelSize()
 
     /**
      * @brief Checks if the panel can be placed on the current screen at the
@@ -386,11 +341,6 @@ private:
      * that are loaded.
      */
     QList<Plugin *> mPlugins;
-    /**
-     * @brief object for storing info if some standalone window is shown
-     * (for preventing hide)
-     */
-    QScopedPointer<WindowNotifier> mStandaloneWindows;
 
     /**
      * @brief Returns the screen index of a screen on which this panel could
@@ -508,55 +458,6 @@ private:
      * \sa mScreenNum, canPlacedOn(), findAvailableScreen().
      */
     int mActualScreenNum;
-    /**
-     * @brief QTimer for delayed saving of changed settings. In many cases,
-     * instead of storing changes to disk immediately we start this timer.
-     * If this timer times out, we store the changes to disk. This has the
-     * advantage that we can store a couple of changes with only one write to
-     * disk.
-     *
-     * \sa saveSettings()
-     */
-    QTimer mDelaySave;
-    /**
-     * @brief Stores if the panel is hidable, i.e. if the panel will be
-     * hidden after the cursor has left the panel area.
-     *
-     * \sa mVisibleMargin, mHidden, mHideTimer, showPanel(), hidePanel(), hidePanelWork()
-     */
-    bool mHidable;
-    /**
-     * @brief Stores if the hidable panel should have a visible margin.
-     *
-     * \sa mHidable, mHidden, mHideTimer, showPanel(), hidePanel(), hidePanelWork()
-     */
-    bool mVisibleMargin;
-    /**
-     * @brief Stores if the panel is currently hidden.
-     *
-     * \sa mHidable, mVisibleMargin, mHideTimer, showPanel(), hidePanel(), hidePanelWork()
-     */
-    bool mHidden;
-    /**
-     * @brief QTimer for hiding the panel. When the cursor leaves the panel
-     * area, this timer will be started. After this timer has timed out, the
-     * panel will actually be hidden.
-     *
-     * \sa mHidable, mVisibleMargin, mHidden, showPanel(), hidePanel(), hidePanelWork()
-     */
-    QTimer mHideTimer;
-    /**
-     * @brief Stores the duration of auto-hide animation.
-     *
-     * \sa mHidden, mHideTimer, showPanel(), hidePanel(), hidePanelWork()
-     */
-    int mAnimationTime;
-    /**
-     * @brief The timer used for showing an auto-hiding panel wih delay.
-     *
-     * \sa showPanel()
-     */
-    QTimer mShowDelayTimer;
 
     /*!
      * \brief Flag if the panel should reserve the space under it as not usable

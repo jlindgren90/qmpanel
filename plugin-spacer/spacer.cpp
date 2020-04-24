@@ -65,12 +65,9 @@ Spacer::Spacer(ILXQtPanel *lxqtPanel) :
 void Spacer::settingsChanged()
 {
     mSize = 8; /* TODO: scale by DPI */
-    const bool old_expandable = mExpandable;
     mExpandable = false;
     mSpacer.setType("spacer");
     setSizes();
-    if (old_expandable != mExpandable)
-        pluginFlagsChanged();
 }
 
 /************************************************
