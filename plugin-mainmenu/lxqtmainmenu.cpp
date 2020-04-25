@@ -47,12 +47,58 @@
 
 #define DEFAULT_SHORTCUT "Alt+F1"
 
+class MainMenu : public XdgMenuWidget
+{
+public:
+    MainMenu(const XdgMenu & xdgMenu, Plugin * plugin, QLineEdit * searchEdit, QWidget * parent) :
+        XdgMenuWidget(xdgMenu, QString(), parent),
+        mPlugin(plugin),
+        mSearchEdit(searchEdit) {}
+
+    void inhibitUpdates(void)
+    {
+        mUpdatesInhibited = true;
+    }
+
+    void resumeUpdates(void)
+    {
+        mUpdatesInhibited = false;
+        // force re-layout
+        QEvent e(QEvent::StyleChange);
+        event(&e);
+    }
+
+protected:
+    void actionEvent(QActionEvent * e) override
+    {
+        if(!mUpdatesInhibited)
+            XdgMenuWidget::actionEvent(e);
+    }
+
+    void keyPressEvent(QKeyEvent * e) override
+    {
+        if (e->key() == Qt::Key_Escape && !mSearchEdit->text().isEmpty())
+            mSearchEdit->setText(QString{});
+        else
+            XdgMenuWidget::keyPressEvent(e);
+    }
+
+    void resizeEvent(QResizeEvent * e) override
+    {
+        move(mPlugin->calculatePopupWindowPos(e->size()).topLeft());
+    }
+
+private:
+    Plugin * mPlugin;
+    QLineEdit * mSearchEdit;
+    bool mUpdatesInhibited = false;
+};
+
 LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
     Plugin(lxqtPanel),
     mMenu(0),
     mSearchEditAction{new QWidgetAction{this}},
-    mSearchViewAction{new QWidgetAction{this}},
-    mHeavyMenuChanges(false)
+    mSearchViewAction{new QWidgetAction{this}}
 {
     mDelayedPopup.setSingleShot(true);
     mDelayedPopup.setInterval(200);
@@ -62,12 +108,6 @@ LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
 
     mButton.setAutoRaise(true);
     mButton.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    //Notes:
-    //1. installing event filter to parent widget to avoid infinite loop
-    //   (while setting icon we also need to set the style)
-    //2. delaying of installEventFilter because in c-tor mButton has no parent widget
-    //   (parent is assigned in panel's logic after widget() call)
-    QTimer::singleShot(0, [this] { Q_ASSERT(mButton.parentWidget()); mButton.parentWidget()->installEventFilter(this); });
 
     connect(&mButton, &QToolButton::clicked, this, &LXQtMainMenu::showHideMenu);
 
@@ -90,7 +130,6 @@ LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
  ************************************************/
 LXQtMainMenu::~LXQtMainMenu()
 {
-    mButton.parentWidget()->removeEventFilter(this);
     if (mMenu)
     {
         mMenu->removeAction(mSearchEditAction);
@@ -176,16 +215,14 @@ static void showHideMenuEntries(QMenu * menu, bool show)
 void LXQtMainMenu::searchTextChanged(QString const & text)
 {
     StringFilter filter(text, true);
-    mHeavyMenuChanges = true;
+    mMenu->inhibitUpdates();
     const bool shown = !text.isEmpty();
     showHideMenuEntries(mMenu, !shown);
     if (shown)
         mSearchView->setFilter(filter);
     mSearchView->setVisible(shown);
     mSearchViewAction->setVisible(shown);
-    mHeavyMenuChanges = false;
-    // force the menu to recalculate its size
-    QApplication::postEvent(mMenu, new QEvent(QEvent::StyleChange));
+    mMenu->resumeUpdates();
 }
 
 /************************************************
@@ -199,16 +236,6 @@ void LXQtMainMenu::setSearchFocus(QAction *action)
         mSearchEdit->clearFocus();
 }
 
-static void menuInstallEventFilter(QMenu * menu, QObject * watcher)
-{
-    for (auto const & action : const_cast<QList<QAction *> const &&>(menu->actions()))
-    {
-        if (action->menu())
-            menuInstallEventFilter(action->menu(), watcher); // recursion
-    }
-    menu->installEventFilter(watcher);
-}
-
 /************************************************
 
  ************************************************/
@@ -220,11 +247,10 @@ void LXQtMainMenu::buildMenu()
         mMenu->removeAction(mSearchViewAction);
         delete mMenu;
     }
-    mMenu = new XdgMenuWidget(mXdgMenu, "", &mButton);
+    mMenu = new MainMenu(mXdgMenu, this, mSearchEdit, &mButton);
 
     mMenu->addSeparator();
 
-    menuInstallEventFilter(mMenu, this);
     connect(mMenu, &QMenu::aboutToHide, &mHideTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(mMenu, &QMenu::aboutToShow, &mHideTimer, &QTimer::stop);
 
@@ -250,54 +276,3 @@ void LXQtMainMenu::setButtonIcon()
     /* TODO: make configurable */
     mButton.setIcon(QIcon("/usr/share/pixmaps/j-login.png"));
 }
-
-/************************************************
-
- ************************************************/
-
-// functor used to match a QAction by prefix
-struct MatchAction
-{
-    MatchAction(QString key):key_(key) {}
-    bool operator()(QAction* action) { return action->text().startsWith(key_, Qt::CaseInsensitive); }
-    QString key_;
-};
-
-bool LXQtMainMenu::eventFilter(QObject *obj, QEvent *event)
-{
-    if(qobject_cast<QMenu*>(obj))
-    {
-        if (obj == mMenu)
-        {
-            if (event->type() == QEvent::Resize)
-            {
-                QResizeEvent * e = dynamic_cast<QResizeEvent *>(event);
-                if (e->oldSize().isValid() && e->oldSize() != e->size())
-                {
-                    mMenu->move(calculatePopupWindowPos(e->size()).topLeft());
-                }
-            } else if (event->type() == QEvent::KeyPress)
-            {
-                QKeyEvent * e = dynamic_cast<QKeyEvent*>(event);
-                if (Qt::Key_Escape == e->key())
-                {
-                    if (!mSearchEdit->text().isEmpty())
-                    {
-                        mSearchEdit->setText(QString{});
-                        //filter out this to not close the menu
-                        return true;
-                    }
-                }
-            } else if (QEvent::ActionChanged == event->type()
-                    || QEvent::ActionAdded == event->type())
-            {
-                //filter this if we are performing heavy changes to reduce flicker
-                if (mHeavyMenuChanges)
-                    return true;
-            }
-        }
-    }
-    return false;
-}
-
-#undef DEFAULT_SHORTCUT

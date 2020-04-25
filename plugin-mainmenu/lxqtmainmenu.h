@@ -55,6 +55,8 @@ namespace GlobalKeyShortcut
 class Action;
 }
 
+class MainMenu;
+
 class LXQtMainMenu : public Plugin
 {
     Q_OBJECT
@@ -64,21 +66,17 @@ public:
 
     QWidget *widget() { return &mButton; }
 
-protected:
-    bool eventFilter(QObject *obj, QEvent *event);
-
 private:
     void setButtonIcon();
 
 private:
     QToolButton mButton;
     QString mLogDir;
-    QMenu* mMenu;
+    MainMenu * mMenu;
     QWidgetAction * mSearchEditAction;
     QLineEdit * mSearchEdit;
     QWidgetAction * mSearchViewAction;
     ActionView * mSearchView;
-    bool mHeavyMenuChanges; //!< flag for filtering some mMenu events while heavy changes are performed
 
     XdgMenu mXdgMenu;
 
