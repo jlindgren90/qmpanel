@@ -72,7 +72,7 @@ MainMenu::MainMenu(const XdgMenu & xdgMenu, LXQtMainMenu * plugin,
     addAction(&mSearchViewAction);
     addAction(&mSearchEditAction);
 
-    mSearchView.setVisible(false);
+    mSearchView.hide();
     mSearchViewAction.setVisible(false);
 
     connect(this, &QMenu::aboutToHide, &mSearchEdit, &QLineEdit::clear);
@@ -99,7 +99,7 @@ void MainMenu::actionEvent(QActionEvent * e)
 void MainMenu::keyPressEvent(QKeyEvent * e)
 {
     if (e->key() == Qt::Key_Escape && !mSearchEdit.text().isEmpty())
-        mSearchEdit.setText(QString{});
+        mSearchEdit.clear();
     else
         XdgMenuWidget::keyPressEvent(e);
 }
