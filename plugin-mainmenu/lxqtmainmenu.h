@@ -25,7 +25,6 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef LXQT_MAINMENU_H
 #define LXQT_MAINMENU_H
 
@@ -41,10 +40,10 @@ class LXQtMainMenu : public Plugin
     Q_OBJECT
 
 public:
-    LXQtMainMenu(LXQtPanel *lxqtPanel);
+    LXQtMainMenu(LXQtPanel * lxqtPanel);
     ~LXQtMainMenu();
 
-    QWidget *widget() { return &mButton; }
+    QWidget * widget() { return &mButton; }
 
 private:
     QToolButton mButton;

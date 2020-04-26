@@ -25,14 +25,13 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #include "lxqtmainmenu.h"
 #include "actionview.h"
 
 #include <QKeyEvent>
+#include <QLineEdit>
 #include <QResizeEvent>
 #include <QWidgetAction>
-#include <QLineEdit>
 #include <XdgMenuWidget>
 
 class MainMenu : public XdgMenuWidget
@@ -57,11 +56,10 @@ private:
     bool mUpdatesInhibited = false;
 };
 
-MainMenu::MainMenu(const XdgMenu & xdgMenu, LXQtMainMenu * plugin, QWidget * parent) :
-    XdgMenuWidget(xdgMenu, QString(), parent),
-    mPlugin(plugin),
-    mSearchEditAction(this),
-    mSearchViewAction(this)
+MainMenu::MainMenu(const XdgMenu & xdgMenu, LXQtMainMenu * plugin,
+                   QWidget * parent)
+    : XdgMenuWidget(xdgMenu, QString(), parent), mPlugin(plugin),
+      mSearchEditAction(this), mSearchViewAction(this)
 {
     mSearchEdit.setClearButtonEnabled(true);
     mSearchEdit.setPlaceholderText("Search");
@@ -79,20 +77,22 @@ MainMenu::MainMenu(const XdgMenu & xdgMenu, LXQtMainMenu * plugin, QWidget * par
 
     connect(this, &QMenu::aboutToHide, &mSearchEdit, &QLineEdit::clear);
     connect(this, &QMenu::hovered, [this](QAction * action) {
-        if(action == &mSearchEditAction)
+        if (action == &mSearchEditAction)
             mSearchEdit.setFocus();
         else
             mSearchEdit.clearFocus();
     });
 
-    connect(&mSearchEdit, &QLineEdit::textChanged, this, &MainMenu::searchTextChanged);
-    connect(&mSearchEdit, &QLineEdit::returnPressed, &mSearchView, &ActionView::activateCurrent);
+    connect(&mSearchEdit, &QLineEdit::textChanged, this,
+            &MainMenu::searchTextChanged);
+    connect(&mSearchEdit, &QLineEdit::returnPressed, &mSearchView,
+            &ActionView::activateCurrent);
     connect(&mSearchView, &QListView::activated, this, &QMenu::hide);
 }
 
 void MainMenu::actionEvent(QActionEvent * e)
 {
-    if(!mUpdatesInhibited)
+    if (!mUpdatesInhibited)
         XdgMenuWidget::actionEvent(e);
 }
 
@@ -138,15 +138,16 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
-    Plugin(lxqtPanel)
+LXQtMainMenu::LXQtMainMenu(LXQtPanel * lxqtPanel) : Plugin(lxqtPanel)
 {
     mButton.setAutoRaise(true);
     mButton.setIcon(QIcon("/usr/share/pixmaps/j-login.png"));
     mButton.setToolButtonStyle(Qt::ToolButtonIconOnly);
 
-    mXdgMenu.setEnvironments(QStringList() << "X-LXQT" << "LXQt");
-    mXdgMenu.read("/home/john/.config/menus/programs.menu"); /* TODO: rework menu */
+    mXdgMenu.setEnvironments(QStringList() << "X-LXQT"
+                                           << "LXQt");
+    /* TODO: rework menu */
+    mXdgMenu.read("/home/john/.config/menus/programs.menu");
 
     mMenu = new MainMenu(mXdgMenu, this, &mButton);
 
@@ -158,7 +159,4 @@ LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
     });
 }
 
-LXQtMainMenu::~LXQtMainMenu()
-{
-    delete mMenu;
-}
+LXQtMainMenu::~LXQtMainMenu() { delete mMenu; }
