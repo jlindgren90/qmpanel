@@ -55,44 +55,51 @@ public:
         mPlugin(plugin),
         mSearchEdit(searchEdit) {}
 
-    void inhibitUpdates(void)
-    {
-        mUpdatesInhibited = true;
-    }
-
-    void resumeUpdates(void)
-    {
-        mUpdatesInhibited = false;
-        // force re-layout
-        QEvent e(QEvent::StyleChange);
-        event(&e);
-    }
+    void inhibitUpdates(void);
+    void resumeUpdates(void);
 
 protected:
-    void actionEvent(QActionEvent * e) override
-    {
-        if(!mUpdatesInhibited)
-            XdgMenuWidget::actionEvent(e);
-    }
-
-    void keyPressEvent(QKeyEvent * e) override
-    {
-        if (e->key() == Qt::Key_Escape && !mSearchEdit->text().isEmpty())
-            mSearchEdit->setText(QString{});
-        else
-            XdgMenuWidget::keyPressEvent(e);
-    }
-
-    void resizeEvent(QResizeEvent * e) override
-    {
-        move(mPlugin->calculatePopupWindowPos(e->size()).topLeft());
-    }
+    void actionEvent(QActionEvent * e) override;
+    void keyPressEvent(QKeyEvent * e) override;
+    void resizeEvent(QResizeEvent * e) override;
 
 private:
     Plugin * mPlugin;
     QLineEdit * mSearchEdit;
     bool mUpdatesInhibited = false;
 };
+
+void MainMenu::inhibitUpdates(void)
+{
+    mUpdatesInhibited = true;
+}
+
+void MainMenu::resumeUpdates(void)
+{
+    mUpdatesInhibited = false;
+    // force re-layout
+    QEvent e(QEvent::StyleChange);
+    event(&e);
+}
+
+void MainMenu::actionEvent(QActionEvent * e)
+{
+    if(!mUpdatesInhibited)
+        XdgMenuWidget::actionEvent(e);
+}
+
+void MainMenu::keyPressEvent(QKeyEvent * e)
+{
+    if (e->key() == Qt::Key_Escape && !mSearchEdit->text().isEmpty())
+        mSearchEdit->setText(QString{});
+    else
+        XdgMenuWidget::keyPressEvent(e);
+}
+
+void MainMenu::resizeEvent(QResizeEvent * e)
+{
+    move(mPlugin->calculatePopupWindowPos(e->size()).topLeft());
+}
 
 LXQtMainMenu::LXQtMainMenu(LXQtPanel *lxqtPanel):
     Plugin(lxqtPanel),
