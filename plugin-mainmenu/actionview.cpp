@@ -142,6 +142,7 @@ ActionView::ActionView(QWidget * parent /*= nullptr*/)
     , mMaxItemsToShow(10)
 {
     setEditTriggers(QAbstractItemView::NoEditTriggers);
+    setFrameStyle(QFrame::NoFrame);
     setSizeAdjustPolicy(AdjustToContents);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setSelectionBehavior(SelectRows);
@@ -224,16 +225,7 @@ void ActionView::setFilter(const StringFilter& filter)
     mProxy->setFilter(filter);
     const int count = mProxy->rowCount();
     if (0 < count)
-    {
-        if (count > mMaxItemsToShow)
-        {
-            setCurrentIndex(mProxy->index(mMaxItemsToShow - 1, 0));
-            verticalScrollBar()->triggerAction(QScrollBar::SliderToMinimum);
-        } else
-        {
-            setCurrentIndex(mProxy->index(count - 1, 0));
-        }
-    }
+        setCurrentIndex(mProxy->index(0, 0));
 }
 
 void ActionView::setMaxItemsToShow(int max)

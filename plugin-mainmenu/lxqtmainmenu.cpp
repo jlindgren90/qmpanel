@@ -49,6 +49,8 @@ private:
     void searchTextChanged(const QString & text);
 
     LXQtMainMenu * mPlugin;
+    QWidget mSearchFrame;
+    QHBoxLayout mSearchLayout;
     QLineEdit mSearchEdit;
     ActionView mSearchView;
     QWidgetAction mSearchEditAction;
@@ -59,15 +61,18 @@ private:
 MainMenu::MainMenu(const XdgMenu & xdgMenu, LXQtMainMenu * plugin,
                    QWidget * parent)
     : XdgMenuWidget(xdgMenu, QString(), parent), mPlugin(plugin),
-      mSearchEditAction(this), mSearchViewAction(this)
+      mSearchLayout(&mSearchFrame), mSearchEditAction(this),
+      mSearchViewAction(this)
 {
     mSearchEdit.setClearButtonEnabled(true);
     mSearchEdit.setPlaceholderText("Search");
+    mSearchLayout.setContentsMargins(3, 3, 3, 3); /* TODO: scale by DPI */
+    mSearchLayout.addWidget(&mSearchEdit);
     mSearchView.setMaxItemsToShow(10);
     mSearchView.setMaxItemWidth(300); /* TODO: scale by DPI */
     mSearchView.fillActions(this);
 
-    mSearchEditAction.setDefaultWidget(&mSearchEdit);
+    mSearchEditAction.setDefaultWidget(&mSearchFrame);
     mSearchViewAction.setDefaultWidget(&mSearchView);
     addAction(&mSearchViewAction);
     addAction(&mSearchEditAction);
