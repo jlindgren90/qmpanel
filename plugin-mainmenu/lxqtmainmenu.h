@@ -30,36 +30,16 @@
 #define LXQT_MAINMENU_H
 
 #include "../panel/plugin.h"
-#include <XdgMenu>
 
-#include <QLabel>
 #include <QToolButton>
-#include <QDomElement>
-#include <QAction>
-#include <QTimer>
-#include <QKeySequence>
-
-class QMenu;
-class QWidgetAction;
-class QLineEdit;
-class ActionView;
-class LXQtBar;
-
-namespace LXQt {
-class PowerManager;
-class ScreenSaver;
-}
-
-namespace GlobalKeyShortcut
-{
-class Action;
-}
+#include <XdgMenu>
 
 class MainMenu;
 
 class LXQtMainMenu : public Plugin
 {
     Q_OBJECT
+
 public:
     LXQtMainMenu(LXQtPanel *lxqtPanel);
     ~LXQtMainMenu();
@@ -67,33 +47,11 @@ public:
     QWidget *widget() { return &mButton; }
 
 private:
-    void setButtonIcon();
-
-private:
     QToolButton mButton;
-    QString mLogDir;
     MainMenu * mMenu;
-    QWidgetAction * mSearchEditAction;
-    QLineEdit * mSearchEdit;
-    QWidgetAction * mSearchViewAction;
-    ActionView * mSearchView;
-
     XdgMenu mXdgMenu;
 
-    QTimer mDelayedPopup;
-    QTimer mHideTimer;
-    QString mMenuFile;
-
-protected slots:
-
-    virtual void settingsChanged();
-    void buildMenu();
-
-private slots:
     void showMenu();
-    void showHideMenu();
-    void searchTextChanged(QString const & text);
-    void setSearchFocus(QAction *action);
 };
 
 #endif
