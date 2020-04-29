@@ -66,6 +66,10 @@ add_definitions(
     -DPLUGIN_DIR=\"${PLUGIN_DIR}\"
 )
 
+remove_definitions("-DQT_NO_CAST_FROM_ASCII")
+remove_definitions("-DQT_NO_CAST_FROM_BYTEARRAY")
+remove_definitions("-DQT_NO_CAST_TO_ASCII")
+
 message(STATUS "CMAKE Module linker flags: ${CMAKE_MODULE_LINKER_FLAGS}")
 message(STATUS "Panel plugins location: ${PLUGIN_DIR}")
 
