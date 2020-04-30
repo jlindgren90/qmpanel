@@ -28,10 +28,48 @@
 
 #include "lxqtworldclock.h"
 
-#include <QDate>
+#include <QCalendarWidget>
+#include <QMouseEvent>
+
+class ClockLabel : public QLabel
+{
+public:
+    ClockLabel(Plugin * plugin, QWidget * parent)
+        : QLabel(parent), mPlugin(plugin)
+    {
+        mCalendar.setWindowFlags(Qt::Popup);
+    }
+
+protected:
+    void mousePressEvent(QMouseEvent * e) override;
+
+private:
+    Plugin * const mPlugin;
+    QCalendarWidget mCalendar;
+};
+
+void ClockLabel::mousePressEvent(QMouseEvent * e)
+{
+    if (e->button() == Qt::LeftButton)
+    {
+        if (mCalendar.isVisible())
+            mCalendar.hide();
+        else
+        {
+            auto size = mCalendar.sizeHint();
+            mCalendar.move(mPlugin->calculatePopupWindowPos(size).topLeft());
+            mCalendar.show();
+        }
+
+        e->accept();
+        return;
+    }
+
+    QLabel::mousePressEvent(e);
+}
 
 LXQtWorldClock::LXQtWorldClock(LXQtPanel * lxqtPanel)
-    : Plugin(lxqtPanel)
+    : Plugin(lxqtPanel), mLabel(new ClockLabel(this, lxqtPanel))
 {
     mTimer.setInterval(10000);
     mTimer.start();
@@ -43,6 +81,5 @@ LXQtWorldClock::LXQtWorldClock(LXQtPanel * lxqtPanel)
 
 void LXQtWorldClock::updateLabel()
 {
-    mLabel.setText(
-        QDateTime::currentDateTime().toString("ddd MMM d, h:mm a"));
+    mLabel->setText(QDateTime::currentDateTime().toString("ddd MMM d, h:mm a"));
 }

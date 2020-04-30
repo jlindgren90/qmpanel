@@ -37,7 +37,7 @@
 class MainMenu : public XdgMenuWidget
 {
 public:
-    MainMenu(const XdgMenu & xdgMenu, LXQtMainMenu * plugin, QWidget * parent);
+    MainMenu(const XdgMenu & xdgMenu, Plugin * plugin, QWidget * parent);
 
 protected:
     void actionEvent(QActionEvent * e) override;
@@ -48,7 +48,7 @@ protected:
 private:
     void searchTextChanged(const QString & text);
 
-    LXQtMainMenu * mPlugin;
+    Plugin * const mPlugin;
     QWidget mSearchFrame;
     QHBoxLayout mSearchLayout;
     QLineEdit mSearchEdit;
@@ -58,8 +58,7 @@ private:
     bool mUpdatesInhibited = false;
 };
 
-MainMenu::MainMenu(const XdgMenu & xdgMenu, LXQtMainMenu * plugin,
-                   QWidget * parent)
+MainMenu::MainMenu(const XdgMenu & xdgMenu, Plugin * plugin, QWidget * parent)
     : XdgMenuWidget(xdgMenu, QString(), parent), mPlugin(plugin),
       mSearchLayout(&mSearchFrame), mSearchEditAction(this),
       mSearchViewAction(this)
