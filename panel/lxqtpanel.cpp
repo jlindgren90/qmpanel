@@ -212,15 +212,6 @@ QRect LXQtPanel::calculatePopupWindowPos(QPoint const & absolutePos,
     if (res.right() > screen.right())
         res.moveRight(screen.right());
 
-    if (res.bottom() > screen.bottom())
-        res.moveBottom(screen.bottom());
-
-    if (res.left() < screen.left())
-        res.moveLeft(screen.left());
-
-    if (res.top() < screen.top())
-        res.moveTop(screen.top());
-
     return res;
 }
 
