@@ -74,7 +74,7 @@ TrayIcon::TrayIcon(Window iconId, QSize const & iconSize, QWidget* parent):
     QFrame(parent),
     mIconId(iconId),
     mWindowId(0),
-    mAppName(xfitMan().getApplicationName(mIconId)),
+    mAppName(XfitMan::getApplicationName(mIconId)),
     mIconSize(iconSize),
     mDamage(0),
     mDisplay(QX11Info::display())
@@ -115,7 +115,7 @@ void TrayIcon::init()
 
 //    qDebug() << "New tray icon ***********************************";
 //    qDebug() << "  * window id:  " << hex << mIconId;
-//    qDebug() << "  * window name:" << xfitMan().getName(mIconId);
+//    qDebug() << "  * window name:" << XfitMan::getName(mIconId);
 //    qDebug() << "  * size (WxH): " << attr.width << "x" << attr.height;
 //    qDebug() << "  * color depth:" << attr.depth;
 
@@ -159,8 +159,8 @@ void TrayIcon::init()
         unsigned char *data = 0;
         int ret;
 
-        ret = XGetWindowProperty(dsp, mIconId, xfitMan().atom("_XEMBED_INFO"),
-                                 0, 2, false, xfitMan().atom("_XEMBED_INFO"),
+        ret = XGetWindowProperty(dsp, mIconId, XfitMan::atom("_XEMBED_INFO"),
+                                 0, 2, false, XfitMan::atom("_XEMBED_INFO"),
                                  &acttype, &actfmt, &nbitem, &bytes, &data);
         if (ret == Success)
         {
@@ -181,7 +181,7 @@ void TrayIcon::init()
         e.xclient.type = ClientMessage;
         e.xclient.serial = 0;
         e.xclient.send_event = True;
-        e.xclient.message_type = xfitMan().atom("_XEMBED");
+        e.xclient.message_type = XfitMan::atom("_XEMBED");
         e.xclient.window = mIconId;
         e.xclient.format = 32;
         e.xclient.data.l[0] = CurrentTime;
@@ -250,10 +250,10 @@ void TrayIcon::setIconSize(QSize iconSize)
 
     const QSize req_size{mIconSize * metric(PdmDevicePixelRatio)};
     if (mWindowId)
-        xfitMan().resizeWindow(mWindowId, req_size.width(), req_size.height());
+        XfitMan::resizeWindow(mWindowId, req_size.width(), req_size.height());
 
     if (mIconId)
-        xfitMan().resizeWindow(mIconId, req_size.width(), req_size.height());
+        XfitMan::resizeWindow(mIconId, req_size.width(), req_size.height());
 }
 
 
@@ -274,7 +274,7 @@ bool TrayIcon::event(QEvent *event)
         case QEvent::Resize:
         {
             QRect rect = iconGeometry();
-            xfitMan().moveWindow(mWindowId, rect.left(), rect.top());
+            XfitMan::moveWindow(mWindowId, rect.left(), rect.top());
         }
             break;
 
@@ -340,7 +340,7 @@ void TrayIcon::draw(QPaintEvent* /*event*/)
 //    qDebug() << "  * Icon geometry:" << iconGeometry();
 //    qDebug() << "  Icon";
 //    qDebug() << "    * window id:  " << hex << mIconId;
-//    qDebug() << "    * window name:" << xfitMan().getName(mIconId);
+//    qDebug() << "    * window name:" << XfitMan::getName(mIconId);
 //    qDebug() << "    * size (WxH): " << attr.width << "x" << attr.height;
 //    qDebug() << "    * pos (XxY):  " << attr.x << attr.y;
 //    qDebug() << "    * color depth:" << attr.depth;
