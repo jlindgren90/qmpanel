@@ -49,19 +49,19 @@ private:
     void searchTextChanged(const QString & text);
 
     Plugin * const mPlugin;
+    QWidgetAction mSearchEditAction;
+    QWidgetAction mSearchViewAction;
     QWidget mSearchFrame;
     QHBoxLayout mSearchLayout;
     QLineEdit mSearchEdit;
     ActionView mSearchView;
-    QWidgetAction mSearchEditAction;
-    QWidgetAction mSearchViewAction;
     bool mUpdatesInhibited = false;
 };
 
 MainMenu::MainMenu(const XdgMenu & xdgMenu, Plugin * plugin, QWidget * parent)
     : XdgMenuWidget(xdgMenu, QString(), parent), mPlugin(plugin),
-      mSearchLayout(&mSearchFrame), mSearchEditAction(this),
-      mSearchViewAction(this)
+      mSearchEditAction(this), mSearchViewAction(this),
+      mSearchLayout(&mSearchFrame)
 {
     mSearchEdit.setClearButtonEnabled(true);
     mSearchEdit.setPlaceholderText("Search");
