@@ -26,13 +26,38 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include <QApplication>
+#include <signal.h>
+#include <thread>
+
 #include "lxqtpanel.h"
 
-int main(int argc, char *argv[])
+static sigset_t signal_set;
+
+static void signal_thread()
 {
+    int signal;
+    (void)sigwait(&signal_set, &signal);
+
+    /* request qApp to exit cleanly */
+    QMetaObject::invokeMethod(qApp, &QApplication::quit, Qt::QueuedConnection);
+}
+
+int main(int argc, char * argv[])
+{
+    /* init signals first */
+    sigemptyset(&signal_set);
+    sigaddset(&signal_set, SIGHUP);
+    sigaddset(&signal_set, SIGINT);
+    sigaddset(&signal_set, SIGQUIT);
+    sigaddset(&signal_set, SIGTERM);
+    sigprocmask(SIG_BLOCK, &signal_set, nullptr);
+
     QApplication app(argc, argv);
     app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
     LXQtPanel panel;
+
+    /* monitor signals once qApp exists */
+    std::thread(signal_thread).detach();
 
     return app.exec();
 }

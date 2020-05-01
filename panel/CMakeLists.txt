@@ -11,6 +11,7 @@ set(SOURCES
 )
 
 set(LIBRARIES
+    ${CMAKE_THREAD_LIBS_INIT}
     lxqt
 )
 
