@@ -40,6 +40,7 @@
 
 class QWidget;
 class LXQtPanel;
+class LXQtTray;
 
 class TrayIcon: public QFrame
 {
@@ -47,7 +48,7 @@ class TrayIcon: public QFrame
     Q_PROPERTY(QSize iconSize READ iconSize WRITE setIconSize)
 
 public:
-    TrayIcon(Window iconId, QSize const & iconSize, QWidget* parent);
+    TrayIcon(Window iconId, QSize const & iconSize, LXQtTray * parent);
     virtual ~TrayIcon();
 
     Window iconId() const { return mIconId; }
@@ -68,6 +69,8 @@ protected:
 private:
     void init();
     QRect iconGeometry();
+
+    LXQtTray * const mTray;
     Window mIconId;
     Window mWindowId;
     QString mAppName;

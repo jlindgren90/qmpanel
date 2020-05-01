@@ -49,10 +49,22 @@ class LXQtTray: public QFrame, QAbstractNativeEventFilter
     Q_OBJECT
     Q_PROPERTY(QSize iconSize READ iconSize WRITE setIconSize)
 public:
+    enum {
+        MANAGER,
+        _NET_SYSTEM_TRAY_ICON_SIZE,
+        _NET_SYSTEM_TRAY_OPCODE,
+        _NET_SYSTEM_TRAY_ORIENTATION,
+        _NET_SYSTEM_TRAY_Sn,
+        _NET_SYSTEM_TRAY_VISUAL,
+        _XEMBED,
+        _XEMBED_INFO,
+        NUM_ATOMS
+    };
+
     LXQtTray(Plugin *plugin, QWidget* parent = 0);
     ~LXQtTray();
 
-
+    Atom atom(int idx) const { return mAtoms[idx]; }
     QSize iconSize() const { return mIconSize; }
     void setIconSize(QSize iconSize);
 
@@ -86,9 +98,10 @@ private:
     int mDamageError;
     QSize mIconSize;
     QHBoxLayout *mLayout;
-    Plugin *mPlugin;
-    Atom _NET_SYSTEM_TRAY_OPCODE;
-    Display* mDisplay;
+    Plugin * const mPlugin;
+    Display * const mDisplay;
+    int const mScreen;
+    Atom const mAtoms[NUM_ATOMS];
 };
 
 

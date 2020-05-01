@@ -38,7 +38,6 @@
 #include <algorithm>
 #include <vector>
 #include "trayicon.h"
-#include "xfitman.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -74,12 +73,23 @@ LXQtTray::LXQtTray(Plugin *plugin, QWidget *parent):
     mDamageError(0),
     mIconSize(TRAY_ICON_SIZE_DEFAULT, TRAY_ICON_SIZE_DEFAULT),
     mPlugin(plugin),
-    mDisplay(QX11Info::display())
+    mDisplay(QX11Info::display()),
+    mScreen(QX11Info::appScreen()),
+    mAtoms{
+        XInternAtom(mDisplay, "MANAGER", false),
+        XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_ICON_SIZE", false),
+        XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_OPCODE", false),
+        XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_ORIENTATION", false),
+        XInternAtom(mDisplay, QString("_NET_SYSTEM_TRAY_S%1").arg(mScreen).toUtf8(), false),
+        XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_VISUAL", false),
+        XInternAtom(mDisplay, "_XEMBED", false),
+        XInternAtom(mDisplay, "_XEMBED_INFO", false)
+    }
 {
     mLayout = new QHBoxLayout(this);
     mLayout->setMargin(0);
     mLayout->setSpacing(3); /* TODO: scale by DPI */
-    _NET_SYSTEM_TRAY_OPCODE = XfitMan::atom("_NET_SYSTEM_TRAY_OPCODE");
+
     // Init the selection later just to ensure that no signals are sent until
     // after construction is done and the creating object has a chance to connect.
     QTimer::singleShot(0, this, SLOT(startTray()));
@@ -153,7 +163,7 @@ void LXQtTray::clientMessageEvent(xcb_generic_event_t *e)
     uint32_t* data32 = event->data.data32;
     message_type = event->type;
     opcode = data32[1];
-    if(message_type != _NET_SYSTEM_TRAY_OPCODE)
+    if(message_type != mAtoms[_NET_SYSTEM_TRAY_OPCODE])
         return;
 
     switch (opcode)
@@ -189,7 +199,7 @@ void LXQtTray::setIconSize(QSize iconSize)
     unsigned long size = qMin(mIconSize.width(), mIconSize.height());
     XChangeProperty(mDisplay,
                     mTrayId,
-                    XfitMan::atom("_NET_SYSTEM_TRAY_ICON_SIZE"),
+                    mAtoms[_NET_SYSTEM_TRAY_ICON_SIZE],
                     XA_CARDINAL,
                     32,
                     PropModeReplace,
@@ -207,7 +217,7 @@ VisualID LXQtTray::getVisual()
     Display* dsp = mDisplay;
 
     XVisualInfo templ;
-    templ.screen=QX11Info::appScreen();
+    templ.screen = mScreen;
     templ.depth=32;
     templ.c_class=TrueColor;
 
@@ -241,13 +251,9 @@ VisualID LXQtTray::getVisual()
  ************************************************/
 void LXQtTray::startTray()
 {
-    Display* dsp = mDisplay;
     Window root = QX11Info::appRootWindow();
 
-    QString s = QString("_NET_SYSTEM_TRAY_S%1").arg(DefaultScreen(dsp));
-    Atom _NET_SYSTEM_TRAY_S = XfitMan::atom(s.toLatin1());
-
-    if (XGetSelectionOwner(dsp, _NET_SYSTEM_TRAY_S) != None)
+    if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != None)
     {
         qWarning() << "Another systray is running";
         mValid = false;
@@ -255,10 +261,10 @@ void LXQtTray::startTray()
     }
 
     // init systray protocol
-    mTrayId = XCreateSimpleWindow(dsp, root, -1, -1, 1, 1, 0, 0, 0);
+    mTrayId = XCreateSimpleWindow(mDisplay, root, -1, -1, 1, 1, 0, 0, 0);
 
-    XSetSelectionOwner(dsp, _NET_SYSTEM_TRAY_S, mTrayId, CurrentTime);
-    if (XGetSelectionOwner(dsp, _NET_SYSTEM_TRAY_S) != mTrayId)
+    XSetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn], mTrayId, CurrentTime);
+    if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != mTrayId)
     {
         qWarning() << "Can't get systray manager";
         stopTray();
@@ -267,9 +273,9 @@ void LXQtTray::startTray()
     }
 
     int orientation = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
-    XChangeProperty(dsp,
+    XChangeProperty(mDisplay,
                     mTrayId,
-                    XfitMan::atom("_NET_SYSTEM_TRAY_ORIENTATION"),
+                    mAtoms[_NET_SYSTEM_TRAY_ORIENTATION],
                     XA_CARDINAL,
                     32,
                     PropModeReplace,
@@ -282,7 +288,7 @@ void LXQtTray::startTray()
     {
         XChangeProperty(mDisplay,
                         mTrayId,
-                        XfitMan::atom("_NET_SYSTEM_TRAY_VISUAL"),
+                        mAtoms[_NET_SYSTEM_TRAY_VISUAL],
                         XA_VISUALID,
                         32,
                         PropModeReplace,
@@ -296,14 +302,14 @@ void LXQtTray::startTray()
     XClientMessageEvent ev;
     ev.type = ClientMessage;
     ev.window = root;
-    ev.message_type = XfitMan::atom("MANAGER");
+    ev.message_type = mAtoms[MANAGER];
     ev.format = 32;
     ev.data.l[0] = CurrentTime;
-    ev.data.l[1] = _NET_SYSTEM_TRAY_S;
+    ev.data.l[1] = mAtoms[_NET_SYSTEM_TRAY_Sn];
     ev.data.l[2] = mTrayId;
     ev.data.l[3] = 0;
     ev.data.l[4] = 0;
-    XSendEvent(dsp, root, False, StructureNotifyMask, (XEvent*)&ev);
+    XSendEvent(mDisplay, root, False, StructureNotifyMask, (XEvent*)&ev);
 
     XDamageQueryExtension(mDisplay, &mDamageEvent, &mDamageError);
 
