@@ -44,7 +44,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xcomposite.h>
-#include <X11/extensions/Xrender.h>
+#include <KWindowInfo>
 
 #define XEMBED_EMBEDDED_NOTIFY 0
 
@@ -74,7 +74,7 @@ TrayIcon::TrayIcon(Window iconId, QSize const & iconSize, QWidget* parent):
     QFrame(parent),
     mIconId(iconId),
     mWindowId(0),
-    mAppName(XfitMan::getApplicationName(mIconId)),
+    mAppName(KWindowInfo(iconId, 0, NET::WM2WindowClass).windowClassName()),
     mIconSize(iconSize),
     mDamage(0),
     mDisplay(QX11Info::display())
@@ -250,10 +250,10 @@ void TrayIcon::setIconSize(QSize iconSize)
 
     const QSize req_size{mIconSize * metric(PdmDevicePixelRatio)};
     if (mWindowId)
-        XfitMan::resizeWindow(mWindowId, req_size.width(), req_size.height());
+        XResizeWindow(mDisplay, mWindowId, req_size.width(), req_size.height());
 
     if (mIconId)
-        XfitMan::resizeWindow(mIconId, req_size.width(), req_size.height());
+        XResizeWindow(mDisplay, mIconId, req_size.width(), req_size.height());
 }
 
 
@@ -274,7 +274,7 @@ bool TrayIcon::event(QEvent *event)
         case QEvent::Resize:
         {
             QRect rect = iconGeometry();
-            XfitMan::moveWindow(mWindowId, rect.left(), rect.top());
+            XMoveWindow(mDisplay, mWindowId, rect.left(), rect.top());
         }
             break;
 
@@ -383,14 +383,4 @@ void TrayIcon::windowDestroyed(Window w)
     //damage is destroyed if it's parent window was destroyed
     if (mIconId == w)
         mDamage = 0;
-}
-
-
-/************************************************
-
- ************************************************/
-bool TrayIcon::isXCompositeAvailable()
-{
-    int eventBase, errorBase;
-    return XCompositeQueryExtension(QX11Info::display(), &eventBase, &errorBase );
 }

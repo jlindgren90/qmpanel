@@ -45,11 +45,6 @@ class XfitMan
 {
 public:
     static Atom atom(const char* atomName);
-
-    static void moveWindow(Window _win, int _x, int _y);
-    static void resizeWindow(Window _wid, int _width, int _height);
-
-    static QString getApplicationName(Window _wid);
 };
 
 #endif // LXQTXFITMAN_H

@@ -74,8 +74,6 @@ private:
     QSize mIconSize;
     Damage mDamage;
     Display* mDisplay;
-
-    static bool isXCompositeAvailable();
 };
 
 #endif // TRAYICON_H
