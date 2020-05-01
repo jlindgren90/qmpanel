@@ -280,16 +280,6 @@ void LXQtTray::startTray()
     }
     // ******************************************
 
-    unsigned long size = mIconSize * devicePixelRatioF();
-    XChangeProperty(mDisplay,
-                    mTrayId,
-                    mAtoms[_NET_SYSTEM_TRAY_ICON_SIZE],
-                    XA_CARDINAL,
-                    32,
-                    PropModeReplace,
-                    (unsigned char*)&size,
-                    1);
-
     XClientMessageEvent ev;
     ev.type = ClientMessage;
     ev.window = root;

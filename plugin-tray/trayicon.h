@@ -58,7 +58,7 @@ public:
 
 protected:
     bool event(QEvent *event);
-    void draw(QPaintEvent* event);
+    void draw();
 
 private:
     void init();

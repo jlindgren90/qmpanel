@@ -233,7 +233,7 @@ bool TrayIcon::event(QEvent *event)
         switch (event->type())
         {
         case QEvent::Paint:
-            draw(static_cast<QPaintEvent*>(event));
+            draw();
             break;
 
         case QEvent::Move:
@@ -278,16 +278,20 @@ QRect TrayIcon::iconGeometry()
 /************************************************
 
  ************************************************/
-void TrayIcon::draw(QPaintEvent* /*event*/)
+void TrayIcon::draw()
 {
-    XWindowAttributes attr;
-    if (!XGetWindowAttributes(mDisplay, mIconId, &attr))
+    XWindowAttributes attr, attr2;
+    if (!XGetWindowAttributes(mDisplay, mIconId, &attr) ||
+        !XGetWindowAttributes(mDisplay, mWindowId, &attr2))
     {
         qWarning() << "Paint error";
         return;
     }
 
-    XImage* ximage = XGetImage(mDisplay, mIconId, 0, 0, attr.width, attr.height, AllPlanes, ZPixmap);
+    XImage* ximage = XGetImage(mDisplay, mIconId, 0, 0,
+                               qMin(attr.width, attr2.width),
+                               qMin(attr.height, attr2.height),
+                               AllPlanes, ZPixmap);
     if(!ximage)
         return;
 
