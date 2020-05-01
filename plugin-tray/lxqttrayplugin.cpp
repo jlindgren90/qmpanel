@@ -44,14 +44,3 @@ QWidget *LXQtTrayPlugin::widget()
 {
     return mWidget;
 }
-
-void LXQtTrayPlugin::realign()
-{
-    mWidget->realign();
-}
-
-void LXQtTrayPlugin::settingsChanged()
-{
-    mWidget->settingsChanged();
-}
-

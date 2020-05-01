@@ -36,11 +36,8 @@
 #include "fixx11h.h"
 
 class TrayIcon;
+class QHBoxLayout;
 class QSize;
-
-namespace LXQt {
-class GridLayout;
-}
 
 /**
  * @brief This makes our trayplugin
@@ -60,12 +57,6 @@ public:
     void setIconSize(QSize iconSize);
 
     bool nativeEventFilter(const QByteArray &eventType, void *message, long *);
-
-    void realign();
-    void settingsChanged();
-
-signals:
-    void iconSizeChanged(int iconSize);
 
 private slots:
     void startTray();
@@ -95,7 +86,7 @@ private:
     int mDamageEvent;
     int mDamageError;
     QSize mIconSize;
-    LXQt::GridLayout *mLayout;
+    QHBoxLayout *mLayout;
     Plugin *mPlugin;
     Atom _NET_SYSTEM_TRAY_OPCODE;
     Display* mDisplay;

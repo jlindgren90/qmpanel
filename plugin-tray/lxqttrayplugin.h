@@ -44,9 +44,6 @@ public:
 
     virtual QWidget *widget();
 
-    void realign();
-    void settingsChanged();
-
 private:
     LXQtTray *mWidget;
 

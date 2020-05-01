@@ -32,12 +32,12 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QHBoxLayout>
 #include <QTimer>
 #include <QX11Info>
 #include <algorithm>
 #include <vector>
 #include "trayicon.h"
-#include <LXQt/GridLayout>
 #include "xfitman.h"
 
 #include <X11/Xlib.h>
@@ -76,9 +76,9 @@ LXQtTray::LXQtTray(Plugin *plugin, QWidget *parent):
     mPlugin(plugin),
     mDisplay(QX11Info::display())
 {
-    mLayout = new LXQt::GridLayout(this);
+    mLayout = new QHBoxLayout(this);
+    mLayout->setMargin(0);
     mLayout->setSpacing(3); /* TODO: scale by DPI */
-    realign();
     _NET_SYSTEM_TRAY_OPCODE = XfitMan::atom("_NET_SYSTEM_TRAY_OPCODE");
     // Init the selection later just to ensure that no signals are sent until
     // after construction is done and the creating object has a chance to connect.
@@ -114,12 +114,6 @@ bool LXQtTray::nativeEventFilter(const QByteArray &eventType, void *message, lon
             clientMessageEvent(event);
             break;
 
-//        case ConfigureNotify:
-//            icon = findIcon(event->xconfigure.window);
-//            if (icon)
-//                icon->configureEvent(&(event->xconfigure));
-//            break;
-
         case DestroyNotify: {
             unsigned long event_window;
             event_window = reinterpret_cast<xcb_destroy_notify_event_t*>(event)->window;
@@ -150,28 +144,6 @@ bool LXQtTray::nativeEventFilter(const QByteArray &eventType, void *message, lon
 /************************************************
 
  ************************************************/
-void LXQtTray::realign()
-{
-    mLayout->setEnabled(false);
-    mLayout->setRowCount(1);
-    mLayout->setColumnCount(0);
-    mLayout->setEnabled(true);
-}
-
-
-/************************************************
-
- ************************************************/
-void LXQtTray::settingsChanged()
-{
-    mLayout->setSpacing(3); /* TODO: scale by DPI */
-    sortIcons();
-}
-
-
-/************************************************
-
- ************************************************/
 void LXQtTray::clientMessageEvent(xcb_generic_event_t *e)
 {
     unsigned long opcode;
@@ -190,20 +162,6 @@ void LXQtTray::clientMessageEvent(xcb_generic_event_t *e)
             id = data32[2];
             if (id)
                 addIcon(id);
-            break;
-
-
-        case SYSTEM_TRAY_BEGIN_MESSAGE:
-        case SYSTEM_TRAY_CANCEL_MESSAGE:
-            qDebug() << "we don't show balloon messages.";
-            break;
-
-
-        default:
-//            if (opcode == xfitMan().atom("_NET_SYSTEM_TRAY_MESSAGE_DATA"))
-//                qDebug() << "message from dockapp:" << e->data.b;
-//            else
-//                qDebug() << "SYSTEM_TRAY : unknown message type" << opcode;
             break;
     }
 }
