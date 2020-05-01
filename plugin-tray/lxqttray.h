@@ -76,7 +76,6 @@ private:
                       long unsigned int data4 = 0) const;
 
     void addIcon(Window id);
-    void sortIcons();
 
     TrayIcon* findIcon(Window trayId);
 

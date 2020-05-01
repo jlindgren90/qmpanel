@@ -353,30 +353,15 @@ void LXQtTray::addIcon(Window winId)
 
     icon = new TrayIcon(winId, mIconSize, this);
     mIcons.append(icon);
-    mLayout->addWidget(icon);
     connect(icon, &QObject::destroyed, this, &LXQtTray::onIconDestroyed);
-    sortIcons();
-}
 
-
-/************************************************
-
- ************************************************/
-void LXQtTray::sortIcons()
-{
-    std::vector<QLayoutItem *> items;
-
-    // temporarily remove all icons to sort them
-    for(QLayoutItem *item; (item = mLayout->takeAt(0)) != nullptr;)
-        items.push_back(item);
-
-    std::stable_sort(items.begin(), items.end(), [](QLayoutItem *a, QLayoutItem *b) {
-        auto ai = static_cast<TrayIcon *>(a->widget());
-        auto bi = static_cast<TrayIcon *>(b->widget());
-        return (ai->appName() < bi->appName());
-    });
-
-    // add them back in sorted order
-    for(QLayoutItem *item : items)
-        mLayout->addItem(item);
+    // add in sorted order
+    int idx = 0;
+    for(; idx < mLayout->count(); idx++)
+    {
+        auto icon2 = static_cast<TrayIcon *>(mLayout->itemAt(idx)->widget());
+        if (icon->appName() < icon2->appName())
+            break;
+    }
+    mLayout->insertWidget(idx, icon);
 }
