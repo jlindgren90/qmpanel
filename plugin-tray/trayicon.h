@@ -44,11 +44,8 @@ class LXQtTray;
 
 class TrayIcon: public QFrame
 {
-    Q_OBJECT
-    Q_PROPERTY(QSize iconSize READ iconSize WRITE setIconSize)
-
 public:
-    TrayIcon(Window iconId, QSize const & iconSize, LXQtTray * parent);
+    TrayIcon(Window iconId, LXQtTray * tray);
     virtual ~TrayIcon();
 
     Window iconId() const { return mIconId; }
@@ -57,10 +54,7 @@ public:
 
     void windowDestroyed(Window w);
 
-    QSize iconSize() const { return mIconSize; }
-    void setIconSize(QSize iconSize);
-
-    QSize sizeHint() const;
+    QSize sizeHint() const { return QSize(mIconSize, mIconSize); }
 
 protected:
     bool event(QEvent *event);
@@ -71,10 +65,10 @@ private:
     QRect iconGeometry();
 
     LXQtTray * const mTray;
+    int const mIconSize;
     Window mIconId;
     Window mWindowId;
     QString mAppName;
-    QSize mIconSize;
     Damage mDamage;
     Display* mDisplay;
 };

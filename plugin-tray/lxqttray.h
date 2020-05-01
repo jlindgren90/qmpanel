@@ -46,8 +46,6 @@ class Plugin;
 
 class LXQtTray: public QFrame, QAbstractNativeEventFilter
 {
-    Q_OBJECT
-    Q_PROPERTY(QSize iconSize READ iconSize WRITE setIconSize)
 public:
     enum {
         MANAGER,
@@ -65,17 +63,15 @@ public:
     ~LXQtTray();
 
     Atom atom(int idx) const { return mAtoms[idx]; }
-    QSize iconSize() const { return mIconSize; }
-    void setIconSize(QSize iconSize);
+    int iconSize() const { return mIconSize; }
 
     bool nativeEventFilter(const QByteArray &eventType, void *message, long *);
 
-private slots:
+private:
     void startTray();
     void stopTray();
     void onIconDestroyed(QObject * icon);
 
-private:
     VisualID getVisual();
 
     void clientMessageEvent(xcb_generic_event_t *e);
@@ -96,9 +92,9 @@ private:
     QList<TrayIcon*> mIcons;
     int mDamageEvent;
     int mDamageError;
-    QSize mIconSize;
-    QHBoxLayout *mLayout;
     Plugin * const mPlugin;
+    QHBoxLayout * const mLayout;
+    int const mIconSize;
     Display * const mDisplay;
     int const mScreen;
     Atom const mAtoms[NUM_ATOMS];

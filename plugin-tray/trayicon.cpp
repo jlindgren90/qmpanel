@@ -70,13 +70,13 @@ int windowErrorHandler(Display *d, XErrorEvent *e)
 /************************************************
 
  ************************************************/
-TrayIcon::TrayIcon(Window iconId, QSize const & iconSize, LXQtTray * parent):
-    QFrame(parent),
-    mTray(parent),
+TrayIcon::TrayIcon(Window iconId, LXQtTray * tray):
+    QFrame(tray),
+    mTray(tray),
+    mIconSize(tray->iconSize()),
     mIconId(iconId),
     mWindowId(0),
     mAppName(KWindowInfo(iconId, 0, NET::WM2WindowClass).windowClassName()),
-    mIconSize(iconSize),
     mDamage(0),
     mDisplay(QX11Info::display())
 {
@@ -114,12 +114,6 @@ void TrayIcon::init()
         return;
     }
 
-//    qDebug() << "New tray icon ***********************************";
-//    qDebug() << "  * window id:  " << hex << mIconId;
-//    qDebug() << "  * window name:" << XfitMan::getName(mIconId);
-//    qDebug() << "  * size (WxH): " << attr.width << "x" << attr.height;
-//    qDebug() << "  * color depth:" << attr.depth;
-
     unsigned long mask = 0;
     XSetWindowAttributes set_attr;
 
@@ -129,8 +123,8 @@ void TrayIcon::init()
     set_attr.border_pixel = 0;
     mask = CWColormap|CWBackPixel|CWBorderPixel;
 
-    const QRect icon_geom = iconGeometry();
-    mWindowId = XCreateWindow(dsp, this->winId(), icon_geom.x(), icon_geom.y(), icon_geom.width() * metric(PdmDevicePixelRatio), icon_geom.height() * metric(PdmDevicePixelRatio),
+    auto geom = iconGeometry();
+    mWindowId = XCreateWindow(dsp, this->winId(), geom.x(), geom.y(), geom.width(), geom.height(),
                               0, attr.depth, InputOutput, visual, mask, &set_attr);
 
 
@@ -200,8 +194,7 @@ void TrayIcon::init()
     XMapWindow(dsp, mIconId);
     XMapRaised(dsp, mWindowId);
 
-    const QSize req_size{mIconSize * metric(PdmDevicePixelRatio)};
-    XResizeWindow(dsp, mIconId, req_size.width(), req_size.height());
+    XResizeWindow(dsp, mIconId, geom.width(), geom.height());
 }
 
 
@@ -233,34 +226,6 @@ TrayIcon::~TrayIcon()
 /************************************************
 
  ************************************************/
-QSize TrayIcon::sizeHint() const
-{
-    QMargins margins = contentsMargins();
-    return QSize(margins.left() + mIconSize.width() + margins.right(),
-                 margins.top() + mIconSize.height() + margins.bottom()
-                );
-}
-
-
-/************************************************
-
- ************************************************/
-void TrayIcon::setIconSize(QSize iconSize)
-{
-    mIconSize = iconSize;
-
-    const QSize req_size{mIconSize * metric(PdmDevicePixelRatio)};
-    if (mWindowId)
-        XResizeWindow(mDisplay, mWindowId, req_size.width(), req_size.height());
-
-    if (mIconId)
-        XResizeWindow(mDisplay, mIconId, req_size.width(), req_size.height());
-}
-
-
-/************************************************
-
- ************************************************/
 bool TrayIcon::event(QEvent *event)
 {
     if (mWindowId)
@@ -274,10 +239,10 @@ bool TrayIcon::event(QEvent *event)
         case QEvent::Move:
         case QEvent::Resize:
         {
-            QRect rect = iconGeometry();
-            XMoveWindow(mDisplay, mWindowId, rect.left(), rect.top());
-        }
+            auto geom = iconGeometry();
+            XMoveWindow(mDisplay, mWindowId, geom.x(), geom.y());
             break;
+        }
 
         case QEvent::MouseButtonPress:
         case QEvent::MouseButtonRelease:
@@ -299,10 +264,14 @@ bool TrayIcon::event(QEvent *event)
  ************************************************/
 QRect TrayIcon::iconGeometry()
 {
-    QRect res = QRect(QPoint(0, 0), mIconSize);
+    QRect geom(QPoint(), QSize(mIconSize, mIconSize));
 
-    res.moveCenter(QRect(0, 0, width(), height()).center());
-    return res;
+    // center and convert to device pixels
+    geom.moveCenter(rect().center());
+    geom.moveTopLeft(geom.topLeft() * devicePixelRatioF());
+    geom.setSize(geom.size() * devicePixelRatioF());
+
+    return geom;
 }
 
 
@@ -311,68 +280,28 @@ QRect TrayIcon::iconGeometry()
  ************************************************/
 void TrayIcon::draw(QPaintEvent* /*event*/)
 {
-    Display* dsp = mDisplay;
-
     XWindowAttributes attr;
-    if (!XGetWindowAttributes(dsp, mIconId, &attr))
+    if (!XGetWindowAttributes(mDisplay, mIconId, &attr))
     {
         qWarning() << "Paint error";
         return;
     }
 
-    QImage image;
-    XImage* ximage = XGetImage(dsp, mIconId, 0, 0, attr.width, attr.height, AllPlanes, ZPixmap);
-    if(ximage)
-    {
-        image = QImage((const uchar*) ximage->data, ximage->width, ximage->height, ximage->bytes_per_line,  QImage::Format_ARGB32_Premultiplied);
-    }
-    else
-    {
-        qWarning() << "    * Error image is NULL";
+    XImage* ximage = XGetImage(mDisplay, mIconId, 0, 0, attr.width, attr.height, AllPlanes, ZPixmap);
+    if(!ximage)
+        return;
 
-        XClearArea(mDisplay, (Window)winId(), 0, 0, attr.width, attr.height, False);
-        // for some unknown reason, XGetImage failed. try another less efficient method.
-        // QScreen::grabWindow uses XCopyArea() internally.
-        image = qApp->primaryScreen()->grabWindow(mIconId).toImage();
-    }
+    QImage image((const uchar*)ximage->data, ximage->width, ximage->height,
+                 ximage->bytes_per_line, QImage::Format_ARGB32_Premultiplied);
+    image.setDevicePixelRatio(devicePixelRatioF());
 
-//    qDebug() << "Paint icon **************************************";
-//    qDebug() << "  * XComposite: " << isXCompositeAvailable();
-//    qDebug() << "  * Icon geometry:" << iconGeometry();
-//    qDebug() << "  Icon";
-//    qDebug() << "    * window id:  " << hex << mIconId;
-//    qDebug() << "    * window name:" << XfitMan::getName(mIconId);
-//    qDebug() << "    * size (WxH): " << attr.width << "x" << attr.height;
-//    qDebug() << "    * pos (XxY):  " << attr.x << attr.y;
-//    qDebug() << "    * color depth:" << attr.depth;
-//    qDebug() << "  XImage";
-//    qDebug() << "    * size (WxH):  " << ximage->width << "x" << ximage->height;
-//    switch (ximage->format)
-//    {
-//        case XYBitmap: qDebug() << "    * format:   XYBitmap"; break;
-//        case XYPixmap: qDebug() << "    * format:   XYPixmap"; break;
-//        case ZPixmap:  qDebug() << "    * format:   ZPixmap"; break;
-//    }
-//    qDebug() << "    * color depth:  " << ximage->depth;
-//    qDebug() << "    * bits per pixel:" << ximage->bits_per_pixel;
+    QRect drawRect(QPoint(), image.size() / devicePixelRatioF());
+    drawRect.moveCenter(rect().center());
 
-    // Draw QImage ...........................
     QPainter painter(this);
-    QRect iconRect = iconGeometry();
-    if (image.size() != iconRect.size())
-    {
-        image = image.scaled(iconRect.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        QRect r = image.rect();
-        r.moveCenter(iconRect.center());
-        iconRect = r;
-    }
-//    qDebug() << " Draw rect:" << iconRect;
+    painter.drawImage(drawRect.topLeft(), image);
 
-    painter.drawImage(iconRect, image);
-
-    if(ximage)
-        XDestroyImage(ximage);
-//    debug << "End paint icon **********************************";
+    XDestroyImage(ximage);
 }
 
 

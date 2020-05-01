@@ -33,6 +33,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QStyle>
 #include <QTimer>
 #include <QX11Info>
 #include <algorithm>
@@ -71,8 +72,9 @@ LXQtTray::LXQtTray(Plugin *plugin, QWidget *parent):
     mTrayId(0),
     mDamageEvent(0),
     mDamageError(0),
-    mIconSize(TRAY_ICON_SIZE_DEFAULT, TRAY_ICON_SIZE_DEFAULT),
     mPlugin(plugin),
+    mLayout(new QHBoxLayout(this)),
+    mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
     mDisplay(QX11Info::display()),
     mScreen(QX11Info::appScreen()),
     mAtoms{
@@ -86,13 +88,12 @@ LXQtTray::LXQtTray(Plugin *plugin, QWidget *parent):
         XInternAtom(mDisplay, "_XEMBED_INFO", false)
     }
 {
-    mLayout = new QHBoxLayout(this);
     mLayout->setMargin(0);
     mLayout->setSpacing(3); /* TODO: scale by DPI */
 
     // Init the selection later just to ensure that no signals are sent until
     // after construction is done and the creating object has a chance to connect.
-    QTimer::singleShot(0, this, SLOT(startTray()));
+    QTimer::singleShot(0, this, &LXQtTray::startTray);
 }
 
 
@@ -193,24 +194,6 @@ TrayIcon* LXQtTray::findIcon(Window id)
 /************************************************
 
 ************************************************/
-void LXQtTray::setIconSize(QSize iconSize)
-{
-    mIconSize = iconSize;
-    unsigned long size = qMin(mIconSize.width(), mIconSize.height());
-    XChangeProperty(mDisplay,
-                    mTrayId,
-                    mAtoms[_NET_SYSTEM_TRAY_ICON_SIZE],
-                    XA_CARDINAL,
-                    32,
-                    PropModeReplace,
-                    (unsigned char*)&size,
-                    1);
-}
-
-
-/************************************************
-
-************************************************/
 VisualID LXQtTray::getVisual()
 {
     VisualID visualId = 0;
@@ -297,7 +280,15 @@ void LXQtTray::startTray()
     }
     // ******************************************
 
-    setIconSize(mIconSize);
+    unsigned long size = mIconSize * devicePixelRatioF();
+    XChangeProperty(mDisplay,
+                    mTrayId,
+                    mAtoms[_NET_SYSTEM_TRAY_ICON_SIZE],
+                    XA_CARDINAL,
+                    32,
+                    PropModeReplace,
+                    (unsigned char*)&size,
+                    1);
 
     XClientMessageEvent ev;
     ev.type = ClientMessage;
@@ -357,7 +348,7 @@ void LXQtTray::addIcon(Window winId)
     if(icon)
         return;
 
-    icon = new TrayIcon(winId, mIconSize, this);
+    icon = new TrayIcon(winId, this);
     mIcons.append(icon);
     connect(icon, &QObject::destroyed, this, &LXQtTray::onIconDestroyed);
 
