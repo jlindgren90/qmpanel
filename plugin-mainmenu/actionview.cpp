@@ -136,6 +136,7 @@ ActionView::ActionView(QWidget * parent /*= nullptr*/)
 {
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setFrameStyle(QFrame::NoFrame);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setSizeAdjustPolicy(AdjustToContents);
     setSelectionBehavior(SelectRows);
     setSelectionMode(SingleSelection);
