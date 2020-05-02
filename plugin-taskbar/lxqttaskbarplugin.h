@@ -25,26 +25,20 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef LXQTTASKBARPLUGIN_H
 #define LXQTTASKBARPLUGIN_H
 
 #include "../panel/plugin.h"
-#include "lxqttaskbar.h"
-#include <QDebug>
-class LXQtTaskBar;
 
 class LXQtTaskBarPlugin : public Plugin
 {
-    Q_OBJECT
 public:
-    LXQtTaskBarPlugin(LXQtPanel *lxqtPanel);
-    ~LXQtTaskBarPlugin();
+    explicit LXQtTaskBarPlugin(LXQtPanel * lxqtPanel);
 
-    QWidget *widget() { return mTaskBar; }
+    QWidget * widget() { return mTaskBar; }
 
 private:
-    LXQtTaskBar *mTaskBar;
+    QWidget * mTaskBar;
 };
 
 #endif // LXQTTASKBARPLUGIN_H

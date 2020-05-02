@@ -25,16 +25,10 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #include "lxqttaskbarplugin.h"
+#include "lxqttaskbar.h"
 
-LXQtTaskBarPlugin::LXQtTaskBarPlugin(LXQtPanel *lxqtPanel):
-    Plugin(lxqtPanel)
+LXQtTaskBarPlugin::LXQtTaskBarPlugin(LXQtPanel * lxqtPanel)
+    : Plugin(lxqtPanel), mTaskBar(new LXQtTaskBar(this))
 {
-    mTaskBar = new LXQtTaskBar(this);
-}
-
-LXQtTaskBarPlugin::~LXQtTaskBarPlugin()
-{
-    delete mTaskBar;
 }

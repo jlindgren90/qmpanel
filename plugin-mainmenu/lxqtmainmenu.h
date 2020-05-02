@@ -37,11 +37,8 @@ class MainMenu;
 
 class LXQtMainMenu : public Plugin
 {
-    Q_OBJECT
-
 public:
-    LXQtMainMenu(LXQtPanel * lxqtPanel);
-    ~LXQtMainMenu();
+    explicit LXQtMainMenu(LXQtPanel * lxqtPanel);
 
     QWidget * widget() { return &mButton; }
 

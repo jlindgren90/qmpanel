@@ -160,5 +160,3 @@ LXQtMainMenu::LXQtMainMenu(LXQtPanel * lxqtPanel) : Plugin(lxqtPanel)
             mMenu->popup(calcPopupPos(mMenu->sizeHint()).topLeft());
     });
 }
-
-LXQtMainMenu::~LXQtMainMenu() { delete mMenu; }

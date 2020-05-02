@@ -25,22 +25,10 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #include "lxqttrayplugin.h"
 #include "lxqttray.h"
 
-LXQtTrayPlugin::LXQtTrayPlugin(LXQtPanel *lxqtPanel) :
-    Plugin(lxqtPanel),
-    mWidget(new LXQtTray(this))
+LXQtTrayPlugin::LXQtTrayPlugin(LXQtPanel * lxqtPanel)
+    : Plugin(lxqtPanel), mWidget(new LXQtTray(this))
 {
-}
-
-LXQtTrayPlugin::~LXQtTrayPlugin()
-{
-    delete mWidget;
-}
-
-QWidget *LXQtTrayPlugin::widget()
-{
-    return mWidget;
 }

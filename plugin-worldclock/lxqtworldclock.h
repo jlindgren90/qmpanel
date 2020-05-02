@@ -37,7 +37,7 @@
 class LXQtWorldClock : public Plugin
 {
 public:
-    LXQtWorldClock(LXQtPanel * lxqtPanel);
+    explicit LXQtWorldClock(LXQtPanel * lxqtPanel);
 
     QWidget * widget() override { return mLabel; }
 

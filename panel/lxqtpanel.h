@@ -32,22 +32,19 @@
 #include <QPointer>
 #include <QWidget>
 
-class Plugin;
-
 // The main panel widget
 class LXQtPanel : public QWidget
 {
-    Q_OBJECT
-
 public:
-    LXQtPanel(QWidget * parent = 0);
+    LXQtPanel();
 
     QRect calcPopupPos(QPoint const & absolutePos,
                        QSize const & windowSize) const;
     QRect calcPopupPos(QWidget * widget, const QSize & windowSize) const;
 
 protected:
-    void showEvent(QShowEvent * event) override {
+    void showEvent(QShowEvent * event) override
+    {
         updateGeometry();
         QWidget::showEvent(event);
     }

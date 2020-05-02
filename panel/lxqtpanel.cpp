@@ -40,7 +40,7 @@
 #include <KWindowSystem/KWindowSystem>
 #include <KWindowSystem/NETWM>
 
-LXQtPanel::LXQtPanel(QWidget * parent) : QWidget(parent), mLayout(this)
+LXQtPanel::LXQtPanel() : mLayout(this)
 {
     setAttribute(Qt::WA_AcceptDrops);
     setAttribute(Qt::WA_AlwaysShowToolTips);

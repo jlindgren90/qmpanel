@@ -25,28 +25,20 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef LXQTTRAYPLUGIN_H
 #define LXQTTRAYPLUGIN_H
 
 #include "../panel/plugin.h"
-#include <QDebug>
-#include <QObject>
-#include <QX11Info>
 
-class LXQtTray;
 class LXQtTrayPlugin : public Plugin
 {
-    Q_OBJECT
 public:
-    explicit LXQtTrayPlugin(LXQtPanel *lxqtPanel);
-    ~LXQtTrayPlugin();
+    explicit LXQtTrayPlugin(LXQtPanel * lxqtPanel);
 
-    virtual QWidget *widget();
+    QWidget * widget() override { return mWidget; }
 
 private:
-    LXQtTray *mWidget;
-
+    QWidget * mWidget;
 };
 
 #endif // LXQTTRAYPLUGIN_H
