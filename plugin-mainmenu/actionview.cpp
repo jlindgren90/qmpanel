@@ -46,7 +46,7 @@ public:
         mSnippets = str.split(' ', QString::SkipEmptyParts);
     }
 
-    bool isMatch(const QString & string) const
+    bool accepts(const QString & string) const
     {
         QStringList words = string.split(' ', QString::SkipEmptyParts);
 
@@ -88,7 +88,7 @@ protected:
         auto srcModel = sourceModel();
         auto index = srcModel->index(source_row, 0, source_parent);
         auto text = srcModel->data(index).toString();
-        return mFilter.isMatch(text);
+        return mFilter.accepts(text);
     }
 
 private:
@@ -130,7 +130,7 @@ private:
     QPointer<XdgAction> mAction;
 };
 
-ActionView::ActionView(QWidget * parent /*= nullptr*/)
+ActionView::ActionView(QWidget * parent)
     : QListView(parent), mModel(new QStandardItemModel(this)),
       mProxy(new FilterProxyModel(this))
 {
@@ -178,8 +178,8 @@ QSize ActionView::viewportSizeHint() const
 
 void ActionView::onActivated(QModelIndex const & index)
 {
-    auto realIndex = mProxy->mapToSource(index);
-    auto item = static_cast<ActionItem *>(mModel->itemFromIndex(realIndex));
+    auto srcIndex = mProxy->mapToSource(index);
+    auto item = static_cast<ActionItem *>(mModel->itemFromIndex(srcIndex));
     if (item)
         item->trigger();
 }
@@ -188,13 +188,13 @@ void ActionView::fillActions(QMenu * menu)
 {
     for (auto action : menu->actions())
     {
-        if (XdgAction * xdgAction = qobject_cast<XdgAction *>(action))
+        if (auto xdgAction = qobject_cast<XdgAction *>(action))
         {
             mModel->appendRow(new ActionItem(xdgAction));
         }
-        else if (QMenu * sub_menu = action->menu())
+        else if (auto subMenu = action->menu())
         {
-            fillActions(sub_menu);
+            fillActions(subMenu);
         }
     }
 }

@@ -25,7 +25,7 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#if !defined(ACTION_VIEW_H)
+#ifndef ACTION_VIEW_H
 #define ACTION_VIEW_H
 
 #include <QListView>
