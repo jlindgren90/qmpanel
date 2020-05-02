@@ -32,6 +32,7 @@
 #include <QAction>
 #include <QWidgetAction>
 #include <QMenu>
+#include <QPointer>
 #include <QStandardItemModel>
 #include <QScrollBar>
 #include <QProxyStyle>
@@ -66,22 +67,10 @@ FilterProxyModel::~FilterProxyModel() {
 bool FilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const {
     if (filter_.searchStr().isEmpty())
         return true;
-    if (QStandardItemModel* srcModel = static_cast<QStandardItemModel*>(sourceModel())) {
-        QModelIndex index = srcModel->index(source_row, 0, source_parent);
-        if (QStandardItem * item = srcModel->itemFromIndex(index)) {
-            XdgAction * action = qobject_cast<XdgAction *>(qvariant_cast<QAction *>(item->data(ActionView::ActionRole)));
-            if (action) {
-                const XdgDesktopFile& df = action->desktopFile();
-                if (filter_.isMatch(df.name()))
-                    return true;
-                QString exec = df.value("Exec").toString();
-                QString base = exec.section(' ', 0, 0).section('/', -1, -1);
-                if (filter_.isMatch(base))
-                    return true;
-            }
-        }
-    }
-    return false;
+    auto srcModel = sourceModel();
+    auto index = srcModel->index(source_row, 0, source_parent);
+    auto text = srcModel->data(index).toString();
+    return filter_.isMatch(text);
 }
 //==============================
 namespace
@@ -100,16 +89,37 @@ namespace
     };
 }
 //==============================
+
+class ActionItem : public QStandardItem
+{
+public:
+    ActionItem(XdgAction * action) :
+        mAction(action)
+    {
+        action->updateIcon();
+        setIcon(action->icon());
+        setText(action->text());
+        setToolTip(action->toolTip());
+    }
+
+    void trigger()
+    {
+        if (mAction)
+            mAction->trigger();
+    }
+
+private:
+    QPointer<XdgAction> mAction;
+};
+
 ActionView::ActionView(QWidget * parent /*= nullptr*/)
     : QListView(parent)
     , mModel{new QStandardItemModel{this}}
     , mProxy{new FilterProxyModel{this}}
-    , mMaxItemsToShow(10)
 {
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setFrameStyle(QFrame::NoFrame);
     setSizeAdjustPolicy(AdjustToContents);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setSelectionBehavior(SelectRows);
     setSelectionMode(SingleSelection);
 
@@ -117,9 +127,6 @@ ActionView::ActionView(QWidget * parent /*= nullptr*/)
     s->setParent(this);
     setStyle(s);
     mProxy->setSourceModel(mModel);
-    mProxy->setDynamicSortFilter(true);
-    mProxy->setFilterRole(FilterRole);
-    mProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mProxy->sort(0);
     {
         QScopedPointer<QItemSelectionModel> guard{selectionModel()};
@@ -128,70 +135,11 @@ ActionView::ActionView(QWidget * parent /*= nullptr*/)
     connect(this, &QAbstractItemView::activated, this, &ActionView::onActivated);
 }
 
-void ActionView::ActionView::clear()
-{
-    for (int i = mModel->rowCount() - 1; i >= 0; --i)
-    {
-        mModel->removeRow(i);
-    }
-}
-
-void ActionView::addAction(QAction * action)
-{
-    auto xa = qobject_cast<XdgAction *>(action);
-    if (xa != nullptr)
-        xa->updateIcon();
-
-    QStandardItem * item = new QStandardItem;
-    item->setData(QVariant::fromValue<QAction *>(action), ActionRole);
-    item->setFont(action->font());
-    item->setIcon(action->icon());
-    item->setText(action->text());
-    item->setToolTip(action->toolTip());
-    QString all = action->text();
-    all += '\n';
-    all += action->toolTip();
-    item->setData(all, FilterRole);
-
-    mModel->appendRow(item);
-    connect(action, &QObject::destroyed, this, &ActionView::onActionDestroyed);
-}
-
-bool ActionView::existsAction(QAction const * action) const
-{
-    bool exists = false;
-    for (int row = mModel->rowCount() - 1; 0 <= row; --row)
-    {
-        const QModelIndex index = mModel->index(row, 0);
-        if (action->text() == mModel->data(index, Qt::DisplayRole)
-                && action->toolTip() == mModel->data(index, Qt::ToolTipRole)
-                )
-        {
-            exists = true;
-            break;
-        }
-
-    }
-    return exists;
-}
-
-void ActionView::fillActions(QMenu * menu)
-{
-    clear();
-    fillActionsRecursive(menu);
-}
-
 void ActionView::setFilter(const StringFilter& filter)
 {
     mProxy->setFilter(filter);
-    const int count = mProxy->rowCount();
-    if (0 < count)
+    if (mProxy->rowCount() > 0)
         setCurrentIndex(mProxy->index(0, 0));
-}
-
-void ActionView::setMaxItemsToShow(int max)
-{
-    mMaxItemsToShow = max;
 }
 
 void ActionView::activateCurrent()
@@ -203,59 +151,33 @@ void ActionView::activateCurrent()
 
 QSize ActionView::viewportSizeHint() const
 {
-    const int count = mProxy->rowCount();
-    QSize s{0, 0};
-    if (0 < count)
-    {
-        const bool scrollable = mMaxItemsToShow < count;
-        s.setWidth(sizeHintForColumn(0) + (scrollable ? verticalScrollBar()->sizeHint().width() : 0));
-        s.setHeight(sizeHintForRow(0) * (scrollable ? mMaxItemsToShow  : count));
-    }
-    return s;
-}
+    int count = mProxy->rowCount();
+    if(count == 0)
+        return QSize();
 
-QSize ActionView::minimumSizeHint() const
-{
-    return QSize{0, 0};
+    return {sizeHintForColumn(0),
+            sizeHintForRow(0) * qMin(count, 10)};
 }
 
 void ActionView::onActivated(QModelIndex const & index)
 {
-    QAction * action = qvariant_cast<QAction *>(model()->data(index, ActionRole));
-    Q_ASSERT(nullptr != action);
-    action->trigger();
+    auto realIndex = mProxy->mapToSource(index);
+    auto item = static_cast<ActionItem *>(mModel->itemFromIndex(realIndex));
+    if (item)
+        item->trigger();
 }
 
-void ActionView::onActionDestroyed()
+void ActionView::fillActions(QMenu * menu)
 {
-    QObject * const action = sender();
-    Q_ASSERT(nullptr != action);
-    for (int i = mModel->rowCount() - 1; 0 <= i; --i)
+    for (auto action : menu->actions())
     {
-        QStandardItem * item = mModel->item(i);
-        if (action == item->data(ActionRole).value<QObject *>())
+        if (XdgAction * xdgAction = qobject_cast<XdgAction *>(action))
         {
-            mModel->removeRow(i);
-            break;
+            mModel->appendRow(new ActionItem(xdgAction));
+        }
+        else if (QMenu * sub_menu = action->menu())
+        {
+            fillActions(sub_menu);
         }
     }
 }
-
-void ActionView::fillActionsRecursive(QMenu * menu)
-{
-    const auto actions = menu->actions();
-    for (auto const & action : actions)
-    {
-        if (QMenu * sub_menu = action->menu())
-        {
-            fillActionsRecursive(sub_menu); //recursion
-        } else if (nullptr == qobject_cast<QWidgetAction* >(action)
-                && !action->isSeparator())
-        {
-            //real menu action -> app
-            if (!existsAction(action))
-                addAction(action);
-        }
-    }
-}
-
