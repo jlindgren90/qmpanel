@@ -52,40 +52,27 @@ LXQtPanel::LXQtPanel(QWidget * parent) : QWidget(parent), mLayout(this)
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
 
-    connect(qApp, &QApplication::primaryScreenChanged, this,
-            &LXQtPanel::realign);
-
-    loadPlugins();
-    show();
-}
-
-void LXQtPanel::show()
-{
-    QWidget::show();
-    KWindowSystem::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
-}
-
-void LXQtPanel::loadPlugins()
-{
-    auto addPlugin = [this](Plugin * plugin) {
-        mLayout.addWidget(plugin->widget());
-        connect(this, &LXQtPanel::realigned, plugin, &Plugin::realign);
-    };
-
-    addPlugin(new LXQtMainMenu(this));
-    addPlugin(new LXQtQuickLaunch(this));
-    addPlugin(new LXQtTaskBarPlugin(this));
-    addPlugin(new LXQtTrayPlugin(this));
-    addPlugin(new LXQtWorldClock(this));
+    mLayout.addWidget((new LXQtMainMenu(this))->widget());
+    mLayout.addWidget((new LXQtQuickLaunch(this))->widget());
+    mLayout.addWidget((new LXQtTaskBarPlugin(this))->widget());
+    mLayout.addWidget((new LXQtTrayPlugin(this))->widget());
+    mLayout.addWidget((new LXQtWorldClock(this))->widget());
 
     mLayout.setStretch(2, 1); // stretch taskbar
 
     mLayout.insertSpacing(3, 6); /* TODO: scale with DPI */
     mLayout.insertSpacing(5, 6); /* TODO: scale with DPI */
     mLayout.insertSpacing(7, 6); /* TODO: scale with DPI */
+
+    show();
+
+    KWindowSystem::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
+
+    connect(qApp, &QApplication::primaryScreenChanged, this,
+            &LXQtPanel::updateGeometry);
 }
 
-void LXQtPanel::setPanelGeometry()
+void LXQtPanel::updateGeometry()
 {
     QScreen * screen = QApplication::primaryScreen();
     if (mScreen != screen)
@@ -93,15 +80,16 @@ void LXQtPanel::setPanelGeometry()
         if (mScreen)
         {
             disconnect(mScreen, &QScreen::geometryChanged, this,
-                       &LXQtPanel::realign);
+                       &LXQtPanel::updateGeometry);
             disconnect(mScreen, &QScreen::virtualGeometryChanged, this,
-                       &LXQtPanel::realign);
+                       &LXQtPanel::updateGeometry);
         }
 
         mScreen = screen;
-        connect(mScreen, &QScreen::geometryChanged, this, &LXQtPanel::realign);
+        connect(mScreen, &QScreen::geometryChanged, this,
+                &LXQtPanel::updateGeometry);
         connect(mScreen, &QScreen::virtualGeometryChanged, this,
-                &LXQtPanel::realign);
+                &LXQtPanel::updateGeometry);
     }
 
     QRect rect = screen->geometry();
@@ -112,46 +100,15 @@ void LXQtPanel::setPanelGeometry()
         setFixedSize(rect.size());
         setGeometry(rect);
     }
-}
-
-void LXQtPanel::realign()
-{
-    if (!isVisible())
-        return;
-
-    setPanelGeometry();
-    updateWmStrut();
-}
-
-void LXQtPanel::updateWmStrut()
-{
-    WId wid = effectiveWinId();
-    if (wid == 0 || !isVisible())
-        return;
 
     // virtualGeometry() usually matches the X11 screen (not monitor) size
-    const QRect wholeScreen = mScreen->virtualGeometry();
-    const QRect rect = geometry();
-
-    KWindowSystem::setExtendedStrut(wid, 0, 0, 0, // left
-                                    0, 0, 0,      // right
-                                    0, 0, 0,      // top
-                                    wholeScreen.bottom() + 1 - rect.top(),
-                                    rect.left(), rect.right() + 1); // bottom
-}
-
-bool LXQtPanel::event(QEvent * event)
-{
-    if (event->type() == QEvent::LayoutRequest)
-        emit realigned();
-
-    return QWidget::event(event);
-}
-
-void LXQtPanel::showEvent(QShowEvent * event)
-{
-    QWidget::showEvent(event);
-    realign();
+    int screenBottom = screen->virtualGeometry().bottom();
+    KWindowSystem::setExtendedStrut(effectiveWinId(),
+                                    /* left   */ 0, 0, 0,
+                                    /* right  */ 0, 0, 0,
+                                    /* top    */ 0, 0, 0,
+                                    /* bottom */ screenBottom + 1 - rect.top(),
+                                    rect.left(), rect.right() + 1);
 }
 
 QRect LXQtPanel::calcPopupPos(QPoint const & absolutePos,

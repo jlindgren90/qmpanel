@@ -46,17 +46,14 @@ public:
                        QSize const & windowSize) const;
     QRect calcPopupPos(QWidget * widget, const QSize & windowSize) const;
 
-    void show();
-
-signals:
-    void realigned();
-
 protected:
-    bool event(QEvent * event) override;
-    void showEvent(QShowEvent * event) override;
+    void showEvent(QShowEvent * event) override {
+        updateGeometry();
+        QWidget::showEvent(event);
+    }
 
 private:
-    void realign();
+    void updateGeometry();
 
     QPointer<QScreen> mScreen;
     QHBoxLayout mLayout;
