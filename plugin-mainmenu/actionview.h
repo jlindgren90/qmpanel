@@ -31,51 +31,15 @@
 #include <QListView>
 
 class QStandardItemModel;
+class FilterProxyModel;
 
-//==============================
-class StringFilter
-{
-public:
-    StringFilter() = default;
-    StringFilter(const QString &searchStr, bool startOfWord);
-
-    const QString& searchStr() const { return searchStr_; }
-
-    bool isMatch(const QString& string) const;
-
-private:
-    QString searchStr_;
-    QStringList snippets;
-    bool startOfWord_ = false;
-};
-//==============================
-#include <QSortFilterProxyModel>
-class FilterProxyModel : public QSortFilterProxyModel
-{
-    Q_OBJECT
-public:
-    explicit FilterProxyModel(QObject* parent = nullptr);
-    virtual ~FilterProxyModel();
-
-    void setFilter(const StringFilter& filter) {
-        filter_ = filter;
-        invalidateFilter();
-    }
-
-protected:
-    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
-
-private:
-    StringFilter filter_;
-};
-//==============================
 class ActionView : public QListView
 {
 public:
     ActionView(QWidget * parent = nullptr);
 
     void fillActions(QMenu * menu);
-    void setFilter(const StringFilter& filter);
+    void setSearchStr(const QString & str);
     void activateCurrent();
 
 protected:
@@ -89,4 +53,4 @@ private:
     FilterProxyModel * mProxy;
 };
 
-#endif //ACTION_VIEW_H
+#endif // ACTION_VIEW_H

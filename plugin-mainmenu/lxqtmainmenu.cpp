@@ -129,7 +129,7 @@ void MainMenu::searchTextChanged(const QString & text)
     }
 
     if (shown)
-        mSearchView.setFilter(StringFilter(text, true));
+        mSearchView.setSearchStr(text);
 
     mSearchView.setVisible(shown);
     mSearchViewAction.setVisible(shown);

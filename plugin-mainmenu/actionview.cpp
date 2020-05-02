@@ -26,75 +26,93 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "actionview.h"
-#include <XdgAction>
 
-#include <algorithm>
-#include <QAction>
-#include <QWidgetAction>
 #include <QMenu>
 #include <QPointer>
-#include <QStandardItemModel>
-#include <QScrollBar>
 #include <QProxyStyle>
-#include <QStyledItemDelegate>
-//==============================
-StringFilter::StringFilter(const QString &searchStr, bool startOfWord)
-    : searchStr_(searchStr)
-    , snippets(searchStr.split(' ', QString::SkipEmptyParts))
-    , startOfWord_(startOfWord)
+#include <QSortFilterProxyModel>
+#include <QStandardItemModel>
+#include <XdgAction>
+#include <algorithm>
+
+class StringFilter
 {
-}
+public:
+    const QString & searchStr() const { return mSearchStr; }
 
-bool StringFilter::isMatch(const QString& string) const {
-    QStringList words = string.split(' ', QString::SkipEmptyParts);
-    auto unmatched = std::find_if(snippets.begin(), snippets.end(), [&](const QString &snippet) {
-        auto match = std::find_if(words.begin(), words.end(), [&](const QString& word) {
-            return startOfWord_ ? word.startsWith(snippet, Qt::CaseInsensitive) :
-                                  word.contains(snippet, Qt::CaseInsensitive);
-        });
-        return match == words.end(); // true if the snippet did NOT match
-    });
-    return unmatched == snippets.end(); // true if all snippets matched
-}
-//==============================
-FilterProxyModel::FilterProxyModel(QObject* parent) :
-    QSortFilterProxyModel(parent) {
-}
-
-FilterProxyModel::~FilterProxyModel() {
-}
-
-bool FilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const {
-    if (filter_.searchStr().isEmpty())
-        return true;
-    auto srcModel = sourceModel();
-    auto index = srcModel->index(source_row, 0, source_parent);
-    auto text = srcModel->data(index).toString();
-    return filter_.isMatch(text);
-}
-//==============================
-namespace
-{
-    class SingleActivateStyle : public QProxyStyle
+    void setSearchStr(const QString & str)
     {
-    public:
-        using QProxyStyle::QProxyStyle;
-        virtual int styleHint(StyleHint hint, const QStyleOption * option = 0, const QWidget * widget = 0, QStyleHintReturn * returnData = 0) const override
-        {
-            if(hint == QStyle::SH_ItemView_ActivateItemOnSingleClick)
-                return 1;
-            return QProxyStyle::styleHint(hint, option, widget, returnData);
+        mSearchStr = str;
+        mSnippets = str.split(' ', QString::SkipEmptyParts);
+    }
 
-        }
-    };
-}
-//==============================
+    bool isMatch(const QString & string) const
+    {
+        QStringList words = string.split(' ', QString::SkipEmptyParts);
+
+        auto snippetNotFound = [&words](const QString & snippet) {
+            auto match = std::find_if(
+                words.begin(), words.end(), [&snippet](const QString & word) {
+                    return word.startsWith(snippet, Qt::CaseInsensitive);
+                });
+            return match == words.end();
+        };
+
+        return std::find_if(mSnippets.begin(), mSnippets.end(),
+                            snippetNotFound) == mSnippets.end();
+    }
+
+private:
+    QString mSearchStr;
+    QStringList mSnippets;
+};
+
+class FilterProxyModel : public QSortFilterProxyModel
+{
+public:
+    using QSortFilterProxyModel::QSortFilterProxyModel;
+
+    void setSearchStr(const QString & str)
+    {
+        mFilter.setSearchStr(str);
+        invalidateFilter();
+    }
+
+protected:
+    bool filterAcceptsRow(int source_row,
+                          const QModelIndex & source_parent) const
+    {
+        if (mFilter.searchStr().isEmpty())
+            return true;
+
+        auto srcModel = sourceModel();
+        auto index = srcModel->index(source_row, 0, source_parent);
+        auto text = srcModel->data(index).toString();
+        return mFilter.isMatch(text);
+    }
+
+private:
+    StringFilter mFilter;
+};
+
+class SingleActivateStyle : public QProxyStyle
+{
+public:
+    virtual int styleHint(StyleHint hint, const QStyleOption * option,
+                          const QWidget * widget,
+                          QStyleHintReturn * returnData) const override
+    {
+        if (hint == QStyle::SH_ItemView_ActivateItemOnSingleClick)
+            return 1;
+
+        return QProxyStyle::styleHint(hint, option, widget, returnData);
+    }
+};
 
 class ActionItem : public QStandardItem
 {
 public:
-    ActionItem(XdgAction * action) :
-        mAction(action)
+    ActionItem(XdgAction * action) : mAction(action)
     {
         action->updateIcon();
         setIcon(action->icon());
@@ -113,9 +131,8 @@ private:
 };
 
 ActionView::ActionView(QWidget * parent /*= nullptr*/)
-    : QListView(parent)
-    , mModel{new QStandardItemModel{this}}
-    , mProxy{new FilterProxyModel{this}}
+    : QListView(parent), mModel(new QStandardItemModel(this)),
+      mProxy(new FilterProxyModel(this))
 {
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setFrameStyle(QFrame::NoFrame);
@@ -126,18 +143,18 @@ ActionView::ActionView(QWidget * parent /*= nullptr*/)
     SingleActivateStyle * s = new SingleActivateStyle;
     s->setParent(this);
     setStyle(s);
+
     mProxy->setSourceModel(mModel);
     mProxy->sort(0);
-    {
-        QScopedPointer<QItemSelectionModel> guard{selectionModel()};
-        setModel(mProxy);
-    }
-    connect(this, &QAbstractItemView::activated, this, &ActionView::onActivated);
+    setModel(mProxy);
+
+    connect(this, &QAbstractItemView::activated, this,
+            &ActionView::onActivated);
 }
 
-void ActionView::setFilter(const StringFilter& filter)
+void ActionView::setSearchStr(const QString & str)
 {
-    mProxy->setFilter(filter);
+    mProxy->setSearchStr(str);
     if (mProxy->rowCount() > 0)
         setCurrentIndex(mProxy->index(0, 0));
 }
@@ -152,11 +169,10 @@ void ActionView::activateCurrent()
 QSize ActionView::viewportSizeHint() const
 {
     int count = mProxy->rowCount();
-    if(count == 0)
+    if (count == 0)
         return QSize();
 
-    return {sizeHintForColumn(0),
-            sizeHintForRow(0) * qMin(count, 10)};
+    return {sizeHintForColumn(0), sizeHintForRow(0) * qMin(count, 10)};
 }
 
 void ActionView::onActivated(QModelIndex const & index)
