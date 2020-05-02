@@ -68,7 +68,6 @@ MainMenu::MainMenu(const XdgMenu & xdgMenu, Plugin * plugin, QWidget * parent)
     mSearchLayout.setContentsMargins(3, 3, 3, 3); /* TODO: scale by DPI */
     mSearchLayout.addWidget(&mSearchEdit);
     mSearchView.setMaxItemsToShow(10);
-    mSearchView.setMaxItemWidth(300); /* TODO: scale by DPI */
     mSearchView.fillActions(this);
 
     mSearchEditAction.setDefaultWidget(&mSearchFrame);

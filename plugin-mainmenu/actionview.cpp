@@ -98,41 +98,6 @@ namespace
 
         }
     };
-
-    class DelayedIconDelegate : public QStyledItemDelegate
-    {
-    public:
-        DelayedIconDelegate(QObject * parent = nullptr)
-            : QStyledItemDelegate(parent)
-            , mMaxItemWidth(300)
-        {
-        }
-
-        void setMaxItemWidth(int max)
-        {
-            mMaxItemWidth = max;
-        }
-
-        virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
-        {
-            QSize s = QStyledItemDelegate::sizeHint(option, index);
-            s.setWidth(qMin(mMaxItemWidth, s.width()));
-            return s;
-        }
-
-        virtual void initStyleOption(QStyleOptionViewItem * option,
-                                     const QModelIndex & index) const override
-        {
-            QStyledItemDelegate::initStyleOption(option, index);
-            auto lv = qobject_cast<QListView *>(parent());
-            if (lv != nullptr)
-                option->decorationSize = option->decorationSize.expandedTo(lv->iconSize());
-        }
-
-    private:
-        int mMaxItemWidth;
-    };
-
 }
 //==============================
 ActionView::ActionView(QWidget * parent /*= nullptr*/)
@@ -159,10 +124,6 @@ ActionView::ActionView(QWidget * parent /*= nullptr*/)
     {
         QScopedPointer<QItemSelectionModel> guard{selectionModel()};
         setModel(mProxy);
-    }
-    {
-        QScopedPointer<QAbstractItemDelegate> guard{itemDelegate()};
-        setItemDelegate(new DelayedIconDelegate{this});
     }
     connect(this, &QAbstractItemView::activated, this, &ActionView::onActivated);
 }
@@ -231,11 +192,6 @@ void ActionView::setFilter(const StringFilter& filter)
 void ActionView::setMaxItemsToShow(int max)
 {
     mMaxItemsToShow = max;
-}
-
-void ActionView::setMaxItemWidth(int max)
-{
-    dynamic_cast<DelayedIconDelegate *>(itemDelegate())->setMaxItemWidth(max);
 }
 
 void ActionView::activateCurrent()
