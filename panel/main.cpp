@@ -44,7 +44,7 @@ static void signal_thread()
 
 int main(int argc, char * argv[])
 {
-    /* init signals first */
+    /* block signals first */
     sigemptyset(&signal_set);
     sigaddset(&signal_set, SIGHUP);
     sigaddset(&signal_set, SIGINT);
@@ -54,10 +54,11 @@ int main(int argc, char * argv[])
 
     QApplication app(argc, argv);
     app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
-    LXQtPanel panel;
 
     /* monitor signals once qApp exists */
     std::thread(signal_thread).detach();
+
+    LXQtPanel panel;
 
     return app.exec();
 }

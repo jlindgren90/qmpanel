@@ -42,39 +42,12 @@
 
 LXQtPanel::LXQtPanel(QWidget * parent) : QWidget(parent), mLayout(this)
 {
-    // You can find information about the flags and widget attributes in your
-    // Qt documentation or at https://doc.qt.io/qt-5/qt.html
-    // Qt::FramelessWindowHint = Produces a borderless window. The user cannot
-    // move or resize a borderless window via the window system. On X11, ...
-    // Qt::WindowStaysOnTopHint = Informs the window system that the window
-    // should stay on top of all other windows. Note that on ...
-    Qt::WindowFlags flags = Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint;
-
-    // NOTE: by PCMan:
-    // In Qt 4, the window is not activated if it has
-    // Qt::WA_X11NetWmWindowTypeDock. Since Qt 5, the default behaviour is
-    // changed. A window is always activated on mouse click. Please see the
-    // source code of Qt5: src/plugins/platforms/xcb/qxcbwindow.cpp. void
-    // QXcbWindow::handleButtonPressEvent(const xcb_button_press_event_t *event)
-    // This new behaviour caused lxqt bug #161 - Cannot minimize windows from
-    // panel 1 when two task managers are open Besides, this breaks minimizing
-    // or restoring windows when clicking on the taskbar buttons. To workaround
-    // this regression bug, we need to add this window flag here. However, since
-    // the panel gets no keyboard focus, this may decrease accessibility since
-    // it's not possible to use the panel with keyboards. We need to find a
-    // better solution later.
-    flags |= Qt::WindowDoesNotAcceptFocus;
-
-    setWindowFlags(flags);
-    // Adds _NET_WM_WINDOW_TYPE_DOCK to the window's _NET_WM_WINDOW_TYPE X11
-    // window property. See https://standards.freedesktop.org/wm-spec/ for more
-    // details.
-    setAttribute(Qt::WA_X11NetWmWindowTypeDock);
-    // Enables tooltips for inactive windows.
-    setAttribute(Qt::WA_AlwaysShowToolTips);
-    // Allows data from drag and drop operations to be dropped onto the widget
-    // (see QWidget::setAcceptDrops()).
     setAttribute(Qt::WA_AcceptDrops);
+    setAttribute(Qt::WA_AlwaysShowToolTips);
+    setAttribute(Qt::WA_X11NetWmWindowTypeDock);
+
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus |
+                   Qt::WindowStaysOnTopHint);
 
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
@@ -83,7 +56,6 @@ LXQtPanel::LXQtPanel(QWidget * parent) : QWidget(parent), mLayout(this)
             &LXQtPanel::realign);
 
     loadPlugins();
-
     show();
 }
 
@@ -106,7 +78,8 @@ void LXQtPanel::loadPlugins()
     addPlugin(new LXQtTrayPlugin(this));
     addPlugin(new LXQtWorldClock(this));
 
-    mLayout.setStretch(2, 1);
+    mLayout.setStretch(2, 1); // stretch taskbar
+
     mLayout.insertSpacing(3, 6); /* TODO: scale with DPI */
     mLayout.insertSpacing(5, 6); /* TODO: scale with DPI */
     mLayout.insertSpacing(7, 6); /* TODO: scale with DPI */
@@ -147,49 +120,30 @@ void LXQtPanel::realign()
         return;
 
     setPanelGeometry();
-
-    // Reserve our space on the screen ..........
-    // It's possible that our geometry is not changed, but screen resolution is
-    // changed, so resetting WM_STRUT is still needed. To make it simple, we
-    // always do it.
     updateWmStrut();
 }
 
-// Update the _NET_WM_PARTIAL_STRUT and _NET_WM_STRUT properties for the window
 void LXQtPanel::updateWmStrut()
 {
     WId wid = effectiveWinId();
     if (wid == 0 || !isVisible())
         return;
 
+    // virtualGeometry() usually matches the X11 screen (not monitor) size
     const QRect wholeScreen = mScreen->virtualGeometry();
     const QRect rect = geometry();
-    // Quote from the EWMH spec: "Note that the strut is relative to the screen
-    // edge, and not the edge of the xinerama monitor." So, we use the geometry
-    // of the whole screen to calculate the strut rather than using the geometry
-    // of individual monitors. Though the spec only mention Xinerama and did not
-    // mention XRandR, the rule should still be applied. At least openbox is
-    // implemented like this.
-    KWindowSystem::setExtendedStrut(wid,
-                                    /* Left   */ 0, 0, 0,
-                                    /* Right  */ 0, 0, 0,
-                                    /* Top    */ 0, 0, 0,
-                                    /* Bottom */ wholeScreen.bottom() -
-                                        rect.bottom() + height(),
-                                    rect.left(), rect.right());
+
+    KWindowSystem::setExtendedStrut(wid, 0, 0, 0, // left
+                                    0, 0, 0,      // right
+                                    0, 0, 0,      // top
+                                    wholeScreen.bottom() + 1 - rect.top(),
+                                    rect.left(), rect.right() + 1); // bottom
 }
 
 bool LXQtPanel::event(QEvent * event)
 {
-    switch (event->type())
-    {
-    case QEvent::LayoutRequest:
+    if (event->type() == QEvent::LayoutRequest)
         emit realigned();
-        break;
-
-    default:
-        break;
-    }
 
     return QWidget::event(event);
 }
@@ -200,25 +154,21 @@ void LXQtPanel::showEvent(QShowEvent * event)
     realign();
 }
 
-QRect LXQtPanel::calculatePopupWindowPos(QPoint const & absolutePos,
-                                         QSize const & windowSize) const
+QRect LXQtPanel::calcPopupPos(QPoint const & absolutePos,
+                              QSize const & windowSize) const
 {
-    int x = absolutePos.x();
-    int y = geometry().top() - windowSize.height();
-
-    QRect res(QPoint(x, y), windowSize);
     QRect screen = QApplication::primaryScreen()->geometry();
+    QRect pos(QPoint(absolutePos.x(), geometry().top() - windowSize.height()),
+              windowSize);
 
-    if (res.right() > screen.right())
-        res.moveRight(screen.right());
+    if (pos.right() > screen.right())
+        pos.moveRight(screen.right());
 
-    return res;
+    return pos;
 }
 
-QRect LXQtPanel::calculatePopupWindowPos(QWidget * widget,
-                                         const QSize & windowSize) const
+QRect LXQtPanel::calcPopupPos(QWidget * widget, const QSize & windowSize) const
 {
-    // Note: assuming there are not contentMargins around the LXQtPanel widget
-    return calculatePopupWindowPos(
-        geometry().topLeft() + widget->geometry().topLeft(), windowSize);
+    return calcPopupPos(geometry().topLeft() + widget->geometry().topLeft(),
+                        windowSize);
 }

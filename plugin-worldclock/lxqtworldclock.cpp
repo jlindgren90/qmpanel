@@ -57,7 +57,7 @@ void ClockLabel::mousePressEvent(QMouseEvent * e)
         else
         {
             auto size = mCalendar.sizeHint();
-            mCalendar.move(mPlugin->calculatePopupWindowPos(size).topLeft());
+            mCalendar.move(mPlugin->calcPopupPos(size).topLeft());
             mCalendar.show();
         }
 

@@ -110,7 +110,7 @@ void MainMenu::keyPressEvent(QKeyEvent * e)
 
 void MainMenu::resizeEvent(QResizeEvent * e)
 {
-    move(mPlugin->calculatePopupWindowPos(e->size()).topLeft());
+    move(mPlugin->calcPopupPos(e->size()).topLeft());
 }
 
 void MainMenu::showEvent(QShowEvent *)
@@ -159,7 +159,7 @@ LXQtMainMenu::LXQtMainMenu(LXQtPanel * lxqtPanel) : Plugin(lxqtPanel)
         if (mMenu->isVisible())
             mMenu->hide();
         else
-            mMenu->popup(calculatePopupWindowPos(mMenu->sizeHint()).topLeft());
+            mMenu->popup(calcPopupPos(mMenu->sizeHint()).topLeft());
     });
 }
 

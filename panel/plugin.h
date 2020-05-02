@@ -40,9 +40,9 @@ public:
 
     LXQtPanel * panel() const { return mPanel; }
 
-    QRect calculatePopupWindowPos(const QSize & windowSize)
+    QRect calcPopupPos(const QSize & windowSize)
     {
-        return mPanel->calculatePopupWindowPos(widget(), windowSize);
+        return mPanel->calcPopupPos(widget(), windowSize);
     }
 
 private:

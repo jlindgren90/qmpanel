@@ -85,7 +85,7 @@ void LXQtTaskGroup::contextMenuEvent(QContextMenuEvent *event)
     connect(menu, &QMenu::aboutToHide, [this] {
         mPreventPopup = false;
     });
-    menu->setGeometry(plugin()->panel()->calculatePopupWindowPos(mapToGlobal(event->pos()), menu->sizeHint()));
+    menu->setGeometry(plugin()->panel()->calcPopupPos(mapToGlobal(event->pos()), menu->sizeHint()));
     menu->show();
 }
 
