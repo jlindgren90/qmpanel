@@ -93,7 +93,6 @@ protected:
 
 private slots:
     void refreshTaskList();
-    void refreshPlaceholderVisibility();
     void groupBecomeEmptySlot();
     void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
     void onWindowAdded(WId window);
@@ -138,7 +137,6 @@ private:
     void resizeEvent(QResizeEvent *event);
 
     Plugin *mPlugin;
-    QWidget *mPlaceHolder;
     LeftAlignedTextStyle *mStyle;
 };
 

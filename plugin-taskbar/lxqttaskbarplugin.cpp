@@ -38,8 +38,3 @@ LXQtTaskBarPlugin::~LXQtTaskBarPlugin()
 {
     delete mTaskBar;
 }
-
-void LXQtTaskBarPlugin::realign()
-{
-    mTaskBar->realign();
-}

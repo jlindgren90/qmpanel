@@ -71,7 +71,6 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     mIconByClass(false),
     mCycleOnWheelScroll(true),
     mPlugin(plugin),
-    mPlaceHolder(new QWidget(this)),
     mStyle(new LeftAlignedTextStyle())
 {
     setStyle(mStyle);
@@ -79,15 +78,10 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     setLayout(mLayout);
     mLayout->setMargin(0);
     mLayout->setStretch(LXQt::GridLayout::StretchHorizontal | LXQt::GridLayout::StretchVertical);
-    realign();
 
-    mPlaceHolder->setMinimumSize(1, 1);
-    mPlaceHolder->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    mPlaceHolder->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    mLayout->addWidget(mPlaceHolder);
-
-    QTimer::singleShot(0, this, SLOT(settingsChanged()));
     setAcceptDrops(true);
+    settingsChanged();
+    realign();
 
     connect(mSignalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &LXQtTaskBar::activateTask);
 
@@ -286,7 +280,6 @@ void LXQtTaskBar::addWindow(WId window)
     {
         group = new LXQtTaskGroup(group_id, window, this);
         connect(group, SIGNAL(groupBecomeEmpty(QString)), this, SLOT(groupBecomeEmptySlot()));
-        connect(group, SIGNAL(visibilityChanged(bool)), this, SLOT(refreshPlaceholderVisibility()));
         connect(group, &LXQtTaskGroup::popupShown, this, &LXQtTaskBar::popupShown);
         connect(group, &LXQtTaskButton::dragging, this, [this] (QObject * dragSource, QPoint const & pos) {
             buttonMove(qobject_cast<LXQtTaskGroup *>(sender()), qobject_cast<LXQtTaskGroup *>(dragSource), pos);
@@ -338,8 +331,6 @@ void LXQtTaskBar::refreshTaskList()
         } else
             ++i;
     }
-
-    refreshPlaceholderVisibility();
 }
 
 /************************************************
@@ -374,32 +365,6 @@ void LXQtTaskBar::onWindowRemoved(WId window)
     {
         removeWindow(pos);
     }
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::refreshPlaceholderVisibility()
-{
-    // if no visible group button show placeholder widget
-    bool haveVisibleWindow = false;
-    for (auto i = mKnownWindows.cbegin(), i_e = mKnownWindows.cend(); i_e != i; ++i)
-    {
-        if ((*i)->isVisible())
-        {
-            haveVisibleWindow = true;
-            break;
-        }
-    }
-    mPlaceHolder->setVisible(!haveVisibleWindow);
-    if (haveVisibleWindow)
-        mPlaceHolder->setFixedSize(0, 0);
-    else
-    {
-        mPlaceHolder->setMinimumSize(1, 1);
-        mPlaceHolder->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    }
-
 }
 
 /************************************************

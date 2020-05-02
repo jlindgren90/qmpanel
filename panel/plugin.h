@@ -36,7 +36,6 @@ public:
     explicit Plugin(LXQtPanel * panel) : QObject(panel), mPanel(panel) {}
 
     virtual QWidget * widget() = 0;
-    virtual void realign() {}
 
     LXQtPanel * panel() const { return mPanel; }
 

@@ -43,9 +43,6 @@ public:
 
     QWidget *widget() { return mTaskBar; }
 
-    void settingsChanged() { mTaskBar->settingsChanged(); }
-    void realign();
-
 private:
     LXQtTaskBar *mTaskBar;
 };
