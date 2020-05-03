@@ -45,8 +45,6 @@ class LXQtTaskButton : public QToolButton
 {
     Q_OBJECT
 
-    Q_PROPERTY(Qt::Corner origin READ origin WRITE setOrigin)
-
 public:
     explicit LXQtTaskButton(const WId window, LXQtTaskBar * taskBar, QWidget *parent = 0);
     virtual ~LXQtTaskButton();
@@ -62,8 +60,6 @@ public:
     bool isOnCurrentScreen() const;
     bool isMinimized() const;
     void updateText();
-
-    Qt::Corner origin() const;
 
     LXQtTaskBar * parentTaskBar() const {return mParentTaskBar;}
 
@@ -86,8 +82,6 @@ public slots:
     void resizeApplication();
     void setApplicationLayer();
 
-    void setOrigin(Qt::Corner);
-
     void updateIcon();
 
 protected:
@@ -99,7 +93,6 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     virtual void contextMenuEvent(QContextMenuEvent *event);
-    void paintEvent(QPaintEvent *);
 
     void setWindowId(WId wid) {mWindow = wid;}
     virtual QMimeData * mimeData();
@@ -111,7 +104,6 @@ private:
     WId mWindow;
     bool mUrgencyHint;
     QPoint mDragStartPosition;
-    Qt::Corner mOrigin;
     LXQtTaskBar * mParentTaskBar;
     Plugin * mPlugin;
     int mIconSize;

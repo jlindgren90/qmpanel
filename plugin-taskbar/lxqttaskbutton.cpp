@@ -67,7 +67,6 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtTaskBar * taskbar, QWidget 
     QToolButton(parent),
     mWindow(window),
     mUrgencyHint(false),
-    mOrigin(Qt::TopLeftCorner),
     mParentTaskBar(taskbar),
     mPlugin(mParentTaskBar->plugin()),
     mIconSize(style()->pixelMetric(QStyle::PM_ToolBarIconSize)),
@@ -658,64 +657,6 @@ bool LXQtTaskButton::isOnCurrentScreen() const
 bool LXQtTaskButton::isMinimized() const
 {
     return KWindowInfo(mWindow,NET::WMState | NET::XAWMState).isMinimized();
-}
-
-Qt::Corner LXQtTaskButton::origin() const
-{
-    return mOrigin;
-}
-
-void LXQtTaskButton::setOrigin(Qt::Corner newOrigin)
-{
-    if (mOrigin != newOrigin)
-    {
-        mOrigin = newOrigin;
-        update();
-    }
-}
-
-void LXQtTaskButton::paintEvent(QPaintEvent *event)
-{
-    if (mOrigin == Qt::TopLeftCorner)
-    {
-        QToolButton::paintEvent(event);
-        return;
-    }
-
-    QSize sz = size();
-    bool transpose = false;
-    QTransform transform;
-
-    switch (mOrigin)
-    {
-    case Qt::TopLeftCorner:
-        break;
-
-    case Qt::TopRightCorner:
-        transform.rotate(90.0);
-        transform.translate(0.0, -sz.width());
-        transpose = true;
-        break;
-
-    case Qt::BottomRightCorner:
-        transform.rotate(180.0);
-        transform.translate(-sz.width(), -sz.height());
-        break;
-
-    case Qt::BottomLeftCorner:
-        transform.rotate(270.0);
-        transform.translate(-sz.height(), 0.0);
-        transpose = true;
-        break;
-    }
-
-    QStylePainter painter(this);
-    painter.setTransform(transform);
-    QStyleOptionToolButton opt;
-    initStyleOption(&opt);
-    if (transpose)
-        opt.rect = opt.rect.transposed();
-    painter.drawComplexControl(QStyle::CC_ToolButton, opt);
 }
 
 bool LXQtTaskButton::hasDragAndDropHover() const
