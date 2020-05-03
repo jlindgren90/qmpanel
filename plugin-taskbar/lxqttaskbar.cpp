@@ -65,8 +65,6 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     mShowDesktopNum(0),
     mShowOnlyCurrentScreenTasks(false),
     mShowOnlyMinimizedTasks(false),
-    mGroupingEnabled(true),
-    mShowGroupOnHover(true),
     mPlugin(plugin)
 {
     mLayout = new LXQt::GridLayout(this);
@@ -238,7 +236,7 @@ void LXQtTaskBar::groupBecomeEmptySlot()
 void LXQtTaskBar::addWindow(WId window)
 {
     // If grouping disabled group behaves like regular button
-    const QString group_id = mGroupingEnabled ? KWindowInfo(window, 0, NET::WM2WindowClass).windowClassClass() : QString("%1").arg(window);
+    const QString group_id = QString("%1").arg(window);
 
     LXQtTaskGroup *group = nullptr;
     auto i_group = mKnownWindows.find(window);
@@ -250,24 +248,10 @@ void LXQtTaskBar::addWindow(WId window)
             (*i_group)->onWindowRemoved(window);
     }
 
-    //check if window belongs to some existing group
-    if (!group && mGroupingEnabled)
-    {
-        for (auto i = mKnownWindows.cbegin(), i_e = mKnownWindows.cend(); i != i_e; ++i)
-        {
-            if ((*i)->groupName() == group_id)
-            {
-                group = *i;
-                break;
-            }
-        }
-    }
-
     if (!group)
     {
         group = new LXQtTaskGroup(group_id, window, this);
         connect(group, SIGNAL(groupBecomeEmpty(QString)), this, SLOT(groupBecomeEmptySlot()));
-        connect(group, &LXQtTaskGroup::popupShown, this, &LXQtTaskBar::popupShown);
         connect(group, &LXQtTaskButton::dragging, this, [this] (QObject * dragSource, QPoint const & pos) {
             buttonMove(qobject_cast<LXQtTaskGroup *>(sender()), qobject_cast<LXQtTaskGroup *>(dragSource), pos);
         });
@@ -370,7 +354,6 @@ void LXQtTaskBar::setButtonStyle(Qt::ToolButtonStyle buttonStyle)
  ************************************************/
 void LXQtTaskBar::settingsChanged()
 {
-    bool groupingEnabledOld = mGroupingEnabled;
     bool showOnlyOneDesktopTasksOld = mShowOnlyOneDesktopTasks;
     const int showDesktopNumOld = mShowDesktopNum;
     bool showOnlyCurrentScreenTasksOld = mShowOnlyCurrentScreenTasks;
@@ -387,23 +370,6 @@ void LXQtTaskBar::settingsChanged()
     mShowOnlyMinimizedTasks = false;
     mCloseOnMiddleClick = true;
     mRaiseOnCurrentDesktop = false;
-    mGroupingEnabled = false;
-    mShowGroupOnHover = true;
-
-    // Delete all groups if grouping feature toggled and start over
-    if (groupingEnabledOld != mGroupingEnabled)
-    {
-        for (int i = mLayout->count() - 1; 0 <= i; --i)
-        {
-            LXQtTaskGroup * group = qobject_cast<LXQtTaskGroup*>(mLayout->itemAt(i)->widget());
-            if (nullptr != group)
-            {
-                mLayout->takeAt(i);
-                group->deleteLater();
-            }
-        }
-        mKnownWindows.clear();
-    }
 
     if (showOnlyOneDesktopTasksOld != mShowOnlyOneDesktopTasks
             || (mShowOnlyOneDesktopTasks && showDesktopNumOld != mShowDesktopNum)

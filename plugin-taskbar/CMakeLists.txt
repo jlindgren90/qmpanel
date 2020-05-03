@@ -5,7 +5,6 @@ set(HEADERS
     lxqttaskbutton.h
     lxqttaskbarplugin.h
     lxqttaskgroup.h
-    lxqtgrouppopup.h
 )
 
 set(SOURCES
@@ -13,7 +12,6 @@ set(SOURCES
     lxqttaskbutton.cpp
     lxqttaskbarplugin.cpp
     lxqttaskgroup.cpp
-    lxqtgrouppopup.cpp
 )
 
 set(LIBRARIES

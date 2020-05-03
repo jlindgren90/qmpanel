@@ -33,7 +33,6 @@
 
 #include "../panel/plugin.h"
 #include "lxqttaskbar.h"
-#include "lxqtgrouppopup.h"
 #include "lxqttaskbutton.h"
 #include <KF5/KWindowSystem/kwindowsystem.h>
 
@@ -58,15 +57,9 @@ public:
     LXQtTaskButton * addWindow(WId id);
     LXQtTaskButton * checkedButton() const;
 
-    // Returns the next or the previous button in the popup
-    // if circular is true, then it will go around the list of buttons
-    LXQtTaskButton * getNextPrevChildButton(bool next, bool circular);
-
     bool onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
     Qt::ToolButtonStyle popupButtonStyle() const;
     void setToolButtonsStyle(Qt::ToolButtonStyle style);
-
-    void setPopupVisible(bool visible = true, bool fast = false);
 
 public slots:
     void onWindowRemoved(WId window);
@@ -74,43 +67,22 @@ public slots:
 protected:
     QMimeData * mimeData();
 
-    void leaveEvent(QEvent * event);
-    void enterEvent(QEvent * event);
-    void dragEnterEvent(QDragEnterEvent * event);
-    void dragLeaveEvent(QDragLeaveEvent * event);
-    void contextMenuEvent(QContextMenuEvent * event);
-    void mouseMoveEvent(QMouseEvent * event);
-    int recalculateFrameHeight() const;
-    int recalculateFrameWidth() const;
-
-    void draggingTimerTimeout();
-
 private slots:
-    void onClicked(bool checked);
-    void onChildButtonClicked();
     void onActiveWindowChanged(WId window);
     void onDesktopChanged(int number);
 
     void closeGroup();
     void refreshIconsGeometry();
     void refreshVisibility();
-    void groupPopupShown(LXQtTaskGroup* sender);
 
 signals:
     void groupBecomeEmpty(QString name);
     void visibilityChanged(bool visible);
-    void popupShown(LXQtTaskGroup* sender);
 
 private:
     QString mGroupName;
-    LXQtGroupPopup * mPopup;
     LXQtTaskButtonHash mButtonHash;
-    bool mPreventPopup;
-    bool mSingleButton; //!< flag if this group should act as a "standard" button (no groupping or only one "shown" window in group)
 
-    QSize recalculateFrameSize();
-    QPoint recalculateFramePosition();
-    void recalculateFrameIfVisible();
     void regroup();
 };
 

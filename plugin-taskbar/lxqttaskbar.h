@@ -69,8 +69,6 @@ public:
     int showDesktopNum() const { return mShowDesktopNum; }
     bool isShowOnlyCurrentScreenTasks() const { return mShowOnlyCurrentScreenTasks; }
     bool isShowOnlyMinimizedTasks() const { return mShowOnlyMinimizedTasks; }
-    bool isGroupingEnabled() const { return mGroupingEnabled; }
-    bool isShowGroupOnHover() const { return mShowGroupOnHover; }
     inline LXQtPanel * panel() const { return mPlugin->panel(); }
     inline Plugin * plugin() const { return mPlugin; }
 
@@ -81,7 +79,6 @@ signals:
     void buttonStyleRefreshed(Qt::ToolButtonStyle buttonStyle);
     void refreshIconGeometry();
     void showOnlySettingChanged();
-    void popupShown(LXQtTaskGroup* sender);
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent * event);
@@ -119,8 +116,6 @@ private:
     int mShowDesktopNum;
     bool mShowOnlyCurrentScreenTasks;
     bool mShowOnlyMinimizedTasks;
-    bool mGroupingEnabled;
-    bool mShowGroupOnHover;
 
     bool acceptWindow(WId window) const;
     void setButtonStyle(Qt::ToolButtonStyle buttonStyle);
