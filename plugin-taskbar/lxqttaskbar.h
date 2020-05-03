@@ -76,7 +76,6 @@ protected:
 
 private slots:
     void refreshTaskList();
-    void groupBecomeEmptySlot();
     void onWindowAdded(WId window);
     void onWindowRemoved(WId window);
     void onActiveWindowChanged(WId window);

@@ -70,6 +70,7 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtTaskBar * taskbar, QWidget 
     Q_ASSERT(taskbar);
 
     setCheckable(true);
+    setChecked(isApplicationActive());
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     setMinimumWidth(1);

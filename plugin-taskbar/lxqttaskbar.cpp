@@ -204,32 +204,11 @@ void LXQtTaskBar::buttonMove(LXQtTaskButton * dst, LXQtTaskButton * src, QPoint 
 /************************************************
 
  ************************************************/
-void LXQtTaskBar::groupBecomeEmptySlot()
-{
-    //group now contains no buttons - clean up in hash and delete the group
-    LXQtTaskButton * const group = qobject_cast<LXQtTaskButton*>(sender());
-    Q_ASSERT(group);
-
-    for (auto i = mKnownWindows.begin(); mKnownWindows.end() != i; )
-    {
-        if (group == *i)
-            i = mKnownWindows.erase(i);
-        else
-            ++i;
-    }
-    mLayout->removeWidget(group);
-    group->deleteLater();
-}
-
-/************************************************
-
- ************************************************/
 void LXQtTaskBar::addWindow(WId window)
 {
     if (mKnownWindows.find(window) == mKnownWindows.end())
     {
         auto group = new LXQtTaskButton(window, this, this);
-        connect(group, SIGNAL(groupBecomeEmpty(QString)), this, SLOT(groupBecomeEmptySlot()));
         connect(group, &LXQtTaskButton::dragging, this, [this] (QObject * dragSource, QPoint const & pos) {
             buttonMove(qobject_cast<LXQtTaskButton *>(sender()), qobject_cast<LXQtTaskButton *>(dragSource), pos);
         });
@@ -248,6 +227,27 @@ auto LXQtTaskBar::removeWindow(windowMap_t::iterator pos) -> windowMap_t::iterat
     auto ret = mKnownWindows.erase(pos);
     group->deleteLater();
     return ret;
+}
+
+/************************************************
+
+ ************************************************/
+void LXQtTaskBar::onActiveWindowChanged(WId window)
+{
+    LXQtTaskButton *button = mKnownWindows.value(window, nullptr);
+
+    for (LXQtTaskButton *btn : qAsConst(mKnownWindows))
+    {
+        if(btn != button)
+            btn->setChecked(false);
+    }
+
+    if (button)
+    {
+        button->setChecked(true);
+        if (button->hasUrgencyHint())
+            button->setUrgencyHint(false);
+    }
 }
 
 /************************************************
