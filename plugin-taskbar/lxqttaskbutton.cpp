@@ -28,7 +28,6 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "lxqttaskbutton.h"
-#include "lxqttaskgroup.h"
 #include "lxqttaskbar.h"
 
 #include <LXQt/Settings>
@@ -48,10 +47,6 @@
 #include <QStylePainter>
 #include <QStyleOptionToolButton>
 #include <QDesktopWidget>
-
-#include "lxqttaskbutton.h"
-#include "lxqttaskgroup.h"
-#include "lxqttaskbar.h"
 
 #include <KWindowSystem/KWindowSystem>
 // Necessary for closeApplication()

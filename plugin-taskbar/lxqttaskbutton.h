@@ -37,7 +37,6 @@
 class QPainter;
 class QPalette;
 class QMimeData;
-class LXQtTaskGroup;
 class LXQtTaskBar;
 class Plugin;
 

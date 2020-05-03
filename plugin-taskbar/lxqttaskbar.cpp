@@ -46,7 +46,6 @@
 #include <XdgIcon>
 
 #include "lxqttaskbar.h"
-#include "lxqttaskgroup.h"
 
 using namespace LXQt;
 
@@ -71,10 +70,9 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
 
     connect(mSignalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &LXQtTaskBar::activateTask);
 
-    connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged)
-            , this, &LXQtTaskBar::onWindowChanged);
     connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this, &LXQtTaskBar::onWindowAdded);
     connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this, &LXQtTaskBar::onWindowRemoved);
+    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &LXQtTaskBar::onActiveWindowChanged);
 }
 
 /************************************************
@@ -121,10 +119,10 @@ bool LXQtTaskBar::acceptWindow(WId window) const
  ************************************************/
 void LXQtTaskBar::dragEnterEvent(QDragEnterEvent* event)
 {
-    if (event->mimeData()->hasFormat(LXQtTaskGroup::mimeDataFormat()))
+    if (event->mimeData()->hasFormat(LXQtTaskButton::mimeDataFormat()))
     {
         event->acceptProposedAction();
-        buttonMove(nullptr, qobject_cast<LXQtTaskGroup *>(event->source()), event->pos());
+        buttonMove(nullptr, qobject_cast<LXQtTaskButton *>(event->source()), event->pos());
     } else
         event->ignore();
     QWidget::dragEnterEvent(event);
@@ -136,14 +134,14 @@ void LXQtTaskBar::dragEnterEvent(QDragEnterEvent* event)
 void LXQtTaskBar::dragMoveEvent(QDragMoveEvent * event)
 {
     //we don't get any dragMoveEvents if dragEnter wasn't accepted
-    buttonMove(nullptr, qobject_cast<LXQtTaskGroup *>(event->source()), event->pos());
+    buttonMove(nullptr, qobject_cast<LXQtTaskButton *>(event->source()), event->pos());
     QWidget::dragMoveEvent(event);
 }
 
 /************************************************
 
  ************************************************/
-void LXQtTaskBar::buttonMove(LXQtTaskGroup * dst, LXQtTaskGroup * src, QPoint const & pos)
+void LXQtTaskBar::buttonMove(LXQtTaskButton * dst, LXQtTaskButton * src, QPoint const & pos)
 {
     int src_index;
     if (!src || -1 == (src_index = mLayout->indexOf(src)))
@@ -209,7 +207,7 @@ void LXQtTaskBar::buttonMove(LXQtTaskGroup * dst, LXQtTaskGroup * src, QPoint co
 void LXQtTaskBar::groupBecomeEmptySlot()
 {
     //group now contains no buttons - clean up in hash and delete the group
-    LXQtTaskGroup * const group = qobject_cast<LXQtTaskGroup*>(sender());
+    LXQtTaskButton * const group = qobject_cast<LXQtTaskButton*>(sender());
     Q_ASSERT(group);
 
     for (auto i = mKnownWindows.begin(); mKnownWindows.end() != i; )
@@ -228,32 +226,17 @@ void LXQtTaskBar::groupBecomeEmptySlot()
  ************************************************/
 void LXQtTaskBar::addWindow(WId window)
 {
-    // If grouping disabled group behaves like regular button
-    const QString group_id = QString("%1").arg(window);
-
-    LXQtTaskGroup *group = nullptr;
-    auto i_group = mKnownWindows.find(window);
-    if (mKnownWindows.end() != i_group)
+    if (mKnownWindows.find(window) == mKnownWindows.end())
     {
-        if ((*i_group)->groupName() == group_id)
-            group = *i_group;
-        else
-            (*i_group)->onWindowRemoved(window);
-    }
-
-    if (!group)
-    {
-        group = new LXQtTaskGroup(group_id, window, this);
+        auto group = new LXQtTaskButton(window, this, this);
         connect(group, SIGNAL(groupBecomeEmpty(QString)), this, SLOT(groupBecomeEmptySlot()));
         connect(group, &LXQtTaskButton::dragging, this, [this] (QObject * dragSource, QPoint const & pos) {
-            buttonMove(qobject_cast<LXQtTaskGroup *>(sender()), qobject_cast<LXQtTaskGroup *>(dragSource), pos);
+            buttonMove(qobject_cast<LXQtTaskButton *>(sender()), qobject_cast<LXQtTaskButton *>(dragSource), pos);
         });
 
+        mKnownWindows[window] = group;
         mLayout->addWidget(group);
     }
-
-    mKnownWindows[window] = group;
-    group->addWindow(window);
 }
 
 /************************************************
@@ -261,10 +244,9 @@ void LXQtTaskBar::addWindow(WId window)
  ************************************************/
 auto LXQtTaskBar::removeWindow(windowMap_t::iterator pos) -> windowMap_t::iterator
 {
-    WId const window = pos.key();
-    LXQtTaskGroup * const group = *pos;
+    LXQtTaskButton * const group = *pos;
     auto ret = mKnownWindows.erase(pos);
-    group->onWindowRemoved(window);
+    group->deleteLater();
     return ret;
 }
 
@@ -299,18 +281,6 @@ void LXQtTaskBar::refreshTaskList()
 /************************************************
 
  ************************************************/
-void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2)
-{
-    auto i = mKnownWindows.find(window);
-    if (mKnownWindows.end() != i)
-    {
-        if (!(*i)->onWindowChanged(window, prop, prop2) && acceptWindow(window))
-        { // window is removed from a group because of class change, so we should add it again
-            addWindow(window);
-        }
-    }
-}
-
 void LXQtTaskBar::onWindowAdded(WId window)
 {
     auto const pos = mKnownWindows.find(window);
@@ -368,7 +338,7 @@ void LXQtTaskBar::activateTask(int pos)
     for (int i = 1; i < mLayout->count(); ++i)
     {
         QWidget * o = mLayout->itemAt(i)->widget();
-        LXQtTaskGroup * g = qobject_cast<LXQtTaskGroup *>(o);
+        LXQtTaskButton * g = qobject_cast<LXQtTaskButton *>(o);
         if (g && g->isVisible())
         {
             pos--;

@@ -33,7 +33,6 @@
 #define LXQTTASKBAR_H
 
 #include "../panel/plugin.h"
-#include "lxqttaskgroup.h"
 #include "lxqttaskbutton.h"
 
 #include <QFrame>
@@ -78,21 +77,21 @@ protected:
 private slots:
     void refreshTaskList();
     void groupBecomeEmptySlot();
-    void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
     void onWindowAdded(WId window);
     void onWindowRemoved(WId window);
+    void onActiveWindowChanged(WId window);
     void activateTask(int pos);
 
 private:
-    typedef QMap<WId, LXQtTaskGroup*> windowMap_t;
+    typedef QMap<WId, LXQtTaskButton*> windowMap_t;
 
 private:
     void addWindow(WId window);
     windowMap_t::iterator removeWindow(windowMap_t::iterator pos);
-    void buttonMove(LXQtTaskGroup * dst, LXQtTaskGroup * src, QPoint const & pos);
+    void buttonMove(LXQtTaskButton * dst, LXQtTaskButton * src, QPoint const & pos);
 
 private:
-    QMap<WId, LXQtTaskGroup*> mKnownWindows; //!< Ids of known windows (mapping to buttons/groups)
+    QMap<WId, LXQtTaskButton*> mKnownWindows; //!< Ids of known windows (mapping to buttons/groups)
     LXQt::GridLayout *mLayout;
     QList<GlobalKeyShortcut::Action*> mKeys;
     QSignalMapper *mSignalMapper;
