@@ -25,8 +25,10 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include "lxqtmainmenu.h"
+#include "mainmenu.h"
 #include "actionview.h"
+
+#include "../panel/lxqtpanel.h"
 
 #include <QKeyEvent>
 #include <QLineEdit>
@@ -37,7 +39,7 @@
 class MainMenu : public XdgMenuWidget
 {
 public:
-    MainMenu(const XdgMenu & xdgMenu, Plugin * plugin, QWidget * parent);
+    MainMenu(const XdgMenu & xdgMenu, MainMenuButton * button);
 
 protected:
     void actionEvent(QActionEvent * e) override;
@@ -48,7 +50,7 @@ protected:
 private:
     void searchTextChanged(const QString & text);
 
-    Plugin * const mPlugin;
+    MainMenuButton * const mButton;
     QWidgetAction mSearchEditAction;
     QWidgetAction mSearchViewAction;
     QWidget mSearchFrame;
@@ -58,8 +60,8 @@ private:
     bool mUpdatesInhibited = false;
 };
 
-MainMenu::MainMenu(const XdgMenu & xdgMenu, Plugin * plugin, QWidget * parent)
-    : XdgMenuWidget(xdgMenu, QString(), parent), mPlugin(plugin),
+MainMenu::MainMenu(const XdgMenu & xdgMenu, MainMenuButton * button)
+    : XdgMenuWidget(xdgMenu, QString(), button), mButton(button),
       mSearchEditAction(this), mSearchViewAction(this),
       mSearchLayout(&mSearchFrame)
 {
@@ -108,7 +110,7 @@ void MainMenu::keyPressEvent(QKeyEvent * e)
 
 void MainMenu::resizeEvent(QResizeEvent * e)
 {
-    move(mPlugin->calcPopupPos(e->size()).topLeft());
+    move(mButton->panel()->calcPopupPos(mButton, e->size()).topLeft());
 }
 
 void MainMenu::showEvent(QShowEvent *)
@@ -140,23 +142,28 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-LXQtMainMenu::LXQtMainMenu(LXQtPanel * lxqtPanel) : Plugin(lxqtPanel)
+MainMenuButton::MainMenuButton(LXQtPanel * panel)
+    : QToolButton(panel), mPanel(panel)
 {
-    mButton.setAutoRaise(true);
-    mButton.setIcon(QIcon("/usr/share/pixmaps/j-login.png"));
-    mButton.setToolButtonStyle(Qt::ToolButtonIconOnly);
+    setAutoRaise(true);
+    /* TODO: make configurable */
+    setIcon(QIcon("/usr/share/pixmaps/j-login.png"));
+    setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     mXdgMenu.setEnvironments(QStringList() << "X-LXQT"
                                            << "LXQt");
     /* TODO: rework menu */
     mXdgMenu.read("/home/john/.config/menus/programs.menu");
 
-    mMenu = new MainMenu(mXdgMenu, this, &mButton);
+    mMenu = new MainMenu(mXdgMenu, this);
 
-    connect(&mButton, &QToolButton::clicked, [this]() {
+    connect(this, &QToolButton::clicked, [this]() {
         if (mMenu->isVisible())
             mMenu->hide();
         else
-            mMenu->popup(calcPopupPos(mMenu->sizeHint()).topLeft());
+        {
+            auto pos = mPanel->calcPopupPos(this, mMenu->sizeHint());
+            mMenu->popup(pos.topLeft());
+        }
     });
 }

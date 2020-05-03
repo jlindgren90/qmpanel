@@ -26,15 +26,13 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include "lxqtquicklaunch.h"
+#include "quicklaunch.h"
 
 #include <QDebug>
 #include <QToolButton>
 #include <XdgAction>
 
-LXQtQuickLaunch::LXQtQuickLaunch(LXQtPanel * lxqtPanel) :
-    Plugin(lxqtPanel),
-    mLayout(&mWidget)
+QuickLaunch::QuickLaunch(QWidget * parent) : QWidget(parent), mLayout(this)
 {
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
@@ -62,7 +60,7 @@ LXQtQuickLaunch::LXQtQuickLaunch(LXQtPanel * lxqtPanel) :
             continue;
         }
 
-        auto button = new QToolButton(&mWidget);
+        auto button = new QToolButton(this);
         button->setAutoRaise(true);
         button->setDefaultAction(new XdgAction(&xdg, this));
         mLayout.addWidget(button);

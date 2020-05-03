@@ -1,11 +1,11 @@
 set(PLUGIN "quicklaunch")
 
 set(HEADERS
-    lxqtquicklaunch.h
+    quicklaunch.h
 )
 
 set(SOURCES
-    lxqtquicklaunch.cpp
+    quicklaunch.cpp
 )
 
 set(LIBRARIES

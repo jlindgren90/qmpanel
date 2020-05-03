@@ -28,8 +28,8 @@
 #include "lxqtpanel.h"
 #include "plugin.h"
 
-#include "../plugin-mainmenu/lxqtmainmenu.h"
-#include "../plugin-quicklaunch/lxqtquicklaunch.h"
+#include "../plugin-mainmenu/mainmenu.h"
+#include "../plugin-quicklaunch/quicklaunch.h"
 #include "../plugin-taskbar/lxqttaskbarplugin.h"
 #include "../plugin-tray/lxqttrayplugin.h"
 #include "../plugin-worldclock/lxqtworldclock.h"
@@ -52,8 +52,8 @@ LXQtPanel::LXQtPanel() : mLayout(this)
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
 
-    mLayout.addWidget((new LXQtMainMenu(this))->widget());
-    mLayout.addWidget((new LXQtQuickLaunch(this))->widget());
+    mLayout.addWidget(new MainMenuButton(this));
+    mLayout.addWidget(new QuickLaunch(this));
     mLayout.addWidget((new LXQtTaskBarPlugin(this))->widget());
     mLayout.addWidget((new LXQtTrayPlugin(this))->widget());
     mLayout.addWidget((new LXQtWorldClock(this))->widget());

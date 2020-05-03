@@ -4,9 +4,10 @@
  * LXQt - a lightweight, Qt based, desktop toolset
  * https://lxqt.org
  *
- * Copyright: 2010-2011 Razor team
+ * Copyright: 2010-2012 Razor team
  * Authors:
- *   Alexander Sokoloff <sokoloff.a@gmail.com>
+ *   Petr Vanek <petr@scribus.info>
+ *   Kuzma Shapran <kuzma.shapran@gmail.com>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public
@@ -25,29 +26,19 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef LXQT_MAINMENU_H
-#define LXQT_MAINMENU_H
+#ifndef QUICKLAUNCH_H
+#define QUICKLAUNCH_H
 
-#include "../panel/plugin.h"
+#include <QHBoxLayout>
+#include <QWidget>
 
-#include <QToolButton>
-#include <XdgMenu>
-
-class MainMenu;
-
-class LXQtMainMenu : public Plugin
+class QuickLaunch : public QWidget
 {
 public:
-    explicit LXQtMainMenu(LXQtPanel * lxqtPanel);
-
-    QWidget * widget() { return &mButton; }
+    explicit QuickLaunch(QWidget * parent);
 
 private:
-    QToolButton mButton;
-    MainMenu * mMenu;
-    XdgMenu mXdgMenu;
-
-    void showMenu();
+    QHBoxLayout mLayout;
 };
 
 #endif

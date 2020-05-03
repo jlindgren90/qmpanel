@@ -2,12 +2,12 @@ set(PLUGIN "mainmenu")
 
 set(HEADERS
     actionview.h
-    lxqtmainmenu.h
+    mainmenu.h
 )
 
 set(SOURCES
     actionview.cpp
-    lxqtmainmenu.cpp
+    mainmenu.cpp
 )
 
 set(LIBRARIES
