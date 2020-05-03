@@ -174,8 +174,6 @@ void LXQtTaskButton::mousePressEvent(QMouseEvent* event)
 
     if (Qt::LeftButton == b)
         mDragStartPosition = event->pos();
-    else if (Qt::MidButton == b && parentTaskBar()->closeOnMiddleClick())
-        closeApplication();
 
     QToolButton::mousePressEvent(event);
 }
@@ -275,19 +273,7 @@ void LXQtTaskButton::activateWithDraggable()
  ************************************************/
 void LXQtTaskButton::raiseApplication()
 {
-    KWindowInfo info(mWindow, NET::WMDesktop | NET::WMState | NET::XAWMState);
-    if (parentTaskBar()->raiseOnCurrentDesktop() && info.isMinimized())
-    {
-        KWindowSystem::setOnDesktop(mWindow, KWindowSystem::currentDesktop());
-    }
-    else
-    {
-        int winDesktop = info.desktop();
-        if (KWindowSystem::currentDesktop() != winDesktop)
-            KWindowSystem::setCurrentDesktop(winDesktop);
-    }
     KWindowSystem::activateWindow(mWindow);
-
     setUrgencyHint(false);
 }
 

@@ -62,12 +62,6 @@ public:
     void realign();
 
     int buttonWidth() const { return mButtonWidth; }
-    bool closeOnMiddleClick() const { return mCloseOnMiddleClick; }
-    bool raiseOnCurrentDesktop() const { return mRaiseOnCurrentDesktop; }
-    bool isShowOnlyOneDesktopTasks() const { return mShowOnlyOneDesktopTasks; }
-    int showDesktopNum() const { return mShowDesktopNum; }
-    bool isShowOnlyCurrentScreenTasks() const { return mShowOnlyCurrentScreenTasks; }
-    bool isShowOnlyMinimizedTasks() const { return mShowOnlyMinimizedTasks; }
     inline LXQtPanel * panel() const { return mPlugin->panel(); }
     inline Plugin * plugin() const { return mPlugin; }
 
@@ -76,7 +70,6 @@ public slots:
 
 signals:
     void buttonStyleRefreshed(Qt::ToolButtonStyle buttonStyle);
-    void showOnlySettingChanged();
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent * event);
@@ -107,12 +100,6 @@ private:
     // Settings
     int mButtonWidth;
     int mButtonHeight;
-    bool mCloseOnMiddleClick;
-    bool mRaiseOnCurrentDesktop;
-    bool mShowOnlyOneDesktopTasks;
-    int mShowDesktopNum;
-    bool mShowOnlyCurrentScreenTasks;
-    bool mShowOnlyMinimizedTasks;
 
     bool acceptWindow(WId window) const;
 

@@ -58,12 +58,6 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     mSignalMapper(new QSignalMapper(this)),
     mButtonWidth(400),
     mButtonHeight(100),
-    mCloseOnMiddleClick(true),
-    mRaiseOnCurrentDesktop(true),
-    mShowOnlyOneDesktopTasks(false),
-    mShowDesktopNum(0),
-    mShowOnlyCurrentScreenTasks(false),
-    mShowOnlyMinimizedTasks(false),
     mPlugin(plugin)
 {
     mLayout = new LXQt::GridLayout(this);
@@ -341,27 +335,8 @@ void LXQtTaskBar::onWindowRemoved(WId window)
  ************************************************/
 void LXQtTaskBar::settingsChanged()
 {
-    bool showOnlyOneDesktopTasksOld = mShowOnlyOneDesktopTasks;
-    const int showDesktopNumOld = mShowDesktopNum;
-    bool showOnlyCurrentScreenTasksOld = mShowOnlyCurrentScreenTasks;
-    bool showOnlyMinimizedTasksOld = mShowOnlyMinimizedTasks;
-
     mButtonWidth = 200; /* TODO: scale by DPI */
     mButtonHeight = 100;
-
-    mShowOnlyOneDesktopTasks = false;
-    mShowDesktopNum = 0;
-    mShowOnlyCurrentScreenTasks = false;
-    mShowOnlyMinimizedTasks = false;
-    mCloseOnMiddleClick = true;
-    mRaiseOnCurrentDesktop = false;
-
-    if (showOnlyOneDesktopTasksOld != mShowOnlyOneDesktopTasks
-            || (mShowOnlyOneDesktopTasks && showDesktopNumOld != mShowDesktopNum)
-            || showOnlyCurrentScreenTasksOld != mShowOnlyCurrentScreenTasks
-            || showOnlyMinimizedTasksOld != mShowOnlyMinimizedTasks
-            )
-        emit showOnlySettingChanged();
 
     refreshTaskList();
 }
@@ -383,9 +358,6 @@ void LXQtTaskBar::realign()
     mLayout->setCellMaximumSize(maxSize);
     mLayout->setDirection(LXQt::GridLayout::LeftToRight);
     mLayout->setEnabled(true);
-
-    //our placement on screen could have been changed
-    emit showOnlySettingChanged();
 }
 
 /************************************************

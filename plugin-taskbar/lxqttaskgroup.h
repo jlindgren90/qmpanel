@@ -67,14 +67,10 @@ protected:
 
 private slots:
     void onActiveWindowChanged(WId window);
-    void onDesktopChanged(int number);
-
     void closeGroup();
-    void refreshVisibility();
 
 signals:
     void groupBecomeEmpty(QString name);
-    void visibilityChanged(bool visible);
 
 private:
     QString mGroupName;

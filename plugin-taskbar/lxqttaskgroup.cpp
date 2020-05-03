@@ -53,9 +53,7 @@ LXQtTaskGroup::LXQtTaskGroup(const QString &groupName, WId window, LXQtTaskBar *
     setObjectName(groupName);
     setText(groupName);
 
-    connect(KWindowSystem::self(), SIGNAL(currentDesktopChanged(int)), this, SLOT(onDesktopChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(onActiveWindowChanged(WId)));
-    connect(parent, &LXQtTaskBar::showOnlySettingChanged, this, &LXQtTaskGroup::refreshVisibility);
 }
 
 /************************************************
@@ -85,8 +83,6 @@ LXQtTaskButton * LXQtTaskGroup::addWindow(WId id)
     }
 
     mButtonHash.insert(id, btn);
-
-    refreshVisibility();
 
     return btn;
 }
@@ -124,14 +120,6 @@ void LXQtTaskGroup::onActiveWindowChanged(WId window)
 /************************************************
 
  ************************************************/
-void LXQtTaskGroup::onDesktopChanged(int number)
-{
-    refreshVisibility();
-}
-
-/************************************************
-
- ************************************************/
 void LXQtTaskGroup::onWindowRemoved(WId window)
 {
     if (mButtonHash.contains(window))
@@ -143,13 +131,7 @@ void LXQtTaskGroup::onWindowRemoved(WId window)
         if (mButtonHash.count())
             regroup();
         else
-        {
-            if (isVisible())
-                emit visibilityChanged(false);
-            hide();
             emit groupBecomeEmpty(groupName());
-
-        }
     }
 }
 
@@ -205,31 +187,6 @@ void LXQtTaskGroup::regroup()
 /************************************************
 
  ************************************************/
-void LXQtTaskGroup::refreshVisibility()
-{
-    bool will = false;
-    LXQtTaskBar const * taskbar = parentTaskBar();
-    const int showDesktop = taskbar->showDesktopNum();
-    for(LXQtTaskButton * btn : qAsConst(mButtonHash))
-    {
-        bool visible = taskbar->isShowOnlyOneDesktopTasks() ? btn->isOnDesktop(0 == showDesktop ? KWindowSystem::currentDesktop() : showDesktop) : true;
-        visible &= taskbar->isShowOnlyCurrentScreenTasks() ? btn->isOnCurrentScreen() : true;
-        visible &= taskbar->isShowOnlyMinimizedTasks() ? btn->isMinimized() : true;
-        btn->setVisible(visible);
-        will |= visible;
-    }
-
-    bool is = isVisible();
-    setVisible(will);
-    regroup();
-
-    if (is != will)
-        emit visibilityChanged(will);
-}
-
-/************************************************
-
- ************************************************/
 QMimeData * LXQtTaskGroup::mimeData()
 {
     QMimeData *mimedata = new QMimeData;
@@ -245,7 +202,6 @@ QMimeData * LXQtTaskGroup::mimeData()
  ************************************************/
 bool LXQtTaskGroup::onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2)
 { // returns true if the class is preserved
-    bool needsRefreshVisibility{false};
     QVector<LXQtTaskButton *> buttons;
     if (mButtonHash.contains(window))
         buttons.append(mButtonHash.value(window));
@@ -256,16 +212,6 @@ bool LXQtTaskGroup::onWindowChanged(WId window, NET::Properties prop, NET::Prope
 
     if (!buttons.isEmpty())
     {
-        // window changed virtual desktop
-        if (prop.testFlag(NET::WMDesktop) || prop.testFlag(NET::WMGeometry))
-        {
-            if (parentTaskBar()->isShowOnlyOneDesktopTasks()
-                    || parentTaskBar()->isShowOnlyCurrentScreenTasks())
-            {
-                needsRefreshVisibility = true;
-            }
-        }
-
         if (prop.testFlag(NET::WMVisibleName) || prop.testFlag(NET::WMName))
             std::for_each(buttons.begin(), buttons.end(), std::mem_fn(&LXQtTaskButton::updateText));
 
@@ -280,16 +226,8 @@ bool LXQtTaskGroup::onWindowChanged(WId window, NET::Properties prop, NET::Prope
             if (info.hasState(NET::SkipTaskbar))
                 onWindowRemoved(window);
             std::for_each(buttons.begin(), buttons.end(), std::bind(&LXQtTaskButton::setUrgencyHint, std::placeholders::_1, info.hasState(NET::DemandsAttention)));
-
-            if (parentTaskBar()->isShowOnlyMinimizedTasks())
-            {
-                needsRefreshVisibility = true;
-            }
         }
     }
-
-    if (needsRefreshVisibility)
-        refreshVisibility();
 
     return true;
 }
