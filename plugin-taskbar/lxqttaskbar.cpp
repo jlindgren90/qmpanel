@@ -117,102 +117,11 @@ bool LXQtTaskBar::acceptWindow(WId window) const
 /************************************************
 
  ************************************************/
-void LXQtTaskBar::dragEnterEvent(QDragEnterEvent* event)
-{
-    if (event->mimeData()->hasFormat(LXQtTaskButton::mimeDataFormat()))
-    {
-        event->acceptProposedAction();
-        buttonMove(nullptr, qobject_cast<LXQtTaskButton *>(event->source()), event->pos());
-    } else
-        event->ignore();
-    QWidget::dragEnterEvent(event);
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::dragMoveEvent(QDragMoveEvent * event)
-{
-    //we don't get any dragMoveEvents if dragEnter wasn't accepted
-    buttonMove(nullptr, qobject_cast<LXQtTaskButton *>(event->source()), event->pos());
-    QWidget::dragMoveEvent(event);
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::buttonMove(LXQtTaskButton * dst, LXQtTaskButton * src, QPoint const & pos)
-{
-    int src_index;
-    if (!src || -1 == (src_index = mLayout->indexOf(src)))
-    {
-        qDebug() << "Dropped invalid";
-        return;
-    }
-
-    const int size = mLayout->count();
-    Q_ASSERT(0 < size);
-    //dst is nullptr in case the drop occured on empty space in taskbar
-    int dst_index;
-    if (nullptr == dst)
-    {
-        //moving based on taskbar (not signaled by button)
-        QRect occupied = mLayout->occupiedGeometry();
-        QRect last_empty_row{occupied};
-        const QRect last_item_geometry = mLayout->itemAt(size - 1)->geometry();
-        if (isRightToLeft())
-        {
-            last_empty_row.setTopRight(last_item_geometry.topLeft());
-        } else
-        {
-            last_empty_row.setTopLeft(last_item_geometry.topRight());
-        }
-        if (occupied.contains(pos) && !last_empty_row.contains(pos))
-            return;
-
-        dst_index = size;
-    } else
-    {
-        //moving based on signal from child button
-        dst_index = mLayout->indexOf(dst);
-    }
-
-    //moving lower index to higher one => consider as the QList::move => insert(to, takeAt(from))
-    if (src_index < dst_index)
-    {
-        if (size == dst_index
-                || src_index + 1 != dst_index)
-        {
-            --dst_index;
-        } else
-        {
-            //switching positions of next standing
-            const int tmp_index = src_index;
-            src_index = dst_index;
-            dst_index = tmp_index;
-        }
-    }
-
-    if (dst_index == src_index
-            || mLayout->animatedMoveInProgress()
-       )
-        return;
-
-    mLayout->moveItem(src_index, dst_index, true);
-}
-
-/************************************************
-
- ************************************************/
 void LXQtTaskBar::addWindow(WId window)
 {
     if (mKnownWindows.find(window) == mKnownWindows.end())
     {
         auto group = new LXQtTaskButton(window, this, this);
-        connect(group, &LXQtTaskButton::dragging, this, [this] (QObject * dragSource, QPoint const & pos) {
-            buttonMove(qobject_cast<LXQtTaskButton *>(sender()), qobject_cast<LXQtTaskButton *>(dragSource), pos);
-        });
-
         mKnownWindows[window] = group;
         mLayout->addWidget(group);
     }

@@ -62,11 +62,6 @@ public:
 
     LXQtTaskBar * parentTaskBar() const {return mParentTaskBar;}
 
-    static QString mimeDataFormat() { return QLatin1String("lxqt/lxqttaskbutton"); }
-    /*! \return true if this buttom received DragEnter event (and no DragLeave event yet)
-     * */
-    bool hasDragAndDropHover() const;
-
 public slots:
     void raiseApplication();
     void minimizeApplication();
@@ -84,24 +79,18 @@ public slots:
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dragMoveEvent(QDragMoveEvent * event);
     virtual void dragLeaveEvent(QDragLeaveEvent *event);
     virtual void dropEvent(QDropEvent *event);
-    void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
     virtual void contextMenuEvent(QContextMenuEvent *event);
 
     void setWindowId(WId wid) {mWindow = wid;}
-    virtual QMimeData * mimeData();
-    static bool sDraggging;
 
     inline Plugin * plugin() const { return mPlugin; }
 
 private:
     WId mWindow;
     bool mUrgencyHint;
-    QPoint mDragStartPosition;
     LXQtTaskBar * mParentTaskBar;
     Plugin * mPlugin;
     int mIconSize;

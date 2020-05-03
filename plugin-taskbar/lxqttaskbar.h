@@ -70,10 +70,6 @@ public slots:
 signals:
     void buttonStyleRefreshed(Qt::ToolButtonStyle buttonStyle);
 
-protected:
-    virtual void dragEnterEvent(QDragEnterEvent * event);
-    virtual void dragMoveEvent(QDragMoveEvent * event);
-
 private slots:
     void refreshTaskList();
     void onWindowAdded(WId window);
@@ -87,7 +83,6 @@ private:
 private:
     void addWindow(WId window);
     windowMap_t::iterator removeWindow(windowMap_t::iterator pos);
-    void buttonMove(LXQtTaskButton * dst, LXQtTaskButton * src, QPoint const & pos);
 
 private:
     QMap<WId, LXQtTaskButton*> mKnownWindows; //!< Ids of known windows (mapping to buttons/groups)
