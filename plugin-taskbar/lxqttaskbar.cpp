@@ -56,7 +56,6 @@ using namespace LXQt;
 LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     QFrame(parent),
     mSignalMapper(new QSignalMapper(this)),
-    mButtonStyle(Qt::ToolButtonTextBesideIcon),
     mButtonWidth(400),
     mButtonHeight(100),
     mCloseOnMiddleClick(true),
@@ -257,7 +256,6 @@ void LXQtTaskBar::addWindow(WId window)
         });
 
         mLayout->addWidget(group);
-        group->setToolButtonsStyle(mButtonStyle);
     }
 
     mKnownWindows[window] = group;
@@ -341,17 +339,6 @@ void LXQtTaskBar::onWindowRemoved(WId window)
 /************************************************
 
  ************************************************/
-void LXQtTaskBar::setButtonStyle(Qt::ToolButtonStyle buttonStyle)
-{
-    const Qt::ToolButtonStyle old_style = mButtonStyle;
-    mButtonStyle = buttonStyle;
-    if (old_style != mButtonStyle)
-        emit buttonStyleRefreshed(mButtonStyle);
-}
-
-/************************************************
-
- ************************************************/
 void LXQtTaskBar::settingsChanged()
 {
     bool showOnlyOneDesktopTasksOld = mShowOnlyOneDesktopTasks;
@@ -361,8 +348,6 @@ void LXQtTaskBar::settingsChanged()
 
     mButtonWidth = 200; /* TODO: scale by DPI */
     mButtonHeight = 100;
-
-    setButtonStyle(Qt::ToolButtonTextBesideIcon);
 
     mShowOnlyOneDesktopTasks = false;
     mShowDesktopNum = 0;

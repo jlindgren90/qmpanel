@@ -61,7 +61,6 @@ public:
 
     void realign();
 
-    Qt::ToolButtonStyle buttonStyle() const { return mButtonStyle; }
     int buttonWidth() const { return mButtonWidth; }
     bool closeOnMiddleClick() const { return mCloseOnMiddleClick; }
     bool raiseOnCurrentDesktop() const { return mRaiseOnCurrentDesktop; }
@@ -107,7 +106,6 @@ private:
     QSignalMapper *mSignalMapper;
 
     // Settings
-    Qt::ToolButtonStyle mButtonStyle;
     int mButtonWidth;
     int mButtonHeight;
     bool mCloseOnMiddleClick;
@@ -118,7 +116,6 @@ private:
     bool mShowOnlyMinimizedTasks;
 
     bool acceptWindow(WId window) const;
-    void setButtonStyle(Qt::ToolButtonStyle buttonStyle);
 
     void resizeEvent(QResizeEvent *event);
 

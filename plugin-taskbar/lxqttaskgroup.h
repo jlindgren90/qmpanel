@@ -58,8 +58,6 @@ public:
     LXQtTaskButton * checkedButton() const;
 
     bool onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
-    Qt::ToolButtonStyle popupButtonStyle() const;
-    void setToolButtonsStyle(Qt::ToolButtonStyle style);
 
 public slots:
     void onWindowRemoved(WId window);

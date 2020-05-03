@@ -56,7 +56,6 @@ LXQtTaskGroup::LXQtTaskGroup(const QString &groupName, WId window, LXQtTaskBar *
     connect(KWindowSystem::self(), SIGNAL(currentDesktopChanged(int)), this, SLOT(onDesktopChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(onActiveWindowChanged(WId)));
     connect(parent, &LXQtTaskBar::refreshIconGeometry, this, &LXQtTaskGroup::refreshIconsGeometry);
-    connect(parent, &LXQtTaskBar::buttonStyleRefreshed, this, &LXQtTaskGroup::setToolButtonsStyle);
     connect(parent, &LXQtTaskBar::showOnlySettingChanged, this, &LXQtTaskGroup::refreshVisibility);
 }
 
@@ -79,7 +78,6 @@ LXQtTaskButton * LXQtTaskGroup::addWindow(WId id)
         return mButtonHash.value(id);
 
     LXQtTaskButton *btn = new LXQtTaskButton(id, parentTaskBar(), this);
-    btn->setToolButtonStyle(popupButtonStyle());
 
     if (btn->isApplicationActive())
     {
@@ -153,31 +151,6 @@ void LXQtTaskGroup::onWindowRemoved(WId window)
             emit groupBecomeEmpty(groupName());
 
         }
-    }
-}
-
-/************************************************
-
- ************************************************/
-Qt::ToolButtonStyle LXQtTaskGroup::popupButtonStyle() const
-{
-    // do not set icons-only style in the buttons in the group,
-    // as they'll be indistinguishable
-    const Qt::ToolButtonStyle style = toolButtonStyle();
-    return style == Qt::ToolButtonIconOnly ? Qt::ToolButtonTextBesideIcon : style;
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskGroup::setToolButtonsStyle(Qt::ToolButtonStyle style)
-{
-    setToolButtonStyle(style);
-
-    const Qt::ToolButtonStyle styleInPopup = popupButtonStyle();
-    for (auto & button : mButtonHash)
-    {
-        button->setToolButtonStyle(styleInPopup);
     }
 }
 
