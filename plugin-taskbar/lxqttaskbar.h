@@ -76,7 +76,6 @@ private slots:
     void onWindowRemoved(WId window);
     void onActiveWindowChanged(WId window);
     void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
-    void activateTask(int pos);
 
 private:
     typedef QMap<WId, LXQtTaskButton*> windowMap_t;
@@ -88,8 +87,6 @@ private:
 private:
     QMap<WId, LXQtTaskButton*> mKnownWindows; //!< Ids of known windows (mapping to buttons/groups)
     LXQt::GridLayout *mLayout;
-    QList<GlobalKeyShortcut::Action*> mKeys;
-    QSignalMapper *mSignalMapper;
 
     // Settings
     int mButtonWidth;

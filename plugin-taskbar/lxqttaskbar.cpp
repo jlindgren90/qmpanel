@@ -54,7 +54,6 @@ using namespace LXQt;
 ************************************************/
 LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     QFrame(parent),
-    mSignalMapper(new QSignalMapper(this)),
     mButtonWidth(400),
     mButtonHeight(100),
     mPlugin(plugin)
@@ -67,8 +66,6 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     setAcceptDrops(true);
     settingsChanged();
     realign();
-
-    connect(mSignalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &LXQtTaskBar::activateTask);
 
     connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this, &LXQtTaskBar::onWindowAdded);
     connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this, &LXQtTaskBar::onWindowRemoved);
@@ -268,25 +265,4 @@ void LXQtTaskBar::realign()
     mLayout->setCellMaximumSize(maxSize);
     mLayout->setDirection(LXQt::GridLayout::LeftToRight);
     mLayout->setEnabled(true);
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::activateTask(int pos)
-{
-    for (int i = 1; i < mLayout->count(); ++i)
-    {
-        QWidget * o = mLayout->itemAt(i)->widget();
-        LXQtTaskButton * g = qobject_cast<LXQtTaskButton *>(o);
-        if (g && g->isVisible())
-        {
-            pos--;
-            if (pos == 0)
-            {
-                g->raiseApplication();
-                break;
-            }
-        }
-    }
 }
