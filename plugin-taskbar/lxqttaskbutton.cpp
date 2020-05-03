@@ -106,7 +106,6 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtTaskBar * taskbar, QWidget 
     mDNDTimer->setInterval(700);
     connect(mDNDTimer, SIGNAL(timeout()), this, SLOT(activateWithDraggable()));
     connect(LXQt::Settings::globalSettings(), SIGNAL(iconThemeChanged()), this, SLOT(updateIcon()));
-    connect(mParentTaskBar, &LXQtTaskBar::iconByClassChanged, this, &LXQtTaskButton::updateIcon);
 }
 
 /************************************************
@@ -132,20 +131,8 @@ void LXQtTaskButton::updateText()
  ************************************************/
 void LXQtTaskButton::updateIcon()
 {
-    QIcon ico;
-    if (mParentTaskBar->isIconByClass())
-    {
-        ico = XdgIcon::fromTheme(QString::fromUtf8(KWindowInfo{mWindow, 0, NET::WM2WindowClass}.windowClassClass()).toLower());
-    }
-    if (ico.isNull())
-    {
-#if QT_VERSION >= 0x050600
-        int devicePixels = mIconSize * devicePixelRatioF();
-#else
-        int devicePixels = mIconSize * devicePixelRatio();
-#endif
-        ico = KWindowSystem::icon(mWindow, devicePixels, devicePixels);
-    }
+    int devicePixels = mIconSize * devicePixelRatioF();
+    QIcon ico = KWindowSystem::icon(mWindow, devicePixels, devicePixels);
     setIcon(ico.isNull() ? XdgIcon::defaultApplicationIcon() : ico);
 }
 

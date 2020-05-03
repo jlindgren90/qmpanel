@@ -65,11 +65,8 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     mShowDesktopNum(0),
     mShowOnlyCurrentScreenTasks(false),
     mShowOnlyMinimizedTasks(false),
-    mAutoRotate(true),
     mGroupingEnabled(true),
     mShowGroupOnHover(true),
-    mIconByClass(false),
-    mCycleOnWheelScroll(true),
     mPlugin(plugin),
     mStyle(new LeftAlignedTextStyle())
 {
@@ -388,7 +385,6 @@ void LXQtTaskBar::settingsChanged()
     const int showDesktopNumOld = mShowDesktopNum;
     bool showOnlyCurrentScreenTasksOld = mShowOnlyCurrentScreenTasks;
     bool showOnlyMinimizedTasksOld = mShowOnlyMinimizedTasks;
-    const bool iconByClassOld = mIconByClass;
 
     mButtonWidth = 200; /* TODO: scale by DPI */
     mButtonHeight = 100;
@@ -399,13 +395,10 @@ void LXQtTaskBar::settingsChanged()
     mShowDesktopNum = 0;
     mShowOnlyCurrentScreenTasks = false;
     mShowOnlyMinimizedTasks = false;
-    mAutoRotate = true;
     mCloseOnMiddleClick = true;
     mRaiseOnCurrentDesktop = false;
     mGroupingEnabled = false;
     mShowGroupOnHover = true;
-    mIconByClass = false;
-    mCycleOnWheelScroll = true;
 
     // Delete all groups if grouping feature toggled and start over
     if (groupingEnabledOld != mGroupingEnabled)
@@ -428,8 +421,6 @@ void LXQtTaskBar::settingsChanged()
             || showOnlyMinimizedTasksOld != mShowOnlyMinimizedTasks
             )
         emit showOnlySettingChanged();
-    if (iconByClassOld != mIconByClass)
-        emit iconByClassChanged();
 
     refreshTaskList();
 }
@@ -455,59 +446,6 @@ void LXQtTaskBar::realign()
     //our placement on screen could have been changed
     emit showOnlySettingChanged();
     emit refreshIconGeometry();
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::wheelEvent(QWheelEvent* event)
-{
-    if (!mCycleOnWheelScroll)
-        return QFrame::wheelEvent(event);
-
-    static int threshold = 0;
-    threshold += abs(event->delta());
-    if (threshold < 300)
-        return QFrame::wheelEvent(event);
-    else
-        threshold = 0;
-
-    int delta = event->delta() < 0 ? 1 : -1;
-
-    // create temporary list of visible groups in the same order like on the layout
-    QList<LXQtTaskGroup*> list;
-    LXQtTaskGroup *group = NULL;
-    for (int i = 0; i < mLayout->count(); i++)
-    {
-        QWidget * o = mLayout->itemAt(i)->widget();
-        LXQtTaskGroup * g = qobject_cast<LXQtTaskGroup *>(o);
-        if (!g)
-            continue;
-
-        if (g->isVisible())
-            list.append(g);
-        if (g->isChecked())
-            group = g;
-    }
-
-    if (list.isEmpty())
-        return QFrame::wheelEvent(event);
-
-    if (!group)
-        group = list.at(0);
-
-    LXQtTaskButton *button = NULL;
-
-    // switching between groups from temporary list in modulo addressing
-    while (!button)
-    {
-        button = group->getNextPrevChildButton(delta == 1, !(list.count() - 1));
-        if (button)
-            button->raiseApplication();
-        int idx = (list.indexOf(group) + delta + list.count()) % list.count();
-        group = list.at(idx);
-    }
-    QFrame::wheelEvent(event);
 }
 
 /************************************************
