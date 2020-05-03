@@ -70,7 +70,6 @@ private slots:
     void onDesktopChanged(int number);
 
     void closeGroup();
-    void refreshIconsGeometry();
     void refreshVisibility();
 
 signals:

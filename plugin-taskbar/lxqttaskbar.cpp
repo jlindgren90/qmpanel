@@ -386,16 +386,6 @@ void LXQtTaskBar::realign()
 
     //our placement on screen could have been changed
     emit showOnlySettingChanged();
-    emit refreshIconGeometry();
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::resizeEvent(QResizeEvent* event)
-{
-    emit refreshIconGeometry();
-    return QWidget::resizeEvent(event);
 }
 
 /************************************************

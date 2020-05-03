@@ -122,29 +122,6 @@ void LXQtTaskButton::updateIcon()
 /************************************************
 
  ************************************************/
-void LXQtTaskButton::refreshIconGeometry(QRect const & geom)
-{
-    NETWinInfo info(QX11Info::connection(),
-                    windowId(),
-                    (WId) QX11Info::appRootWindow(),
-                    NET::WMIconGeometry,
-                    0);
-    NETRect const curr = info.iconGeometry();
-    if (curr.pos.x != geom.x() || curr.pos.y != geom.y()
-            || curr.size.width != geom.width() || curr.size.height != geom.height())
-    {
-        NETRect nrect;
-        nrect.pos.x = geom.x();
-        nrect.pos.y = geom.y();
-        nrect.size.height = geom.height();
-        nrect.size.width = geom.width();
-        info.setIconGeometry(nrect);
-    }
-}
-
-/************************************************
-
- ************************************************/
 void LXQtTaskButton::dragEnterEvent(QDragEnterEvent *event)
 {
     // It must be here otherwise dragLeaveEvent and dragMoveEvent won't be called

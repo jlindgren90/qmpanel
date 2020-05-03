@@ -55,7 +55,6 @@ LXQtTaskGroup::LXQtTaskGroup(const QString &groupName, WId window, LXQtTaskBar *
 
     connect(KWindowSystem::self(), SIGNAL(currentDesktopChanged(int)), this, SLOT(onDesktopChanged(int)));
     connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(onActiveWindowChanged(WId)));
-    connect(parent, &LXQtTaskBar::refreshIconGeometry, this, &LXQtTaskGroup::refreshIconsGeometry);
     connect(parent, &LXQtTaskBar::showOnlySettingChanged, this, &LXQtTaskGroup::refreshVisibility);
 }
 
@@ -239,17 +238,6 @@ QMimeData * LXQtTaskGroup::mimeData()
     stream << groupName();
     mimedata->setData(mimeDataFormat(), byteArray);
     return mimedata;
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskGroup::refreshIconsGeometry()
-{
-    QRect rect = geometry();
-    rect.moveTo(mapToGlobal(QPoint(0, 0)));
-
-    refreshIconGeometry(rect);
 }
 
 /************************************************

@@ -76,7 +76,6 @@ public slots:
 
 signals:
     void buttonStyleRefreshed(Qt::ToolButtonStyle buttonStyle);
-    void refreshIconGeometry();
     void showOnlySettingChanged();
 
 protected:
@@ -116,8 +115,6 @@ private:
     bool mShowOnlyMinimizedTasks;
 
     bool acceptWindow(WId window) const;
-
-    void resizeEvent(QResizeEvent *event);
 
     Plugin *mPlugin;
 };
