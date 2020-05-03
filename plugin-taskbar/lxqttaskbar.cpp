@@ -73,6 +73,8 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this, &LXQtTaskBar::onWindowAdded);
     connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this, &LXQtTaskBar::onWindowRemoved);
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &LXQtTaskBar::onActiveWindowChanged);
+    connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged)
+            , this, &LXQtTaskBar::onWindowChanged);
 }
 
 /************************************************
@@ -156,6 +158,35 @@ void LXQtTaskBar::onActiveWindowChanged(WId window)
         button->setChecked(true);
         if (button->hasUrgencyHint())
             button->setUrgencyHint(false);
+    }
+}
+
+/************************************************
+
+ ************************************************/
+void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2)
+{
+    if(prop.testFlag(NET::WMWindowType) || prop.testFlag(NET::WMState) || prop2.testFlag(NET::WM2TransientFor))
+    {
+        if(acceptWindow(window))
+            addWindow(window);
+        else
+            onWindowRemoved(window);
+    }
+
+    auto button = mKnownWindows.value(window);
+    if(button == nullptr)
+        return;
+
+    if (prop.testFlag(NET::WMVisibleName) || prop.testFlag(NET::WMName))
+        button->updateText();
+    if (prop.testFlag(NET::WMIcon))
+        button->updateIcon();
+
+    if (prop.testFlag(NET::WMState))
+    {
+        KWindowInfo info{window, NET::WMState};
+        button->setUrgencyHint(info.hasState(NET::DemandsAttention));
     }
 }
 
