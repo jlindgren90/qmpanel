@@ -41,17 +41,6 @@ class LXQtTaskGroup;
 class LXQtTaskBar;
 class Plugin;
 
-class LeftAlignedTextStyle : public QProxyStyle
-{
-    using QProxyStyle::QProxyStyle;
-public:
-
-    virtual void drawItemText(QPainter * painter, const QRect & rect, int flags
-            , const QPalette & pal, bool enabled, const QString & text
-            , QPalette::ColorRole textRole = QPalette::NoRole) const override;
-};
-
-
 class LXQtTaskButton : public QToolButton
 {
     Q_OBJECT

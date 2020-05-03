@@ -63,22 +63,6 @@ bool LXQtTaskButton::sDraggging = false;
 /************************************************
 
 ************************************************/
-void LeftAlignedTextStyle::drawItemText(QPainter * painter, const QRect & rect, int flags
-            , const QPalette & pal, bool enabled, const QString & text
-            , QPalette::ColorRole textRole) const
-{
-    QString txt = text;
-    // get the button text because the text that's given to this function may be middle-elided
-    if (const QToolButton *tb = dynamic_cast<const QToolButton*>(painter->device()))
-        txt = tb->text();
-    txt = QFontMetrics(painter->font()).elidedText(txt, Qt::ElideRight, rect.width());
-    QProxyStyle::drawItemText(painter, rect, (flags & ~Qt::AlignHCenter) | Qt::AlignLeft, pal, enabled, txt, textRole);
-}
-
-
-/************************************************
-
-************************************************/
 LXQtTaskButton::LXQtTaskButton(const WId window, LXQtTaskBar * taskbar, QWidget *parent) :
     QToolButton(parent),
     mWindow(window),

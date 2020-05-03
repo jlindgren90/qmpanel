@@ -67,10 +67,8 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
     mShowOnlyMinimizedTasks(false),
     mGroupingEnabled(true),
     mShowGroupOnHover(true),
-    mPlugin(plugin),
-    mStyle(new LeftAlignedTextStyle())
+    mPlugin(plugin)
 {
-    setStyle(mStyle);
     mLayout = new LXQt::GridLayout(this);
     setLayout(mLayout);
     mLayout->setMargin(0);
@@ -86,14 +84,6 @@ LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
             , this, &LXQtTaskBar::onWindowChanged);
     connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this, &LXQtTaskBar::onWindowAdded);
     connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this, &LXQtTaskBar::onWindowRemoved);
-}
-
-/************************************************
-
- ************************************************/
-LXQtTaskBar::~LXQtTaskBar()
-{
-    delete mStyle;
 }
 
 /************************************************
@@ -455,19 +445,6 @@ void LXQtTaskBar::resizeEvent(QResizeEvent* event)
 {
     emit refreshIconGeometry();
     return QWidget::resizeEvent(event);
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::changeEvent(QEvent* event)
-{
-    // if current style is changed, reset the base style of the proxy style
-    // so we can apply the new style correctly to task buttons.
-    if(event->type() == QEvent::StyleChange)
-        mStyle->setBaseStyle(NULL);
-
-    QFrame::changeEvent(event);
 }
 
 /************************************************

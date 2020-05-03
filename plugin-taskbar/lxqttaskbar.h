@@ -58,7 +58,6 @@ class LXQtTaskBar : public QFrame
 
 public:
     explicit LXQtTaskBar(Plugin *plugin, QWidget* parent = 0);
-    virtual ~LXQtTaskBar();
 
     void realign();
 
@@ -126,11 +125,9 @@ private:
     bool acceptWindow(WId window) const;
     void setButtonStyle(Qt::ToolButtonStyle buttonStyle);
 
-    void changeEvent(QEvent* event);
     void resizeEvent(QResizeEvent *event);
 
     Plugin *mPlugin;
-    LeftAlignedTextStyle *mStyle;
 };
 
 #endif // LXQTTASKBAR_H
