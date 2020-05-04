@@ -120,6 +120,11 @@ void LXQtTaskBar::onWindowAdded(WId window)
 void LXQtTaskBar::onActiveWindowChanged(WId window)
 {
     auto active = mKnownWindows.value(window);
+    if(!active)
+    {
+        KWindowInfo info(window, 0, NET::WM2TransientFor);
+        active = mKnownWindows.value(info.transientFor());
+    }
 
     for (auto button : mKnownWindows)
     {
