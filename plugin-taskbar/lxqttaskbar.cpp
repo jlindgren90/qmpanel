@@ -28,40 +28,38 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include <QX11Info>
 #include <KWindowSystem>
+#include <QX11Info>
 
 #include "lxqttaskbar.h"
 
-/************************************************
-
-************************************************/
-LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
-    QWidget(parent),
-    mLayout(this),
-    mPlugin(plugin)
+LXQtTaskBar::LXQtTaskBar(Plugin * plugin, QWidget * parent)
+    : QWidget(parent), mLayout(this), mPlugin(plugin)
 {
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
 
     setAcceptDrops(true);
 
-    for (auto window: KWindowSystem::stackingOrder())
+    for (auto window : KWindowSystem::stackingOrder())
     {
         if (acceptWindow(window))
             addWindow(window);
     }
 
-    connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this, &LXQtTaskBar::onWindowAdded);
-    connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this, &LXQtTaskBar::onWindowRemoved);
-    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &LXQtTaskBar::onActiveWindowChanged);
-    connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged)
-            , this, &LXQtTaskBar::onWindowChanged);
+    connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this,
+            &LXQtTaskBar::onWindowAdded);
+    connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this,
+            &LXQtTaskBar::onWindowRemoved);
+    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this,
+            &LXQtTaskBar::onActiveWindowChanged);
+    connect(KWindowSystem::self(),
+            static_cast<void (KWindowSystem::*)(WId, NET::Properties,
+                                                NET::Properties2)>(
+                &KWindowSystem::windowChanged),
+            this, &LXQtTaskBar::onWindowChanged);
 }
 
-/************************************************
-
- ************************************************/
 bool LXQtTaskBar::acceptWindow(WId window) const
 {
     QFlags<NET::WindowTypeMask> ignoreList;
@@ -73,7 +71,8 @@ bool LXQtTaskBar::acceptWindow(WId window) const
     ignoreList |= NET::PopupMenuMask;
     ignoreList |= NET::NotificationMask;
 
-    KWindowInfo info(window, NET::WMWindowType | NET::WMState, NET::WM2TransientFor);
+    KWindowInfo info(window, NET::WMWindowType | NET::WMState,
+                     NET::WM2TransientFor);
     if (!info.valid())
         return false;
 
@@ -85,15 +84,13 @@ bool LXQtTaskBar::acceptWindow(WId window) const
 
     // WM_TRANSIENT_FOR hint not set - normal window
     WId transFor = info.transientFor();
-    if (transFor == 0 || transFor == window || transFor == (WId) QX11Info::appRootWindow())
+    if (transFor == 0 || transFor == window ||
+        transFor == (WId)QX11Info::appRootWindow())
         return true;
 
     return false;
 }
 
-/************************************************
-
- ************************************************/
 void LXQtTaskBar::addWindow(WId window)
 {
     if (mKnownWindows.find(window) == mKnownWindows.end())
@@ -104,10 +101,8 @@ void LXQtTaskBar::addWindow(WId window)
     }
 }
 
-/************************************************
-
- ************************************************/
-auto LXQtTaskBar::removeWindow(windowMap_t::iterator pos) -> windowMap_t::iterator
+auto LXQtTaskBar::removeWindow(windowMap_t::iterator pos)
+    -> windowMap_t::iterator
 {
     LXQtTaskButton * const group = *pos;
     auto ret = mKnownWindows.erase(pos);
@@ -115,16 +110,13 @@ auto LXQtTaskBar::removeWindow(windowMap_t::iterator pos) -> windowMap_t::iterat
     return ret;
 }
 
-/************************************************
-
- ************************************************/
 void LXQtTaskBar::onActiveWindowChanged(WId window)
 {
-    LXQtTaskButton *button = mKnownWindows.value(window, nullptr);
+    LXQtTaskButton * button = mKnownWindows.value(window, nullptr);
 
-    for (LXQtTaskButton *btn : qAsConst(mKnownWindows))
+    for (LXQtTaskButton * btn : qAsConst(mKnownWindows))
     {
-        if(btn != button)
+        if (btn != button)
             btn->setChecked(false);
     }
 
@@ -132,21 +124,20 @@ void LXQtTaskBar::onActiveWindowChanged(WId window)
         button->setChecked(true);
 }
 
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2)
+void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop,
+                                  NET::Properties2 prop2)
 {
-    if(prop.testFlag(NET::WMWindowType) || prop.testFlag(NET::WMState) || prop2.testFlag(NET::WM2TransientFor))
+    if (prop.testFlag(NET::WMWindowType) || prop.testFlag(NET::WMState) ||
+        prop2.testFlag(NET::WM2TransientFor))
     {
-        if(acceptWindow(window))
+        if (acceptWindow(window))
             addWindow(window);
         else
             onWindowRemoved(window);
     }
 
     auto button = mKnownWindows.value(window);
-    if(button == nullptr)
+    if (button == nullptr)
         return;
 
     if (prop.testFlag(NET::WMVisibleName) || prop.testFlag(NET::WMName))
@@ -155,9 +146,6 @@ void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop, NET::Propert
         button->updateIcon();
 }
 
-/************************************************
-
- ************************************************/
 void LXQtTaskBar::onWindowAdded(WId window)
 {
     auto const pos = mKnownWindows.find(window);
@@ -165,14 +153,9 @@ void LXQtTaskBar::onWindowAdded(WId window)
         addWindow(window);
 }
 
-/************************************************
-
- ************************************************/
 void LXQtTaskBar::onWindowRemoved(WId window)
 {
     auto const pos = mKnownWindows.find(window);
     if (mKnownWindows.end() != pos)
-    {
         removeWindow(pos);
-    }
 }

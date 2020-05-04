@@ -28,21 +28,20 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef LXQTTASKBAR_H
 #define LXQTTASKBAR_H
 
 #include "../panel/plugin.h"
 #include "lxqttaskbutton.h"
 
+#include <NETWM>
 #include <QHBoxLayout>
 #include <QMap>
-#include <NETWM>
 
 class LXQtTaskBar : public QWidget
 {
 public:
-    explicit LXQtTaskBar(Plugin *plugin, QWidget* parent = 0);
+    explicit LXQtTaskBar(Plugin * plugin, QWidget * parent = 0);
 
     inline LXQtPanel * panel() const { return mPlugin->panel(); }
     inline Plugin * plugin() const { return mPlugin; }
@@ -51,19 +50,20 @@ private:
     void onWindowAdded(WId window);
     void onWindowRemoved(WId window);
     void onActiveWindowChanged(WId window);
-    void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
+    void onWindowChanged(WId window, NET::Properties prop,
+                         NET::Properties2 prop2);
 
-    typedef QMap<WId, LXQtTaskButton*> windowMap_t;
+    typedef QMap<WId, LXQtTaskButton *> windowMap_t;
 
     void addWindow(WId window);
     windowMap_t::iterator removeWindow(windowMap_t::iterator pos);
 
-    QMap<WId, LXQtTaskButton*> mKnownWindows; //!< Ids of known windows (mapping to buttons/groups)
+    QMap<WId, LXQtTaskButton *> mKnownWindows;
     QHBoxLayout mLayout;
 
     bool acceptWindow(WId window) const;
 
-    Plugin *mPlugin;
+    Plugin * mPlugin;
 };
 
 #endif // LXQTTASKBAR_H
