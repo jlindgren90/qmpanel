@@ -53,43 +53,38 @@ LXQtTaskBar::LXQtTaskBar(LXQtPanel * panel)
     connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this,
             &LXQtTaskBar::onWindowAdded);
     connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this,
-            &LXQtTaskBar::onWindowRemoved);
+            &LXQtTaskBar::removeWindow);
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this,
             &LXQtTaskBar::onActiveWindowChanged);
-    connect(KWindowSystem::self(),
-            static_cast<void (KWindowSystem::*)(WId, NET::Properties,
-                                                NET::Properties2)>(
-                &KWindowSystem::windowChanged),
-            this, &LXQtTaskBar::onWindowChanged);
+
+    void (KWindowSystem::*windowChanged)(
+        WId, NET::Properties, NET::Properties2) = &KWindowSystem::windowChanged;
+    connect(KWindowSystem::self(), windowChanged, this,
+            &LXQtTaskBar::onWindowChanged);
 }
 
 bool LXQtTaskBar::acceptWindow(WId window) const
 {
-    QFlags<NET::WindowTypeMask> ignoreList;
-    ignoreList |= NET::DesktopMask;
-    ignoreList |= NET::DockMask;
-    ignoreList |= NET::SplashMask;
-    ignoreList |= NET::ToolbarMask;
-    ignoreList |= NET::MenuMask;
-    ignoreList |= NET::PopupMenuMask;
-    ignoreList |= NET::NotificationMask;
+    const NET::WindowTypes ignoreList =
+        NET::DesktopMask | NET::DockMask | NET::SplashMask | NET::ToolbarMask |
+        NET::MenuMask | NET::PopupMenuMask | NET::NotificationMask;
 
     KWindowInfo info(window, NET::WMWindowType | NET::WMState,
                      NET::WM2TransientFor);
-    if (!info.valid())
-        return false;
 
-    if (NET::typeMatchesMask(info.windowType(NET::AllTypesMask), ignoreList))
+    if (!info.valid() ||
+        NET::typeMatchesMask(info.windowType(NET::AllTypesMask), ignoreList) ||
+        (info.state() & NET::SkipTaskbar))
+    {
         return false;
+    }
 
-    if (info.state() & NET::SkipTaskbar)
-        return false;
-
-    // WM_TRANSIENT_FOR hint not set - normal window
     WId transFor = info.transientFor();
     if (transFor == 0 || transFor == window ||
         transFor == (WId)QX11Info::appRootWindow())
+    {
         return true;
+    }
 
     return false;
 }
@@ -98,33 +93,42 @@ void LXQtTaskBar::addWindow(WId window)
 {
     if (mKnownWindows.find(window) == mKnownWindows.end())
     {
-        auto group = new LXQtTaskButton(window, mPanel, this);
-        mKnownWindows[window] = group;
-        mLayout.insertWidget(mLayout.count() - 1, group);
+        auto button = new LXQtTaskButton(window, mPanel, this);
+        mLayout.insertWidget(mLayout.count() - 1, button);
+        mKnownWindows[window] = button;
     }
 }
 
-auto LXQtTaskBar::removeWindow(windowMap_t::iterator pos)
-    -> windowMap_t::iterator
+void LXQtTaskBar::removeWindow(WId window)
 {
-    LXQtTaskButton * const group = *pos;
-    auto ret = mKnownWindows.erase(pos);
-    group->deleteLater();
-    return ret;
+    auto pos = mKnownWindows.find(window);
+    if (pos != mKnownWindows.end())
+    {
+        auto button = *pos;
+        mKnownWindows.erase(pos);
+        delete button;
+    }
+}
+
+void LXQtTaskBar::onWindowAdded(WId window)
+{
+    auto pos = mKnownWindows.find(window);
+    if (pos == mKnownWindows.end() && acceptWindow(window))
+        addWindow(window);
 }
 
 void LXQtTaskBar::onActiveWindowChanged(WId window)
 {
-    LXQtTaskButton * button = mKnownWindows.value(window, nullptr);
+    auto active = mKnownWindows.value(window);
 
-    for (LXQtTaskButton * btn : qAsConst(mKnownWindows))
+    for (auto button : mKnownWindows)
     {
-        if (btn != button)
-            btn->setChecked(false);
+        if (button != active)
+            button->setChecked(false);
     }
 
-    if (button)
-        button->setChecked(true);
+    if (active)
+        active->setChecked(true);
 }
 
 void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop,
@@ -136,29 +140,15 @@ void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop,
         if (acceptWindow(window))
             addWindow(window);
         else
-            onWindowRemoved(window);
+            removeWindow(window);
     }
 
     auto button = mKnownWindows.value(window);
-    if (button == nullptr)
+    if (!button)
         return;
 
     if (prop.testFlag(NET::WMVisibleName) || prop.testFlag(NET::WMName))
         button->updateText();
     if (prop.testFlag(NET::WMIcon))
         button->updateIcon();
-}
-
-void LXQtTaskBar::onWindowAdded(WId window)
-{
-    auto const pos = mKnownWindows.find(window);
-    if (mKnownWindows.end() == pos && acceptWindow(window))
-        addWindow(window);
-}
-
-void LXQtTaskBar::onWindowRemoved(WId window)
-{
-    auto const pos = mKnownWindows.find(window);
-    if (mKnownWindows.end() != pos)
-        removeWindow(pos);
 }

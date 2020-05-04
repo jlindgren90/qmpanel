@@ -45,22 +45,17 @@ public:
     explicit LXQtTaskBar(LXQtPanel * panel);
 
 private:
+    bool acceptWindow(WId window) const;
+    void addWindow(WId window);
+    void removeWindow(WId window);
     void onWindowAdded(WId window);
-    void onWindowRemoved(WId window);
     void onActiveWindowChanged(WId window);
     void onWindowChanged(WId window, NET::Properties prop,
                          NET::Properties2 prop2);
 
-    typedef QMap<WId, LXQtTaskButton *> windowMap_t;
-
-    void addWindow(WId window);
-    windowMap_t::iterator removeWindow(windowMap_t::iterator pos);
-
     LXQtPanel * const mPanel;
     QMap<WId, LXQtTaskButton *> mKnownWindows;
     QHBoxLayout mLayout;
-
-    bool acceptWindow(WId window) const;
 };
 
 #endif // LXQTTASKBAR_H
