@@ -32,28 +32,14 @@
 
 #include "../panel/lxqtpanel.h"
 
-#include <LXQt/Settings>
-
-#include <QDebug>
-#include <XdgIcon>
-#include <QTimer>
-#include <QMenu>
+#include <KWindowSystem>
 #include <QAction>
-#include <QContextMenuEvent>
-#include <QPainter>
-#include <QDrag>
-#include <QMouseEvent>
-#include <QMimeData>
-#include <QApplication>
 #include <QDragEnterEvent>
-#include <QStylePainter>
-#include <QStyleOptionToolButton>
-#include <QDesktopWidget>
-
-#include <KWindowSystem/KWindowSystem>
-// Necessary for closeApplication()
-#include <KWindowSystem/NETWM>
+#include <QMenu>
+#include <QStyle>
+#include <QTimer>
 #include <QX11Info>
+#include <XdgIcon>
 
 /************************************************
 
@@ -65,14 +51,9 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtPanel *panel, QWidget *pare
     mIconSize(style()->pixelMetric(QStyle::PM_ToolBarIconSize)),
     mDNDTimer(new QTimer(this))
 {
-    Q_ASSERT(panel);
-
     setCheckable(true);
     setChecked(isApplicationActive());
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    setMinimumWidth(1);
-    setMinimumHeight(1);
     setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     setAcceptDrops(true);
 
@@ -82,7 +63,6 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtPanel *panel, QWidget *pare
     mDNDTimer->setSingleShot(true);
     mDNDTimer->setInterval(700);
     connect(mDNDTimer, SIGNAL(timeout()), this, SLOT(activateWithDraggable()));
-    connect(LXQt::Settings::globalSettings(), SIGNAL(iconThemeChanged()), this, SLOT(updateIcon()));
 }
 
 /************************************************
@@ -111,6 +91,12 @@ void LXQtTaskButton::updateIcon()
     int devicePixels = mIconSize * devicePixelRatioF();
     QIcon ico = KWindowSystem::icon(mWindow, devicePixels, devicePixels);
     setIcon(ico.isNull() ? XdgIcon::defaultApplicationIcon() : ico);
+}
+
+QSize LXQtTaskButton::sizeHint() const
+{
+    return {200, /* TODO: scale with DPI */
+            QToolButton::sizeHint().height()};
 }
 
 /************************************************

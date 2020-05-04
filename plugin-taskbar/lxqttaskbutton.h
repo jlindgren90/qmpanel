@@ -50,6 +50,9 @@ public:
     bool isOnDesktop(int desktop) const;
     bool isMinimized() const;
     void updateText();
+    void updateIcon();
+
+    QSize sizeHint() const override;
 
 public slots:
     void raiseApplication();
@@ -64,14 +67,12 @@ public slots:
     void resizeApplication();
     void setApplicationLayer();
 
-    void updateIcon();
-
 protected:
-    virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dragLeaveEvent(QDragLeaveEvent *event);
-    virtual void dropEvent(QDropEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    virtual void contextMenuEvent(QContextMenuEvent *event);
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     WId const mWindow;

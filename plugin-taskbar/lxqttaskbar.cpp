@@ -40,6 +40,7 @@ LXQtTaskBar::LXQtTaskBar(LXQtPanel * panel)
 {
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
+    mLayout.addStretch(1);
 
     setAcceptDrops(true);
 
@@ -99,7 +100,7 @@ void LXQtTaskBar::addWindow(WId window)
     {
         auto group = new LXQtTaskButton(window, mPanel, this);
         mKnownWindows[window] = group;
-        mLayout.addWidget(group);
+        mLayout.insertWidget(mLayout.count() - 1, group);
     }
 }
 
