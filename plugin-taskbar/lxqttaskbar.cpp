@@ -28,44 +28,29 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include <QApplication>
-#include <QDebug>
-#include <QSignalMapper>
-#include <QToolButton>
-#include <QSettings>
-#include <QList>
-#include <QMimeData>
-#include <QWheelEvent>
-#include <QFlag>
 #include <QX11Info>
-#include <QDebug>
-#include <QTimer>
-
-#include <lxqt-globalkeys.h>
-#include <LXQt/GridLayout>
-#include <XdgIcon>
+#include <KWindowSystem>
 
 #include "lxqttaskbar.h"
-
-using namespace LXQt;
 
 /************************************************
 
 ************************************************/
 LXQtTaskBar::LXQtTaskBar(Plugin *plugin, QWidget *parent) :
-    QFrame(parent),
-    mButtonWidth(400),
-    mButtonHeight(100),
+    QWidget(parent),
+    mLayout(this),
     mPlugin(plugin)
 {
-    mLayout = new LXQt::GridLayout(this);
-    setLayout(mLayout);
-    mLayout->setMargin(0);
-    mLayout->setStretch(LXQt::GridLayout::StretchHorizontal | LXQt::GridLayout::StretchVertical);
+    mLayout.setMargin(0);
+    mLayout.setSpacing(0);
 
     setAcceptDrops(true);
-    settingsChanged();
-    realign();
+
+    for (auto window: KWindowSystem::stackingOrder())
+    {
+        if (acceptWindow(window))
+            addWindow(window);
+    }
 
     connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this, &LXQtTaskBar::onWindowAdded);
     connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this, &LXQtTaskBar::onWindowRemoved);
@@ -122,7 +107,7 @@ void LXQtTaskBar::addWindow(WId window)
     {
         auto group = new LXQtTaskButton(window, this, this);
         mKnownWindows[window] = group;
-        mLayout->addWidget(group);
+        mLayout.addWidget(group);
     }
 }
 
@@ -190,34 +175,6 @@ void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop, NET::Propert
 /************************************************
 
  ************************************************/
-void LXQtTaskBar::refreshTaskList()
-{
-    QList<WId> new_list;
-    // Just add new windows to groups, deleting is up to the groups
-    const auto wnds = KWindowSystem::stackingOrder();
-    for (auto const wnd: wnds)
-    {
-        if (acceptWindow(wnd))
-        {
-            new_list << wnd;
-            addWindow(wnd);
-        }
-    }
-
-    //emulate windowRemoved if known window not reported by KWindowSystem
-    for (auto i = mKnownWindows.begin(), i_e = mKnownWindows.end(); i != i_e; )
-    {
-        if (0 > new_list.indexOf(i.key()))
-        {
-            i = removeWindow(i);
-        } else
-            ++i;
-    }
-}
-
-/************************************************
-
- ************************************************/
 void LXQtTaskBar::onWindowAdded(WId window)
 {
     auto const pos = mKnownWindows.find(window);
@@ -235,34 +192,4 @@ void LXQtTaskBar::onWindowRemoved(WId window)
     {
         removeWindow(pos);
     }
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::settingsChanged()
-{
-    mButtonWidth = 200; /* TODO: scale by DPI */
-    mButtonHeight = 100;
-
-    refreshTaskList();
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskBar::realign()
-{
-    mLayout->setEnabled(false);
-
-    QSize maxSize = QSize(mButtonWidth, mButtonHeight);
-    QSize minSize = QSize(0, 0);
-
-    mLayout->setRowCount(1);
-    mLayout->setColumnCount(0);
-
-    mLayout->setCellMinimumSize(minSize);
-    mLayout->setCellMaximumSize(maxSize);
-    mLayout->setDirection(LXQt::GridLayout::LeftToRight);
-    mLayout->setEnabled(true);
 }

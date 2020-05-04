@@ -35,62 +35,31 @@
 #include "../panel/plugin.h"
 #include "lxqttaskbutton.h"
 
-#include <QFrame>
-#include <QBoxLayout>
+#include <QHBoxLayout>
 #include <QMap>
-#include <lxqt-globalkeys.h>
-#include <KWindowSystem/KWindowSystem>
-#include <KWindowSystem/KWindowInfo>
-#include <KWindowSystem/NETWM>
+#include <NETWM>
 
-class QSignalMapper;
-class LXQtTaskButton;
-class ElidedButtonStyle;
-
-namespace LXQt {
-class GridLayout;
-}
-
-class LXQtTaskBar : public QFrame
+class LXQtTaskBar : public QWidget
 {
-    Q_OBJECT
-
 public:
     explicit LXQtTaskBar(Plugin *plugin, QWidget* parent = 0);
 
-    void realign();
-
-    int buttonWidth() const { return mButtonWidth; }
     inline LXQtPanel * panel() const { return mPlugin->panel(); }
     inline Plugin * plugin() const { return mPlugin; }
 
-public slots:
-    void settingsChanged();
-
-signals:
-    void buttonStyleRefreshed(Qt::ToolButtonStyle buttonStyle);
-
-private slots:
-    void refreshTaskList();
+private:
     void onWindowAdded(WId window);
     void onWindowRemoved(WId window);
     void onActiveWindowChanged(WId window);
     void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
 
-private:
     typedef QMap<WId, LXQtTaskButton*> windowMap_t;
 
-private:
     void addWindow(WId window);
     windowMap_t::iterator removeWindow(windowMap_t::iterator pos);
 
-private:
     QMap<WId, LXQtTaskButton*> mKnownWindows; //!< Ids of known windows (mapping to buttons/groups)
-    LXQt::GridLayout *mLayout;
-
-    // Settings
-    int mButtonWidth;
-    int mButtonHeight;
+    QHBoxLayout mLayout;
 
     bool acceptWindow(WId window) const;
 
