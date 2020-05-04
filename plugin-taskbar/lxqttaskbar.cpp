@@ -88,14 +88,7 @@ bool LXQtTaskBar::acceptWindow(WId window) const
     if (transFor == 0 || transFor == window || transFor == (WId) QX11Info::appRootWindow())
         return true;
 
-    info = KWindowInfo(transFor, NET::WMWindowType);
-
-    QFlags<NET::WindowTypeMask> normalFlag;
-    normalFlag |= NET::NormalMask;
-    normalFlag |= NET::DialogMask;
-    normalFlag |= NET::UtilityMask;
-
-    return !NET::typeMatchesMask(info.windowType(NET::AllTypesMask), normalFlag);
+    return false;
 }
 
 /************************************************
@@ -136,11 +129,7 @@ void LXQtTaskBar::onActiveWindowChanged(WId window)
     }
 
     if (button)
-    {
         button->setChecked(true);
-        if (button->hasUrgencyHint())
-            button->setUrgencyHint(false);
-    }
 }
 
 /************************************************
@@ -164,12 +153,6 @@ void LXQtTaskBar::onWindowChanged(WId window, NET::Properties prop, NET::Propert
         button->updateText();
     if (prop.testFlag(NET::WMIcon))
         button->updateIcon();
-
-    if (prop.testFlag(NET::WMState))
-    {
-        KWindowInfo info{window, NET::WMState};
-        button->setUrgencyHint(info.hasState(NET::DemandsAttention));
-    }
 }
 
 /************************************************

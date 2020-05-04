@@ -52,9 +52,6 @@ public:
     bool isApplicationActive() const;
     WId windowId() const { return mWindow; }
 
-    bool hasUrgencyHint() const { return mUrgencyHint; }
-    void setUrgencyHint(bool set);
-
     bool isOnDesktop(int desktop) const;
     bool isOnCurrentScreen() const;
     bool isMinimized() const;
@@ -90,7 +87,6 @@ protected:
 
 private:
     WId mWindow;
-    bool mUrgencyHint;
     LXQtTaskBar * mParentTaskBar;
     Plugin * mPlugin;
     int mIconSize;

@@ -59,7 +59,6 @@
 LXQtTaskButton::LXQtTaskButton(const WId window, LXQtTaskBar * taskbar, QWidget *parent) :
     QToolButton(parent),
     mWindow(window),
-    mUrgencyHint(false),
     mParentTaskBar(taskbar),
     mPlugin(mParentTaskBar->plugin()),
     mIconSize(style()->pixelMetric(QStyle::PM_ToolBarIconSize)),
@@ -183,7 +182,6 @@ void LXQtTaskButton::activateWithDraggable()
 void LXQtTaskButton::raiseApplication()
 {
     KWindowSystem::activateWindow(mWindow);
-    setUrgencyHint(false);
 }
 
 /************************************************
@@ -493,24 +491,6 @@ void LXQtTaskButton::contextMenuEvent(QContextMenuEvent* event)
     connect(a, SIGNAL(triggered(bool)), this, SLOT(closeApplication()));
     menu->setGeometry(mParentTaskBar->panel()->calcPopupPos(mapToGlobal(event->pos()), menu->sizeHint()));
     menu->show();
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskButton::setUrgencyHint(bool set)
-{
-    if (mUrgencyHint == set)
-        return;
-
-    if (!set)
-        KWindowSystem::demandAttention(mWindow, false);
-
-    mUrgencyHint = set;
-    setProperty("urgent", set);
-    style()->unpolish(this);
-    style()->polish(this);
-    update();
 }
 
 /************************************************
