@@ -28,13 +28,15 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
+#include "lxqttaskbar.h"
+
 #include <KWindowSystem>
 #include <QX11Info>
 
-#include "lxqttaskbar.h"
+#include "../panel/lxqtpanel.h"
 
-LXQtTaskBar::LXQtTaskBar(Plugin * plugin, QWidget * parent)
-    : QWidget(parent), mLayout(this), mPlugin(plugin)
+LXQtTaskBar::LXQtTaskBar(LXQtPanel * panel)
+    : QWidget(panel), mPanel(panel), mLayout(this)
 {
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
@@ -95,7 +97,7 @@ void LXQtTaskBar::addWindow(WId window)
 {
     if (mKnownWindows.find(window) == mKnownWindows.end())
     {
-        auto group = new LXQtTaskButton(window, this, this);
+        auto group = new LXQtTaskButton(window, mPanel, this);
         mKnownWindows[window] = group;
         mLayout.addWidget(group);
     }

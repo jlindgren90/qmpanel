@@ -31,20 +31,18 @@
 #ifndef LXQTTASKBAR_H
 #define LXQTTASKBAR_H
 
-#include "../panel/plugin.h"
 #include "lxqttaskbutton.h"
 
 #include <NETWM>
 #include <QHBoxLayout>
 #include <QMap>
 
+class LXQtPanel;
+
 class LXQtTaskBar : public QWidget
 {
 public:
-    explicit LXQtTaskBar(Plugin * plugin, QWidget * parent = 0);
-
-    inline LXQtPanel * panel() const { return mPlugin->panel(); }
-    inline Plugin * plugin() const { return mPlugin; }
+    explicit LXQtTaskBar(LXQtPanel * panel);
 
 private:
     void onWindowAdded(WId window);
@@ -58,12 +56,11 @@ private:
     void addWindow(WId window);
     windowMap_t::iterator removeWindow(windowMap_t::iterator pos);
 
+    LXQtPanel * const mPanel;
     QMap<WId, LXQtTaskButton *> mKnownWindows;
     QHBoxLayout mLayout;
 
     bool acceptWindow(WId window) const;
-
-    Plugin * mPlugin;
 };
 
 #endif // LXQTTASKBAR_H

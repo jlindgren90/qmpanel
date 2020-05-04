@@ -32,20 +32,15 @@
 #define LXQTTASKBUTTON_H
 
 #include <QToolButton>
-#include <QProxyStyle>
 
-class QPainter;
-class QPalette;
-class QMimeData;
-class LXQtTaskBar;
-class Plugin;
+class LXQtPanel;
 
 class LXQtTaskButton : public QToolButton
 {
     Q_OBJECT
 
 public:
-    explicit LXQtTaskButton(const WId window, LXQtTaskBar * taskBar, QWidget *parent = 0);
+    explicit LXQtTaskButton(const WId window, LXQtPanel * panel, QWidget *parent = 0);
     virtual ~LXQtTaskButton();
 
     bool isApplicationHidden() const;
@@ -53,11 +48,8 @@ public:
     WId windowId() const { return mWindow; }
 
     bool isOnDesktop(int desktop) const;
-    bool isOnCurrentScreen() const;
     bool isMinimized() const;
     void updateText();
-
-    LXQtTaskBar * parentTaskBar() const {return mParentTaskBar;}
 
 public slots:
     void raiseApplication();
@@ -81,14 +73,9 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
     virtual void contextMenuEvent(QContextMenuEvent *event);
 
-    void setWindowId(WId wid) {mWindow = wid;}
-
-    inline Plugin * plugin() const { return mPlugin; }
-
 private:
-    WId mWindow;
-    LXQtTaskBar * mParentTaskBar;
-    Plugin * mPlugin;
+    WId const mWindow;
+    LXQtPanel * const mPanel;
     int mIconSize;
 
     // Timer for when draggind something into a button (the button's window

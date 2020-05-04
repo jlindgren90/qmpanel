@@ -30,6 +30,8 @@
 #include "lxqttaskbutton.h"
 #include "lxqttaskbar.h"
 
+#include "../panel/lxqtpanel.h"
+
 #include <LXQt/Settings>
 
 #include <QDebug>
@@ -56,15 +58,14 @@
 /************************************************
 
 ************************************************/
-LXQtTaskButton::LXQtTaskButton(const WId window, LXQtTaskBar * taskbar, QWidget *parent) :
+LXQtTaskButton::LXQtTaskButton(const WId window, LXQtPanel *panel, QWidget *parent) :
     QToolButton(parent),
     mWindow(window),
-    mParentTaskBar(taskbar),
-    mPlugin(mParentTaskBar->plugin()),
+    mPanel(panel),
     mIconSize(style()->pixelMetric(QStyle::PM_ToolBarIconSize)),
     mDNDTimer(new QTimer(this))
 {
-    Q_ASSERT(taskbar);
+    Q_ASSERT(panel);
 
     setCheckable(true);
     setChecked(isApplicationActive());
@@ -489,7 +490,7 @@ void LXQtTaskButton::contextMenuEvent(QContextMenuEvent* event)
     menu->addSeparator();
     a = menu->addAction(XdgIcon::fromTheme("process-stop"), tr("&Close"));
     connect(a, SIGNAL(triggered(bool)), this, SLOT(closeApplication()));
-    menu->setGeometry(mParentTaskBar->panel()->calcPopupPos(mapToGlobal(event->pos()), menu->sizeHint()));
+    menu->setGeometry(mPanel->calcPopupPos(mapToGlobal(event->pos()), menu->sizeHint()));
     menu->show();
 }
 
@@ -499,11 +500,6 @@ void LXQtTaskButton::contextMenuEvent(QContextMenuEvent* event)
 bool LXQtTaskButton::isOnDesktop(int desktop) const
 {
     return KWindowInfo(mWindow, NET::WMDesktop).isOnDesktop(desktop);
-}
-
-bool LXQtTaskButton::isOnCurrentScreen() const
-{
-    return QApplication::desktop()->screenGeometry(parentTaskBar()).intersects(KWindowInfo(mWindow, NET::WMFrameExtents).frameGeometry());
 }
 
 bool LXQtTaskButton::isMinimized() const
