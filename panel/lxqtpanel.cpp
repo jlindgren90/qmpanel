@@ -30,7 +30,7 @@
 
 #include "../plugin-mainmenu/mainmenu.h"
 #include "../plugin-quicklaunch/quicklaunch.h"
-#include "../plugin-taskbar/lxqttaskbar.h"
+#include "../plugin-taskbar/taskbar.h"
 #include "../plugin-tray/lxqttrayplugin.h"
 #include "../plugin-worldclock/lxqtworldclock.h"
 
@@ -54,7 +54,7 @@ LXQtPanel::LXQtPanel() : mLayout(this)
 
     mLayout.addWidget(new MainMenuButton(this));
     mLayout.addWidget(new QuickLaunch(this));
-    mLayout.addWidget(new LXQtTaskBar(this));
+    mLayout.addWidget(new TaskBar(this));
     mLayout.addWidget((new LXQtTrayPlugin(this))->widget());
     mLayout.addWidget((new LXQtWorldClock(this))->widget());
 

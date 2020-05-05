@@ -28,19 +28,19 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef LXQTTASKBAR_H
-#define LXQTTASKBAR_H
+#ifndef TASKBAR_H
+#define TASKBAR_H
 
-#include "lxqttaskbutton.h"
+#include "taskbutton.h"
 
 #include <NETWM>
 #include <QHBoxLayout>
 #include <QMap>
 
-class LXQtTaskBar : public QWidget
+class TaskBar : public QWidget
 {
 public:
-    explicit LXQtTaskBar(QWidget * parent);
+    explicit TaskBar(QWidget * parent);
 
 private:
     bool acceptWindow(WId window) const;
@@ -51,8 +51,8 @@ private:
     void onWindowChanged(WId window, NET::Properties prop,
                          NET::Properties2 prop2);
 
-    QMap<WId, LXQtTaskButton *> mKnownWindows;
+    QMap<WId, TaskButton *> mKnownWindows;
     QHBoxLayout mLayout;
 };
 
-#endif // LXQTTASKBAR_H
+#endif // TASKBAR_H

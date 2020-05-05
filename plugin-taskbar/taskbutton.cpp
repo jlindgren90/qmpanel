@@ -27,7 +27,7 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include "lxqttaskbutton.h"
+#include "taskbutton.h"
 
 #include <KWindowSystem>
 #include <NETWM>
@@ -36,7 +36,7 @@
 #include <QTimer>
 #include <QX11Info>
 
-LXQtTaskButton::LXQtTaskButton(const WId window, QWidget * parent)
+TaskButton::TaskButton(const WId window, QWidget * parent)
     : QToolButton(parent), mWindow(window)
 {
     setCheckable(true);
@@ -58,7 +58,7 @@ LXQtTaskButton::LXQtTaskButton(const WId window, QWidget * parent)
     });
 }
 
-void LXQtTaskButton::updateText()
+void TaskButton::updateText()
 {
     KWindowInfo info(mWindow, NET::WMVisibleName | NET::WMName);
     QString title = info.visibleName();
@@ -69,39 +69,39 @@ void LXQtTaskButton::updateText()
     setToolTip(title);
 }
 
-void LXQtTaskButton::updateIcon()
+void TaskButton::updateIcon()
 {
     int size = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
     size *= devicePixelRatioF();
     setIcon(KWindowSystem::icon(mWindow, size, size));
 }
 
-QSize LXQtTaskButton::sizeHint() const
+QSize TaskButton::sizeHint() const
 {
     return {200, /* TODO: scale with DPI */
             QToolButton::sizeHint().height()};
 }
 
-void LXQtTaskButton::dragEnterEvent(QDragEnterEvent * event)
+void TaskButton::dragEnterEvent(QDragEnterEvent * event)
 {
     mTimer.start();
     event->acceptProposedAction();
     QToolButton::dragEnterEvent(event);
 }
 
-void LXQtTaskButton::dragLeaveEvent(QDragLeaveEvent * event)
+void TaskButton::dragLeaveEvent(QDragLeaveEvent * event)
 {
     mTimer.stop();
     QToolButton::dragLeaveEvent(event);
 }
 
-void LXQtTaskButton::dropEvent(QDropEvent * event)
+void TaskButton::dropEvent(QDropEvent * event)
 {
     mTimer.stop();
     QToolButton::dropEvent(event);
 }
 
-void LXQtTaskButton::mousePressEvent(QMouseEvent * event)
+void TaskButton::mousePressEvent(QMouseEvent * event)
 {
     if (event->button() == Qt::LeftButton)
     {
@@ -119,7 +119,7 @@ void LXQtTaskButton::mousePressEvent(QMouseEvent * event)
     event->accept();
 }
 
-void LXQtTaskButton::mouseReleaseEvent(QMouseEvent * event)
+void TaskButton::mouseReleaseEvent(QMouseEvent * event)
 {
     if (mHideOnRelease && event->button() == Qt::LeftButton)
     {

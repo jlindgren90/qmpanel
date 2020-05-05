@@ -1,17 +1,13 @@
 set(PLUGIN "taskbar")
 
 set(HEADERS
-    lxqttaskbar.h
-    lxqttaskbutton.h
+    taskbar.h
+    taskbutton.h
 )
 
 set(SOURCES
-    lxqttaskbar.cpp
-    lxqttaskbutton.cpp
-)
-
-set(LIBRARIES
-    Qt5Xdg
+    taskbar.cpp
+    taskbutton.cpp
 )
 
 BUILD_LXQT_PLUGIN(${PLUGIN})

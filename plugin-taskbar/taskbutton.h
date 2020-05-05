@@ -27,16 +27,16 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef LXQTTASKBUTTON_H
-#define LXQTTASKBUTTON_H
+#ifndef TASKBUTTON_H
+#define TASKBUTTON_H
 
 #include <QTimer>
 #include <QToolButton>
 
-class LXQtTaskButton : public QToolButton
+class TaskButton : public QToolButton
 {
 public:
-    explicit LXQtTaskButton(const WId window, QWidget * parent);
+    explicit TaskButton(const WId window, QWidget * parent);
 
     void updateText();
     void updateIcon();
@@ -56,4 +56,4 @@ private:
     bool mHideOnRelease = false;
 };
 
-#endif // LXQTTASKBUTTON_H
+#endif // TASKBUTTON_H
