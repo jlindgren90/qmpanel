@@ -27,26 +27,21 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "lxqtworldclock.h"
+#include "../panel/lxqtpanel.h"
 
-#include <QCalendarWidget>
 #include <QMouseEvent>
 
-class ClockLabel : public QLabel
+ClockLabel::ClockLabel(LXQtPanel * panel)
+    : QLabel(panel), mPanel(panel)
 {
-public:
-    ClockLabel(Plugin * plugin, QWidget * parent)
-        : QLabel(parent), mPlugin(plugin)
-    {
-        mCalendar.setWindowFlags(Qt::Popup);
-    }
+    mCalendar.setWindowFlags(Qt::Popup);
+    mTimer.setInterval(10000);
+    mTimer.start();
 
-protected:
-    void mousePressEvent(QMouseEvent * e) override;
+    QObject::connect(&mTimer, &QTimer::timeout, this, &ClockLabel::updateTime);
 
-private:
-    Plugin * const mPlugin;
-    QCalendarWidget mCalendar;
-};
+    updateTime();
+}
 
 void ClockLabel::mousePressEvent(QMouseEvent * e)
 {
@@ -57,7 +52,7 @@ void ClockLabel::mousePressEvent(QMouseEvent * e)
         else
         {
             auto size = mCalendar.sizeHint();
-            mCalendar.move(mPlugin->calcPopupPos(size).topLeft());
+            mCalendar.move(mPanel->calcPopupPos(this, size).topLeft());
             mCalendar.show();
         }
 
@@ -68,18 +63,7 @@ void ClockLabel::mousePressEvent(QMouseEvent * e)
     QLabel::mousePressEvent(e);
 }
 
-LXQtWorldClock::LXQtWorldClock(LXQtPanel * lxqtPanel)
-    : Plugin(lxqtPanel), mLabel(new ClockLabel(this, lxqtPanel))
+void ClockLabel::updateTime()
 {
-    mTimer.setInterval(10000);
-    mTimer.start();
-
-    QObject::connect(&mTimer, &QTimer::timeout, [this]() { updateLabel(); });
-
-    updateLabel();
-}
-
-void LXQtWorldClock::updateLabel()
-{
-    mLabel->setText(QDateTime::currentDateTime().toString("ddd MMM d, h:mm a"));
+    setText(QDateTime::currentDateTime().toString("ddd MMM d, h:mm a"));
 }

@@ -2,7 +2,6 @@ set(PROJECT lxqt-panel)
 
 set(PRIV_HEADERS
     lxqtpanel.h
-    plugin.h
 )
 
 set(SOURCES

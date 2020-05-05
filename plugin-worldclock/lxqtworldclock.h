@@ -29,22 +29,25 @@
 #ifndef LXQT_PANEL_WORLDCLOCK_H
 #define LXQT_PANEL_WORLDCLOCK_H
 
+#include <QCalendarWidget>
 #include <QLabel>
 #include <QTimer>
 
-#include "../panel/plugin.h"
+class LXQtPanel;
 
-class LXQtWorldClock : public Plugin
+class ClockLabel : public QLabel
 {
 public:
-    explicit LXQtWorldClock(LXQtPanel * lxqtPanel);
+    ClockLabel(LXQtPanel * panel);
 
-    QWidget * widget() override { return mLabel; }
+protected:
+    void mousePressEvent(QMouseEvent * e) override;
 
 private:
-    void updateLabel();
+    void updateTime();
 
-    QLabel * mLabel;
+    LXQtPanel * const mPanel;
+    QCalendarWidget mCalendar;
     QTimer mTimer;
 };
 

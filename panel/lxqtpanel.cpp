@@ -26,7 +26,6 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "lxqtpanel.h"
-#include "plugin.h"
 
 #include "../plugin-mainmenu/mainmenu.h"
 #include "../plugin-quicklaunch/quicklaunch.h"
@@ -56,7 +55,7 @@ LXQtPanel::LXQtPanel() : mLayout(this)
     mLayout.addWidget(new QuickLaunch(this));
     mLayout.addWidget(new TaskBar(this));
     mLayout.addWidget(new LXQtTray(this));
-    mLayout.addWidget((new LXQtWorldClock(this))->widget());
+    mLayout.addWidget(new ClockLabel(this));
 
     mLayout.setStretch(2, 1); // stretch taskbar
 
