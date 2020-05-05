@@ -52,6 +52,13 @@ TaskButton::TaskButton(const WId window, QWidget * parent)
     mTimer.setSingleShot(true);
     mTimer.setInterval(500);
 
+    connect(this, &QToolButton::clicked, [window](bool checked) {
+        if (checked)
+            KWindowSystem::forceActiveWindow(window);
+        else
+            KWindowSystem::minimizeWindow(window);
+    });
+
     connect(&mTimer, &QTimer::timeout, [window]() {
         KWindowSystem::forceActiveWindow(window);
         xcb_flush(QX11Info::connection());
@@ -103,29 +110,13 @@ void TaskButton::dropEvent(QDropEvent * event)
 
 void TaskButton::mousePressEvent(QMouseEvent * event)
 {
-    if (event->button() == Qt::LeftButton)
-    {
-        if (isChecked())
-            mHideOnRelease = true;
-        else
-            KWindowSystem::forceActiveWindow(mWindow);
-    }
-    else if (event->button() == Qt::MiddleButton)
+    if (event->button() == Qt::MiddleButton)
     {
         NETRootInfo info(QX11Info::connection(), NET::CloseWindow);
         info.closeWindowRequest(mWindow);
+        event->accept();
+        return;
     }
 
-    event->accept();
-}
-
-void TaskButton::mouseReleaseEvent(QMouseEvent * event)
-{
-    if (mHideOnRelease && event->button() == Qt::LeftButton)
-    {
-        KWindowSystem::minimizeWindow(mWindow);
-        mHideOnRelease = false;
-    }
-
-    event->accept();
+    QToolButton::mousePressEvent(event);
 }
