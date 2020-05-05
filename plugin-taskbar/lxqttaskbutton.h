@@ -31,14 +31,13 @@
 #ifndef LXQTTASKBUTTON_H
 #define LXQTTASKBUTTON_H
 
+#include <QTimer>
 #include <QToolButton>
 
 class LXQtPanel;
 
 class LXQtTaskButton : public QToolButton
 {
-    Q_OBJECT
-
 public:
     explicit LXQtTaskButton(const WId window, LXQtPanel * panel, QWidget *parent = 0);
 
@@ -56,20 +55,8 @@ protected:
 private:
     WId const mWindow;
     LXQtPanel * const mPanel;
+    QTimer mTimer;
     int mIconSize;
-
-    // Timer for when draggind something into a button (the button's window
-    // must be activated so that the use can continue dragging to the window
-    QTimer * mDNDTimer;
-
-private slots:
-    void activateWithDraggable();
-
-signals:
-    void dropped(QObject * dragSource, QPoint const & pos);
-    void dragging(QObject * dragSource, QPoint const & pos);
 };
-
-typedef QHash<WId,LXQtTaskButton*> LXQtTaskButtonHash;
 
 #endif // LXQTTASKBUTTON_H

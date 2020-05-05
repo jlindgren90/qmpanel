@@ -48,8 +48,7 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtPanel *panel, QWidget *pare
     QToolButton(parent),
     mWindow(window),
     mPanel(panel),
-    mIconSize(style()->pixelMetric(QStyle::PM_ToolBarIconSize)),
-    mDNDTimer(new QTimer(this))
+    mIconSize(style()->pixelMetric(QStyle::PM_ToolBarIconSize))
 {
     setCheckable(true);
     setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -58,12 +57,16 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtPanel *panel, QWidget *pare
     updateText();
     updateIcon();
 
-    if(KWindowSystem::activeWindow() == mWindow)
+    if(KWindowSystem::activeWindow() == window)
         setChecked(true);
 
-    mDNDTimer->setSingleShot(true);
-    mDNDTimer->setInterval(700);
-    connect(mDNDTimer, SIGNAL(timeout()), this, SLOT(activateWithDraggable()));
+    mTimer.setSingleShot(true);
+    mTimer.setInterval(500);
+
+    connect(&mTimer, &QTimer::timeout, [window](){
+        KWindowSystem::forceActiveWindow(window);
+        xcb_flush(QX11Info::connection());
+    });
 }
 
 /************************************************
@@ -98,22 +101,20 @@ QSize LXQtTaskButton::sizeHint() const
  ************************************************/
 void LXQtTaskButton::dragEnterEvent(QDragEnterEvent *event)
 {
-    // It must be here otherwise dragLeaveEvent and dragMoveEvent won't be called
-    // on the other hand drop and dragmove events of parent widget won't be called
+    mTimer.start();
     event->acceptProposedAction();
-    mDNDTimer->start();
     QToolButton::dragEnterEvent(event);
 }
 
 void LXQtTaskButton::dragLeaveEvent(QDragLeaveEvent *event)
 {
-    mDNDTimer->stop();
+    mTimer.stop();
     QToolButton::dragLeaveEvent(event);
 }
 
 void LXQtTaskButton::dropEvent(QDropEvent *event)
 {
-    mDNDTimer->stop();
+    mTimer.stop();
     QToolButton::dropEvent(event);
 }
 
@@ -127,7 +128,7 @@ void LXQtTaskButton::mousePressEvent(QMouseEvent* event)
         if (isChecked())
             KWindowSystem::minimizeWindow(mWindow);
         else
-            KWindowSystem::activateWindow(mWindow);
+            KWindowSystem::forceActiveWindow(mWindow);
     }
     else if(event->button() == Qt::MiddleButton)
     {
@@ -135,15 +136,4 @@ void LXQtTaskButton::mousePressEvent(QMouseEvent* event)
     }
 
     event->accept();
-}
-
-/************************************************
-
- ************************************************/
-void LXQtTaskButton::activateWithDraggable()
-{
-    // raise app in any time when there is a drag
-    // in progress to allow drop it into an app
-    KWindowSystem::activateWindow(mWindow);
-    KWindowSystem::forceActiveWindow(mWindow);
 }
