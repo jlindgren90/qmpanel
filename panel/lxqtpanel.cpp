@@ -31,7 +31,7 @@
 #include "../plugin-quicklaunch/quicklaunch.h"
 #include "../plugin-taskbar/taskbar.h"
 #include "../plugin-tray/lxqttray.h"
-#include "../plugin-worldclock/lxqtworldclock.h"
+#include "../plugin-worldclock/clocklabel.h"
 
 #include <QApplication>
 #include <QScreen>

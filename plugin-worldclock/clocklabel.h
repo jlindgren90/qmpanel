@@ -26,8 +26,8 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef LXQT_PANEL_WORLDCLOCK_H
-#define LXQT_PANEL_WORLDCLOCK_H
+#ifndef CLOCKLABEL_H
+#define CLOCKLABEL_H
 
 #include <QCalendarWidget>
 #include <QLabel>
@@ -51,4 +51,4 @@ private:
     QTimer mTimer;
 };
 
-#endif // LXQT_PANEL_WORLDCLOCK_H
+#endif // CLOCKLABEL_H

@@ -1,11 +1,11 @@
 set(PLUGIN "worldclock")
 
 set(HEADERS
-    lxqtworldclock.h
+    clocklabel.h
 )
 
 set(SOURCES
-    lxqtworldclock.cpp
+    clocklabel.cpp
 )
 
 BUILD_LXQT_PLUGIN(${PLUGIN})
