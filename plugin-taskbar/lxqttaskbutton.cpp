@@ -28,27 +28,16 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "lxqttaskbutton.h"
-#include "lxqttaskbar.h"
-
-#include "../panel/lxqtpanel.h"
 
 #include <KWindowSystem>
-#include <QAction>
+#include <NETWM>
 #include <QDragEnterEvent>
-#include <QMenu>
 #include <QStyle>
 #include <QTimer>
 #include <QX11Info>
-#include <XdgIcon>
 
-/************************************************
-
-************************************************/
-LXQtTaskButton::LXQtTaskButton(const WId window, LXQtPanel *panel, QWidget *parent) :
-    QToolButton(parent),
-    mWindow(window),
-    mPanel(panel),
-    mIconSize(style()->pixelMetric(QStyle::PM_ToolBarIconSize))
+LXQtTaskButton::LXQtTaskButton(const WId window, QWidget * parent)
+    : QToolButton(parent), mWindow(window)
 {
     setCheckable(true);
     setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -57,37 +46,34 @@ LXQtTaskButton::LXQtTaskButton(const WId window, LXQtPanel *panel, QWidget *pare
     updateText();
     updateIcon();
 
-    if(KWindowSystem::activeWindow() == window)
+    if (KWindowSystem::activeWindow() == window)
         setChecked(true);
 
     mTimer.setSingleShot(true);
     mTimer.setInterval(500);
 
-    connect(&mTimer, &QTimer::timeout, [window](){
+    connect(&mTimer, &QTimer::timeout, [window]() {
         KWindowSystem::forceActiveWindow(window);
         xcb_flush(QX11Info::connection());
     });
 }
 
-/************************************************
-
- ************************************************/
 void LXQtTaskButton::updateText()
 {
     KWindowInfo info(mWindow, NET::WMVisibleName | NET::WMName);
-    QString title = info.visibleName().isEmpty() ? info.name() : info.visibleName();
+    QString title = info.visibleName();
+    if (title.isEmpty())
+        title = info.name();
+
     setText(title.replace("&", "&&"));
     setToolTip(title);
 }
 
-/************************************************
-
- ************************************************/
 void LXQtTaskButton::updateIcon()
 {
-    int devicePixels = mIconSize * devicePixelRatioF();
-    QIcon ico = KWindowSystem::icon(mWindow, devicePixels, devicePixels);
-    setIcon(ico.isNull() ? XdgIcon::defaultApplicationIcon() : ico);
+    int size = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
+    size *= devicePixelRatioF();
+    setIcon(KWindowSystem::icon(mWindow, size, size));
 }
 
 QSize LXQtTaskButton::sizeHint() const
@@ -96,43 +82,38 @@ QSize LXQtTaskButton::sizeHint() const
             QToolButton::sizeHint().height()};
 }
 
-/************************************************
-
- ************************************************/
-void LXQtTaskButton::dragEnterEvent(QDragEnterEvent *event)
+void LXQtTaskButton::dragEnterEvent(QDragEnterEvent * event)
 {
     mTimer.start();
     event->acceptProposedAction();
     QToolButton::dragEnterEvent(event);
 }
 
-void LXQtTaskButton::dragLeaveEvent(QDragLeaveEvent *event)
+void LXQtTaskButton::dragLeaveEvent(QDragLeaveEvent * event)
 {
     mTimer.stop();
     QToolButton::dragLeaveEvent(event);
 }
 
-void LXQtTaskButton::dropEvent(QDropEvent *event)
+void LXQtTaskButton::dropEvent(QDropEvent * event)
 {
     mTimer.stop();
     QToolButton::dropEvent(event);
 }
 
-/************************************************
-
- ************************************************/
-void LXQtTaskButton::mousePressEvent(QMouseEvent* event)
+void LXQtTaskButton::mousePressEvent(QMouseEvent * event)
 {
-    if(event->button() == Qt::LeftButton)
+    if (event->button() == Qt::LeftButton)
     {
         if (isChecked())
             KWindowSystem::minimizeWindow(mWindow);
         else
             KWindowSystem::forceActiveWindow(mWindow);
     }
-    else if(event->button() == Qt::MiddleButton)
+    else if (event->button() == Qt::MiddleButton)
     {
-        NETRootInfo(QX11Info::connection(), NET::CloseWindow).closeWindowRequest(mWindow);
+        NETRootInfo info(QX11Info::connection(), NET::CloseWindow);
+        info.closeWindowRequest(mWindow);
     }
 
     event->accept();

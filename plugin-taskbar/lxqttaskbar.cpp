@@ -33,10 +33,7 @@
 #include <KWindowSystem>
 #include <QX11Info>
 
-#include "../panel/lxqtpanel.h"
-
-LXQtTaskBar::LXQtTaskBar(LXQtPanel * panel)
-    : QWidget(panel), mPanel(panel), mLayout(this)
+LXQtTaskBar::LXQtTaskBar(QWidget * parent) : QWidget(parent), mLayout(this)
 {
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
@@ -93,7 +90,7 @@ void LXQtTaskBar::addWindow(WId window)
 {
     if (mKnownWindows.find(window) == mKnownWindows.end())
     {
-        auto button = new LXQtTaskButton(window, mPanel, this);
+        auto button = new LXQtTaskButton(window, this);
         mLayout.insertWidget(mLayout.count() - 1, button);
         mKnownWindows[window] = button;
     }
@@ -120,7 +117,7 @@ void LXQtTaskBar::onWindowAdded(WId window)
 void LXQtTaskBar::onActiveWindowChanged(WId window)
 {
     auto active = mKnownWindows.value(window);
-    if(!active)
+    if (!active)
     {
         KWindowInfo info(window, 0, NET::WM2TransientFor);
         active = mKnownWindows.value(info.transientFor());

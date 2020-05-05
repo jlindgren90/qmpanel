@@ -37,12 +37,10 @@
 #include <QHBoxLayout>
 #include <QMap>
 
-class LXQtPanel;
-
 class LXQtTaskBar : public QWidget
 {
 public:
-    explicit LXQtTaskBar(LXQtPanel * panel);
+    explicit LXQtTaskBar(QWidget * parent);
 
 private:
     bool acceptWindow(WId window) const;
@@ -53,7 +51,6 @@ private:
     void onWindowChanged(WId window, NET::Properties prop,
                          NET::Properties2 prop2);
 
-    LXQtPanel * const mPanel;
     QMap<WId, LXQtTaskButton *> mKnownWindows;
     QHBoxLayout mLayout;
 };

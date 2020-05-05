@@ -27,19 +27,16 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef LXQTTASKBUTTON_H
 #define LXQTTASKBUTTON_H
 
 #include <QTimer>
 #include <QToolButton>
 
-class LXQtPanel;
-
 class LXQtTaskButton : public QToolButton
 {
 public:
-    explicit LXQtTaskButton(const WId window, LXQtPanel * panel, QWidget *parent = 0);
+    explicit LXQtTaskButton(const WId window, QWidget * parent);
 
     void updateText();
     void updateIcon();
@@ -47,16 +44,14 @@ public:
     QSize sizeHint() const override;
 
 protected:
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dragLeaveEvent(QDragLeaveEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent * event) override;
+    void dragLeaveEvent(QDragLeaveEvent * event) override;
+    void dropEvent(QDropEvent * event) override;
+    void mousePressEvent(QMouseEvent * event) override;
 
 private:
     WId const mWindow;
-    LXQtPanel * const mPanel;
     QTimer mTimer;
-    int mIconSize;
 };
 
 #endif // LXQTTASKBUTTON_H
