@@ -25,11 +25,6 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-/********************************************************************
-  Inspired by freedesktops tint2 ;)
-
-*********************************************************************/
-
 #include <QApplication>
 #include <QDebug>
 #include <QHBoxLayout>
@@ -51,22 +46,10 @@
 #include "lxqttray.h"
 
 #define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
-#define _NET_SYSTEM_TRAY_ORIENTATION_VERT 1
+#define SYSTEM_TRAY_REQUEST_DOCK 0
 
-#define SYSTEM_TRAY_REQUEST_DOCK    0
-#define SYSTEM_TRAY_BEGIN_MESSAGE   1
-#define SYSTEM_TRAY_CANCEL_MESSAGE  2
-
-#define XEMBED_EMBEDDED_NOTIFY  0
-#define XEMBED_MAPPED          (1 << 0)
-
-
-/************************************************
-
- ************************************************/
 LXQtTray::LXQtTray(QWidget *parent):
     QFrame(parent),
-    mValid(false),
     mTrayId(0),
     mDamageEvent(0),
     mDamageError(0),
@@ -88,24 +71,14 @@ LXQtTray::LXQtTray(QWidget *parent):
     mLayout->setMargin(0);
     mLayout->setSpacing(3); /* TODO: scale by DPI */
 
-    // Init the selection later just to ensure that no signals are sent until
-    // after construction is done and the creating object has a chance to connect.
-    QTimer::singleShot(0, this, &LXQtTray::startTray);
+    startTray();
 }
 
-
-/************************************************
-
- ************************************************/
 LXQtTray::~LXQtTray()
 {
     stopTray();
 }
 
-
-/************************************************
-
- ************************************************/
 bool LXQtTray::nativeEventFilter(const QByteArray &eventType, void *message, long *)
 {
     if (eventType != "xcb_generic_event_t")
@@ -148,10 +121,6 @@ bool LXQtTray::nativeEventFilter(const QByteArray &eventType, void *message, lon
     return false;
 }
 
-
-/************************************************
-
- ************************************************/
 void LXQtTray::clientMessageEvent(xcb_generic_event_t *e)
 {
     unsigned long opcode;
@@ -174,9 +143,6 @@ void LXQtTray::clientMessageEvent(xcb_generic_event_t *e)
     }
 }
 
-/************************************************
-
- ************************************************/
 TrayIcon* LXQtTray::findIcon(Window id)
 {
     for(TrayIcon* icon : qAsConst(mIcons))
@@ -187,10 +153,6 @@ TrayIcon* LXQtTray::findIcon(Window id)
     return 0;
 }
 
-
-/************************************************
-
-************************************************/
 VisualID LXQtTray::getVisual()
 {
     VisualID visualId = 0;
@@ -225,10 +187,6 @@ VisualID LXQtTray::getVisual()
     return visualId;
 }
 
-
-/************************************************
-   freedesktop systray specification
- ************************************************/
 void LXQtTray::startTray()
 {
     Window root = QX11Info::appRootWindow();
@@ -236,7 +194,6 @@ void LXQtTray::startTray()
     if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != None)
     {
         qWarning() << "Another systray is running";
-        mValid = false;
         return;
     }
 
@@ -248,7 +205,6 @@ void LXQtTray::startTray()
     {
         qWarning() << "Can't get systray manager";
         stopTray();
-        mValid = false;
         return;
     }
 
@@ -262,7 +218,6 @@ void LXQtTray::startTray()
                     (unsigned char *) &orientation,
                     1);
 
-    // ** Visual ********************************
     VisualID visualId = getVisual();
     if (visualId)
     {
@@ -275,7 +230,6 @@ void LXQtTray::startTray()
                         (unsigned char*)&visualId,
                         1);
     }
-    // ******************************************
 
     XClientMessageEvent ev;
     ev.type = ClientMessage;
@@ -291,16 +245,9 @@ void LXQtTray::startTray()
 
     XDamageQueryExtension(mDisplay, &mDamageEvent, &mDamageError);
 
-    qDebug() << "Systray started";
-    mValid = true;
-
     qApp->installNativeEventFilter(this);
 }
 
-
-/************************************************
-
- ************************************************/
 void LXQtTray::stopTray()
 {
     for (auto & icon : mIcons)
@@ -311,13 +258,8 @@ void LXQtTray::stopTray()
         XDestroyWindow(mDisplay, mTrayId);
         mTrayId = 0;
     }
-    mValid = false;
 }
 
-
-/************************************************
-
- ************************************************/
 void LXQtTray::onIconDestroyed(QObject * icon)
 {
     //in the time QOjbect::destroyed is emitted, the child destructor
@@ -325,9 +267,6 @@ void LXQtTray::onIconDestroyed(QObject * icon)
     mIcons.removeAll(static_cast<TrayIcon *>(icon));
 }
 
-/************************************************
-
- ************************************************/
 void LXQtTray::addIcon(Window winId)
 {
     // decline to add an icon for a window we already manage

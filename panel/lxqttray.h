@@ -81,7 +81,6 @@ private:
 
     TrayIcon* findIcon(Window trayId);
 
-    bool mValid;
     Window mTrayId;
     QList<TrayIcon*> mIcons;
     int mDamageEvent;
