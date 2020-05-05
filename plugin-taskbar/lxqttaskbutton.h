@@ -48,10 +48,12 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent * event) override;
     void dropEvent(QDropEvent * event) override;
     void mousePressEvent(QMouseEvent * event) override;
+    void mouseReleaseEvent(QMouseEvent * event) override;
 
 private:
     WId const mWindow;
     QTimer mTimer;
+    bool mHideOnRelease = false;
 };
 
 #endif // LXQTTASKBUTTON_H

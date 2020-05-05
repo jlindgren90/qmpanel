@@ -106,7 +106,7 @@ void LXQtTaskButton::mousePressEvent(QMouseEvent * event)
     if (event->button() == Qt::LeftButton)
     {
         if (isChecked())
-            KWindowSystem::minimizeWindow(mWindow);
+            mHideOnRelease = true;
         else
             KWindowSystem::forceActiveWindow(mWindow);
     }
@@ -114,6 +114,17 @@ void LXQtTaskButton::mousePressEvent(QMouseEvent * event)
     {
         NETRootInfo info(QX11Info::connection(), NET::CloseWindow);
         info.closeWindowRequest(mWindow);
+    }
+
+    event->accept();
+}
+
+void LXQtTaskButton::mouseReleaseEvent(QMouseEvent * event)
+{
+    if (mHideOnRelease && event->button() == Qt::LeftButton)
+    {
+        KWindowSystem::minimizeWindow(mWindow);
+        mHideOnRelease = false;
     }
 
     event->accept();
