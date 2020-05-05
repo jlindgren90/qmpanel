@@ -102,7 +102,6 @@ bool LXQtTray::nativeEventFilter(const QByteArray &eventType, void *message, lon
             if (icon)
             {
                 icon->windowDestroyed(event_window);
-                mIcons.removeAll(icon);
                 delete icon;
             }
             break;
@@ -145,12 +144,15 @@ void LXQtTray::clientMessageEvent(xcb_generic_event_t *e)
 
 TrayIcon* LXQtTray::findIcon(Window id)
 {
-    for(TrayIcon* icon : qAsConst(mIcons))
+    for(int idx = 0; idx < mLayout->count(); idx++)
     {
+        auto item = mLayout->itemAt(idx);
+        auto icon = static_cast<TrayIcon *>(item->widget());
         if (icon->iconId() == id || icon->windowId() == id)
             return icon;
     }
-    return 0;
+
+    return nullptr;
 }
 
 VisualID LXQtTray::getVisual()
@@ -250,21 +252,14 @@ void LXQtTray::startTray()
 
 void LXQtTray::stopTray()
 {
-    for (auto & icon : mIcons)
-        disconnect(icon, &QObject::destroyed, this, &LXQtTray::onIconDestroyed);
-    qDeleteAll(mIcons);
+    while(!mLayout->isEmpty())
+        delete mLayout->itemAt(0)->widget();
+
     if (mTrayId)
     {
         XDestroyWindow(mDisplay, mTrayId);
         mTrayId = 0;
     }
-}
-
-void LXQtTray::onIconDestroyed(QObject * icon)
-{
-    //in the time QOjbect::destroyed is emitted, the child destructor
-    //is already finished, so the qobject_cast to child will return nullptr in all cases
-    mIcons.removeAll(static_cast<TrayIcon *>(icon));
 }
 
 void LXQtTray::addIcon(Window winId)
@@ -275,8 +270,6 @@ void LXQtTray::addIcon(Window winId)
         return;
 
     icon = new TrayIcon(winId, this);
-    mIcons.append(icon);
-    connect(icon, &QObject::destroyed, this, &LXQtTray::onIconDestroyed);
 
     // add in sorted order
     int idx = 0;

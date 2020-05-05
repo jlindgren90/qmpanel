@@ -64,7 +64,6 @@ public:
 private:
     void startTray();
     void stopTray();
-    void onIconDestroyed(QObject * icon);
 
     VisualID getVisual();
 
@@ -82,7 +81,6 @@ private:
     TrayIcon* findIcon(Window trayId);
 
     Window mTrayId;
-    QList<TrayIcon*> mIcons;
     int mDamageEvent;
     int mDamageError;
     QHBoxLayout * const mLayout;
