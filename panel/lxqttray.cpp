@@ -71,12 +71,72 @@ LXQtTray::LXQtTray(QWidget *parent):
     mLayout->setMargin(0);
     mLayout->setSpacing(3); /* TODO: scale by DPI */
 
-    startTray();
+    Window root = QX11Info::appRootWindow();
+
+    if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != None)
+    {
+        qWarning() << "Another systray is running";
+        return;
+    }
+
+    mTrayId = XCreateSimpleWindow(mDisplay, root, -1, -1, 1, 1, 0, 0, 0);
+    XSetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn], mTrayId, CurrentTime);
+    if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != mTrayId)
+    {
+        qWarning() << "Can't get systray manager";
+        return;
+    }
+
+    int orientation = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
+    XChangeProperty(mDisplay,
+                    mTrayId,
+                    mAtoms[_NET_SYSTEM_TRAY_ORIENTATION],
+                    XA_CARDINAL,
+                    32,
+                    PropModeReplace,
+                    (unsigned char *) &orientation,
+                    1);
+
+    VisualID visualId = getVisual();
+    if (visualId)
+    {
+        XChangeProperty(mDisplay,
+                        mTrayId,
+                        mAtoms[_NET_SYSTEM_TRAY_VISUAL],
+                        XA_VISUALID,
+                        32,
+                        PropModeReplace,
+                        (unsigned char*)&visualId,
+                        1);
+    }
+
+    XClientMessageEvent ev;
+    ev.type = ClientMessage;
+    ev.window = root;
+    ev.message_type = mAtoms[MANAGER];
+    ev.format = 32;
+    ev.data.l[0] = CurrentTime;
+    ev.data.l[1] = mAtoms[_NET_SYSTEM_TRAY_Sn];
+    ev.data.l[2] = mTrayId;
+    ev.data.l[3] = 0;
+    ev.data.l[4] = 0;
+    XSendEvent(mDisplay, root, False, StructureNotifyMask, (XEvent*)&ev);
+
+    XDamageQueryExtension(mDisplay, &mDamageEvent, &mDamageError);
+
+    qApp->installNativeEventFilter(this);
 }
 
 LXQtTray::~LXQtTray()
 {
-    stopTray();
+    while(!mLayout->isEmpty())
+        delete mLayout->itemAt(0)->widget();
+
+    if (mTrayId)
+    {
+        XDestroyWindow(mDisplay, mTrayId);
+        mTrayId = 0;
+    }
 }
 
 bool LXQtTray::nativeEventFilter(const QByteArray &eventType, void *message, long *)
@@ -187,79 +247,6 @@ VisualID LXQtTray::getVisual()
     }
 
     return visualId;
-}
-
-void LXQtTray::startTray()
-{
-    Window root = QX11Info::appRootWindow();
-
-    if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != None)
-    {
-        qWarning() << "Another systray is running";
-        return;
-    }
-
-    // init systray protocol
-    mTrayId = XCreateSimpleWindow(mDisplay, root, -1, -1, 1, 1, 0, 0, 0);
-
-    XSetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn], mTrayId, CurrentTime);
-    if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != mTrayId)
-    {
-        qWarning() << "Can't get systray manager";
-        stopTray();
-        return;
-    }
-
-    int orientation = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
-    XChangeProperty(mDisplay,
-                    mTrayId,
-                    mAtoms[_NET_SYSTEM_TRAY_ORIENTATION],
-                    XA_CARDINAL,
-                    32,
-                    PropModeReplace,
-                    (unsigned char *) &orientation,
-                    1);
-
-    VisualID visualId = getVisual();
-    if (visualId)
-    {
-        XChangeProperty(mDisplay,
-                        mTrayId,
-                        mAtoms[_NET_SYSTEM_TRAY_VISUAL],
-                        XA_VISUALID,
-                        32,
-                        PropModeReplace,
-                        (unsigned char*)&visualId,
-                        1);
-    }
-
-    XClientMessageEvent ev;
-    ev.type = ClientMessage;
-    ev.window = root;
-    ev.message_type = mAtoms[MANAGER];
-    ev.format = 32;
-    ev.data.l[0] = CurrentTime;
-    ev.data.l[1] = mAtoms[_NET_SYSTEM_TRAY_Sn];
-    ev.data.l[2] = mTrayId;
-    ev.data.l[3] = 0;
-    ev.data.l[4] = 0;
-    XSendEvent(mDisplay, root, False, StructureNotifyMask, (XEvent*)&ev);
-
-    XDamageQueryExtension(mDisplay, &mDamageEvent, &mDamageError);
-
-    qApp->installNativeEventFilter(this);
-}
-
-void LXQtTray::stopTray()
-{
-    while(!mLayout->isEmpty())
-        delete mLayout->itemAt(0)->widget();
-
-    if (mTrayId)
-    {
-        XDestroyWindow(mDisplay, mTrayId);
-        mTrayId = 0;
-    }
 }
 
 void LXQtTray::addIcon(Window winId)

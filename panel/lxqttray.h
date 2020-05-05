@@ -62,9 +62,6 @@ public:
     bool nativeEventFilter(const QByteArray &eventType, void *message, long *);
 
 private:
-    void startTray();
-    void stopTray();
-
     VisualID getVisual();
 
     void clientMessageEvent(xcb_generic_event_t *e);
