@@ -40,9 +40,16 @@ find_package(Qt5Widgets ${REQUIRED_QT_VERSION} REQUIRED)
 find_package(Qt5X11Extras ${REQUIRED_QT_VERSION} REQUIRED)
 find_package(Qt5Xml ${REQUIRED_QT_VERSION} REQUIRED)
 find_package(KF5WindowSystem ${KF5_MINIMUM_VERSION} REQUIRED)
+find_package(X11 REQUIRED)
 find_package(lxqt ${LXQT_MINIMUM_VERSION} REQUIRED)
 find_package(lxqt-globalkeys ${LXQT_MINIMUM_VERSION} REQUIRED)
 find_package(lxqt-globalkeys-ui ${LXQT_MINIMUM_VERSION} REQUIRED)
+
+find_package(PkgConfig)
+pkg_check_modules(XCB REQUIRED xcb xcb-util xcb-damage)
+pkg_check_modules(XCOMPOSITE REQUIRED xcomposite)
+pkg_check_modules(XDAMAGE REQUIRED xdamage)
+pkg_check_modules(XRENDER REQUIRED xrender)
 
 # Patch Version
 set(LXQT_PANEL_PATCH_VERSION 1)
@@ -84,46 +91,6 @@ include("cmake/BuildPlugin.cmake")
 
 set(ENABLED_PLUGINS) # list of enabled plugins
 set(STATIC_PLUGINS) # list of statically linked plugins
-
-setByDefault(MAINMENU_PLUGIN Yes)
-if(MAINMENU_PLUGIN)
-    list(APPEND STATIC_PLUGINS "mainmenu")
-    add_definitions(-DWITH_MAINMENU_PLUGIN)
-    list(APPEND ENABLED_PLUGINS "Application menu")
-    add_subdirectory(plugin-mainmenu)
-endif()
-
-setByDefault(QUICKLAUNCH_PLUGIN Yes)
-if(QUICKLAUNCH_PLUGIN)
-    list(APPEND STATIC_PLUGINS "quicklaunch")
-    add_definitions(-DWITH_QUICKLAUNCH_PLUGIN)
-    list(APPEND ENABLED_PLUGINS "Quicklaunch")
-    add_subdirectory(plugin-quicklaunch)
-endif()
-
-setByDefault(TASKBAR_PLUGIN Yes)
-if(TASKBAR_PLUGIN)
-  list(APPEND STATIC_PLUGINS "taskbar")
-  add_definitions(-DWITH_TASKBAR_PLUGIN)
-  list(APPEND ENABLED_PLUGINS "Taskbar")
-  add_subdirectory(plugin-taskbar)
-endif()
-
-setByDefault(TRAY_PLUGIN Yes)
-if(TRAY_PLUGIN)
-    list(APPEND STATIC_PLUGINS "tray")
-    add_definitions(-DWITH_TRAY_PLUGIN)
-    list(APPEND ENABLED_PLUGINS "System Tray")
-    add_subdirectory(plugin-tray)
-endif()
-
-setByDefault(WORLDCLOCK_PLUGIN Yes)
-if(WORLDCLOCK_PLUGIN)
-    list(APPEND STATIC_PLUGINS "worldclock")
-    add_definitions(-DWITH_WORLDCLOCK_PLUGIN)
-    list(APPEND ENABLED_PLUGINS "World Clock")
-    add_subdirectory(plugin-worldclock)
-endif(WORLDCLOCK_PLUGIN)
 
 #########################################################################
 

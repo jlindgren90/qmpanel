@@ -27,11 +27,11 @@
 
 #include "lxqtpanel.h"
 
-#include "../plugin-mainmenu/mainmenu.h"
-#include "../plugin-quicklaunch/quicklaunch.h"
-#include "../plugin-taskbar/taskbar.h"
-#include "../plugin-tray/lxqttray.h"
-#include "../plugin-worldclock/clocklabel.h"
+#include "clocklabel.h"
+#include "lxqttray.h"
+#include "mainmenu.h"
+#include "quicklaunch.h"
+#include "taskbar.h"
 
 #include <QApplication>
 #include <QScreen>

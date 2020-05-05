@@ -5,8 +5,16 @@ set(PRIV_HEADERS
 )
 
 set(SOURCES
+    actionview.cpp
+    clocklabel.cpp
     main.cpp
+    mainmenu.cpp
     lxqtpanel.cpp
+    lxqttray.cpp
+    quicklaunch.cpp
+    taskbar.cpp
+    taskbutton.cpp
+    trayicon.cpp
 )
 
 set(LIBRARIES
@@ -59,6 +67,11 @@ target_link_libraries(${PROJECT}
     ${LIBRARIES}
     ${QTX_LIBRARIES}
     KF5::WindowSystem
+    ${X11_LIBRARIES}
+    ${XCB_LIBRARIES}
+    ${XCOMPOSITE_LDFLAGS}
+    ${XDAMAGE_LIBRARIES}
+    ${XRENDER_LIBRARIES}
     ${STATIC_PLUGINS}
 )
 
