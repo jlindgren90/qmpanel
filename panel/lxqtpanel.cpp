@@ -67,6 +67,7 @@ LXQtPanel::LXQtPanel() : mLayout(this)
     show();
 
     KWindowSystem::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
+    KWindowSystem::setType(effectiveWinId(), NET::Dock);
 
     connect(qApp, &QApplication::primaryScreenChanged, this,
             &LXQtPanel::updateGeometry);
