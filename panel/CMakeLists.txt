@@ -1,9 +1,5 @@
 set(PROJECT lxqt-panel)
 
-set(PRIV_HEADERS
-    lxqtpanel.h
-)
-
 set(SOURCES
     actionview.cpp
     clocklabel.cpp
@@ -19,62 +15,17 @@ set(SOURCES
 
 set(LIBRARIES
     ${CMAKE_THREAD_LIBS_INIT}
-    lxqt
-)
-
-file(GLOB CONFIG_FILES resources/*.conf)
-
-############################################
-
-add_definitions(-DCOMPILE_LXQT_PANEL)
-
-set(PLUGIN_DESKTOPS_DIR "${CMAKE_INSTALL_FULL_DATAROOTDIR}/lxqt/${PROJECT}")
-add_definitions(-DPLUGIN_DESKTOPS_DIR=\"${PLUGIN_DESKTOPS_DIR}\")
-
-if (WITH_SCREENSAVER_FALLBACK)
-    message(STATUS "Building with conversion of deprecated 'screensaver' plugin")
-    add_definitions(-DWITH_SCREENSAVER_FALLBACK "-DLXQT_LOCK_DESKTOP=\"${CMAKE_INSTALL_FULL_DATAROOTDIR}/applications/lxqt-lockscreen.desktop\"")
-endif ()
-
-project(${PROJECT})
-
-set(QTX_LIBRARIES Qt5::Widgets Qt5::Xml Qt5::DBus)
-
-# Translations
-lxqt_translate_ts(QM_FILES SOURCES
-    UPDATE_TRANSLATIONS
-        ${UPDATE_TRANSLATIONS}
-    SOURCES
-        ${PUB_HEADERS}
-        ${PRIV_HEADERS}
-        ${SOURCES}
-        ${UI}
-    INSTALL_DIR
-        "${LXQT_TRANSLATIONS_DIR}/${PROJECT_NAME}"
-)
-
-lxqt_app_translation_loader(SOURCES ${PROJECT_NAME})
-
-add_executable(${PROJECT}
-    ${PUB_HEADERS}
-    ${PRIV_HEADERS}
-    ${QM_FILES}
-    ${SOURCES}
-    ${UI}
-)
-
-target_link_libraries(${PROJECT}
-    ${LIBRARIES}
-    ${QTX_LIBRARIES}
+    Qt5::Widgets
     KF5::WindowSystem
     ${X11_LIBRARIES}
     ${XCB_LIBRARIES}
     ${XCOMPOSITE_LDFLAGS}
     ${XDAMAGE_LIBRARIES}
     ${XRENDER_LIBRARIES}
-    ${STATIC_PLUGINS}
+    lxqt
 )
 
+project(${PROJECT})
+add_executable(${PROJECT} ${SOURCES})
+target_link_libraries(${PROJECT} ${LIBRARIES})
 install(TARGETS ${PROJECT} RUNTIME DESTINATION bin)
-install(FILES ${CONFIG_FILES} DESTINATION ${CMAKE_INSTALL_DATADIR}/lxqt)
-install(FILES ${PUB_HEADERS} DESTINATION include/lxqt)
