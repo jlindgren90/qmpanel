@@ -37,12 +37,6 @@
 
 class TrayIcon;
 class QHBoxLayout;
-class QSize;
-
-/**
- * @brief This makes our trayplugin
- */
-class Plugin;
 
 class LXQtTray: public QFrame, QAbstractNativeEventFilter
 {
@@ -59,7 +53,7 @@ public:
         NUM_ATOMS
     };
 
-    LXQtTray(Plugin *plugin, QWidget* parent = 0);
+    LXQtTray(QWidget* parent);
     ~LXQtTray();
 
     Atom atom(int idx) const { return mAtoms[idx]; }
@@ -92,7 +86,6 @@ private:
     QList<TrayIcon*> mIcons;
     int mDamageEvent;
     int mDamageError;
-    Plugin * const mPlugin;
     QHBoxLayout * const mLayout;
     int const mIconSize;
     Display * const mDisplay;

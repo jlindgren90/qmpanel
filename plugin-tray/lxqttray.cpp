@@ -66,13 +66,12 @@
 /************************************************
 
  ************************************************/
-LXQtTray::LXQtTray(Plugin *plugin, QWidget *parent):
+LXQtTray::LXQtTray(QWidget *parent):
     QFrame(parent),
     mValid(false),
     mTrayId(0),
     mDamageEvent(0),
     mDamageError(0),
-    mPlugin(plugin),
     mLayout(new QHBoxLayout(this)),
     mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
     mDisplay(QX11Info::display()),
