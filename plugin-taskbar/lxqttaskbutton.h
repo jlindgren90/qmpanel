@@ -41,38 +41,17 @@ class LXQtTaskButton : public QToolButton
 
 public:
     explicit LXQtTaskButton(const WId window, LXQtPanel * panel, QWidget *parent = 0);
-    virtual ~LXQtTaskButton();
 
-    bool isApplicationHidden() const;
-    bool isApplicationActive() const;
-    WId windowId() const { return mWindow; }
-
-    bool isOnDesktop(int desktop) const;
-    bool isMinimized() const;
     void updateText();
     void updateIcon();
 
     QSize sizeHint() const override;
 
-public slots:
-    void raiseApplication();
-    void minimizeApplication();
-    void maximizeApplication();
-    void deMaximizeApplication();
-    void shadeApplication();
-    void unShadeApplication();
-    void closeApplication();
-    void moveApplicationToDesktop();
-    void moveApplication();
-    void resizeApplication();
-    void setApplicationLayer();
-
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void contextMenuEvent(QContextMenuEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 private:
     WId const mWindow;
