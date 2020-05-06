@@ -55,8 +55,7 @@ SysTray::SysTray(QWidget * parent)
                          QString("_NET_SYSTEM_TRAY_S%1").arg(mScreen).toUtf8(),
                          false),
              XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_VISUAL", false),
-             XInternAtom(mDisplay, "_XEMBED", false),
-             XInternAtom(mDisplay, "_XEMBED_INFO", false)}
+             XInternAtom(mDisplay, "_XEMBED", false)}
 {
     mLayout->setMargin(0);
     mLayout->setSpacing(3); /* TODO: scale by DPI */

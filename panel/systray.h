@@ -51,7 +51,6 @@ public:
         _NET_SYSTEM_TRAY_Sn,
         _NET_SYSTEM_TRAY_VISUAL,
         _XEMBED,
-        _XEMBED_INFO,
         NUM_ATOMS
     };
 

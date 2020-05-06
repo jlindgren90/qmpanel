@@ -105,39 +105,8 @@ void TrayIcon::init()
 
     if (xError)
     {
-        qWarning() << "****************************************";
-        qWarning() << "* Not icon_swallow                     *";
-        qWarning() << "****************************************";
-        XDestroyWindow(dsp, mWindowId);
-        mWindowId = 0;
-        deleteLater();
+        qWarning() << "Can't reparent icon window";
         return;
-    }
-
-    {
-        Atom acttype;
-        int actfmt;
-        unsigned long nbitem, bytes;
-        unsigned char * data = 0;
-        int ret;
-
-        ret =
-            XGetWindowProperty(dsp, mIconId, mTray->atom(SysTray::_XEMBED_INFO),
-                               0, 2, false, mTray->atom(SysTray::_XEMBED_INFO),
-                               &acttype, &actfmt, &nbitem, &bytes, &data);
-        if (ret == Success)
-        {
-            if (data)
-                XFree(data);
-        }
-        else
-        {
-            qWarning() << "TrayIcon: xembed error";
-            XDestroyWindow(dsp, mWindowId);
-            mWindowId = 0;
-            deleteLater();
-            return;
-        }
     }
 
     {
