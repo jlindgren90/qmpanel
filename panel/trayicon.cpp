@@ -37,7 +37,7 @@
 #include <QTimer>
 
 #include "../panel/lxqtpanel.h"
-#include "lxqttray.h"
+#include "systray.h"
 #include "trayicon.h"
 
 #include <QX11Info>
@@ -70,7 +70,7 @@ int windowErrorHandler(Display *d, XErrorEvent *e)
 /************************************************
 
  ************************************************/
-TrayIcon::TrayIcon(Window iconId, LXQtTray * tray):
+TrayIcon::TrayIcon(Window iconId, SysTray * tray):
     QFrame(tray),
     mTray(tray),
     mIconSize(tray->iconSize()),
@@ -154,8 +154,8 @@ void TrayIcon::init()
         unsigned char *data = 0;
         int ret;
 
-        ret = XGetWindowProperty(dsp, mIconId, mTray->atom(LXQtTray::_XEMBED_INFO),
-                                 0, 2, false, mTray->atom(LXQtTray::_XEMBED_INFO),
+        ret = XGetWindowProperty(dsp, mIconId, mTray->atom(SysTray::_XEMBED_INFO),
+                                 0, 2, false, mTray->atom(SysTray::_XEMBED_INFO),
                                  &acttype, &actfmt, &nbitem, &bytes, &data);
         if (ret == Success)
         {
@@ -176,7 +176,7 @@ void TrayIcon::init()
         e.xclient.type = ClientMessage;
         e.xclient.serial = 0;
         e.xclient.send_event = True;
-        e.xclient.message_type = mTray->atom(LXQtTray::_XEMBED);
+        e.xclient.message_type = mTray->atom(SysTray::_XEMBED);
         e.xclient.window = mIconId;
         e.xclient.format = 32;
         e.xclient.data.l[0] = CurrentTime;

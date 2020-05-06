@@ -25,8 +25,8 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef LXQTTRAY_H
-#define LXQTTRAY_H
+#ifndef SYSTRAY_H
+#define SYSTRAY_H
 
 #include <QAbstractNativeEventFilter>
 #include <QFrame>
@@ -40,7 +40,7 @@
 class TrayIcon;
 class QHBoxLayout;
 
-class LXQtTray : public QFrame, QAbstractNativeEventFilter
+class SysTray : public QFrame, QAbstractNativeEventFilter
 {
 public:
     enum
@@ -56,8 +56,8 @@ public:
         NUM_ATOMS
     };
 
-    LXQtTray(QWidget * parent);
-    ~LXQtTray();
+    SysTray(QWidget * parent);
+    ~SysTray();
 
     Atom atom(int idx) const { return mAtoms[idx]; }
     int iconSize() const { return mIconSize; }

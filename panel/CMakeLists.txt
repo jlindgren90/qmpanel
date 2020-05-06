@@ -6,8 +6,8 @@ set(SOURCES
     main.cpp
     mainmenu.cpp
     lxqtpanel.cpp
-    lxqttray.cpp
     quicklaunch.cpp
+    systray.cpp
     taskbar.cpp
     taskbutton.cpp
     trayicon.cpp

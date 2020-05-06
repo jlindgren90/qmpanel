@@ -39,13 +39,13 @@
 #include <xcb/damage.h>
 #include <xcb/xcb.h>
 
-#include "lxqttray.h"
+#include "systray.h"
 #include "trayicon.h"
 
 #define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
 #define SYSTEM_TRAY_REQUEST_DOCK 0
 
-LXQtTray::LXQtTray(QWidget * parent)
+SysTray::SysTray(QWidget * parent)
     : QFrame(parent), mLayout(new QHBoxLayout(this)),
       mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
       mDisplay(QX11Info::display()), mScreen(QX11Info::appScreen()),
@@ -108,7 +108,7 @@ LXQtTray::LXQtTray(QWidget * parent)
     qApp->installNativeEventFilter(this);
 }
 
-LXQtTray::~LXQtTray()
+SysTray::~SysTray()
 {
     while (!mLayout->isEmpty())
         delete mLayout->itemAt(0)->widget();
@@ -117,7 +117,7 @@ LXQtTray::~LXQtTray()
         XDestroyWindow(mDisplay, mTrayId);
 }
 
-bool LXQtTray::nativeEventFilter(const QByteArray & eventType, void * message,
+bool SysTray::nativeEventFilter(const QByteArray & eventType, void * message,
                                  long *)
 {
     if (eventType != "xcb_generic_event_t")
@@ -151,7 +151,7 @@ bool LXQtTray::nativeEventFilter(const QByteArray & eventType, void * message,
     return false;
 }
 
-void LXQtTray::clientMessageEvent(xcb_generic_event_t * e)
+void SysTray::clientMessageEvent(xcb_generic_event_t * e)
 {
     auto event = (xcb_client_message_event_t *)e;
 
@@ -163,7 +163,7 @@ void LXQtTray::clientMessageEvent(xcb_generic_event_t * e)
     }
 }
 
-TrayIcon * LXQtTray::findIcon(Window id)
+TrayIcon * SysTray::findIcon(Window id)
 {
     for (int idx = 0; idx < mLayout->count(); idx++)
     {
@@ -176,7 +176,7 @@ TrayIcon * LXQtTray::findIcon(Window id)
     return nullptr;
 }
 
-VisualID LXQtTray::getVisual()
+VisualID SysTray::getVisual()
 {
     VisualID visualId = 0;
 
@@ -208,7 +208,7 @@ VisualID LXQtTray::getVisual()
     return visualId;
 }
 
-void LXQtTray::addIcon(Window winId)
+void SysTray::addIcon(Window winId)
 {
     // decline to add an icon for a window we already manage
     TrayIcon * icon = findIcon(winId);

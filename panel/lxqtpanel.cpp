@@ -28,9 +28,9 @@
 #include "lxqtpanel.h"
 
 #include "clocklabel.h"
-#include "lxqttray.h"
 #include "mainmenu.h"
 #include "quicklaunch.h"
+#include "systray.h"
 #include "taskbar.h"
 
 #include <QApplication>
@@ -54,7 +54,7 @@ LXQtPanel::LXQtPanel() : mLayout(this)
     mLayout.addWidget(new MainMenuButton(this));
     mLayout.addWidget(new QuickLaunch(this));
     mLayout.addWidget(new TaskBar(this));
-    mLayout.addWidget(new LXQtTray(this));
+    mLayout.addWidget(new SysTray(this));
     mLayout.addWidget(new ClockLabel(this));
 
     mLayout.setStretch(2, 1); // stretch taskbar
