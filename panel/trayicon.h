@@ -47,15 +47,11 @@ public:
 
     void windowDestroyed(Window w);
 
-    QSize sizeHint() const { return QSize(mIconSize, mIconSize); }
-
 protected:
-    bool event(QEvent * event);
-    void draw();
+    void paintEvent(QPaintEvent *) override;
 
 private:
     void init();
-    QRect iconGeometry();
 
     SysTray * const mTray;
     int const mIconSize;

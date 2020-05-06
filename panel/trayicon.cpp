@@ -64,6 +64,8 @@ TrayIcon::TrayIcon(Window iconId, SysTray * tray)
       mAppName(KWindowInfo(iconId, 0, NET::WM2WindowClass).windowClassName()),
       mDisplay(QX11Info::display())
 {
+    setFixedSize(mIconSize, mIconSize);
+
     QTimer::singleShot(200, [this] {
         init();
         update();
@@ -90,10 +92,9 @@ void TrayIcon::init()
     set_attr.border_pixel = 0;
     mask = CWColormap | CWBackPixel | CWBorderPixel;
 
-    auto geom = iconGeometry();
-    mWindowId = XCreateWindow(dsp, this->winId(), geom.x(), geom.y(),
-                              geom.width(), geom.height(), 0, attr.depth,
-                              InputOutput, visual, mask, &set_attr);
+    int sizeDevPx = mIconSize * devicePixelRatioF();
+    mWindowId = XCreateWindow(dsp, this->winId(), 0, 0, sizeDevPx, sizeDevPx, 0,
+                              attr.depth, InputOutput, visual, mask, &set_attr);
 
     xError = false;
     XErrorHandler old;
@@ -133,6 +134,7 @@ void TrayIcon::init()
         {
             qWarning() << "TrayIcon: xembed error";
             XDestroyWindow(dsp, mWindowId);
+            mWindowId = 0;
             deleteLater();
             return;
         }
@@ -160,8 +162,7 @@ void TrayIcon::init()
 
     XMapWindow(dsp, mIconId);
     XMapRaised(dsp, mWindowId);
-
-    XResizeWindow(dsp, mIconId, geom.width(), geom.height());
+    XResizeWindow(dsp, mIconId, sizeDevPx, sizeDevPx);
 }
 
 TrayIcon::~TrayIcon()
@@ -185,52 +186,11 @@ TrayIcon::~TrayIcon()
     XSetErrorHandler(old);
 }
 
-bool TrayIcon::event(QEvent * event)
+void TrayIcon::paintEvent(QPaintEvent *)
 {
-    if (mWindowId)
-    {
-        switch (event->type())
-        {
-        case QEvent::Paint:
-            draw();
-            break;
+    if (!mWindowId)
+        return;
 
-        case QEvent::Move:
-        case QEvent::Resize:
-        {
-            auto geom = iconGeometry();
-            XMoveWindow(mDisplay, mWindowId, geom.x(), geom.y());
-            break;
-        }
-
-        case QEvent::MouseButtonPress:
-        case QEvent::MouseButtonRelease:
-        case QEvent::MouseButtonDblClick:
-            event->accept();
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    return QWidget::event(event);
-}
-
-QRect TrayIcon::iconGeometry()
-{
-    QRect geom(QPoint(), QSize(mIconSize, mIconSize));
-
-    // center and convert to device pixels
-    geom.moveCenter(rect().center());
-    geom.moveTopLeft(geom.topLeft() * devicePixelRatioF());
-    geom.setSize(geom.size() * devicePixelRatioF());
-
-    return geom;
-}
-
-void TrayIcon::draw()
-{
     XWindowAttributes attr, attr2;
     if (!XGetWindowAttributes(mDisplay, mIconId, &attr) ||
         !XGetWindowAttributes(mDisplay, mWindowId, &attr2))
