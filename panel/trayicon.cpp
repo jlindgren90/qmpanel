@@ -25,21 +25,14 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include <QApplication>
-#include <QBitmap>
+#include <KWindowInfo>
 #include <QDebug>
 #include <QPainter>
-#include <QResizeEvent>
-#include <QScreen>
-#include <QStyle>
-#include <QTimer>
+#include <QX11Info>
 
 #include "systray.h"
 #include "trayicon.h"
 
-#include <KWindowInfo>
-#include <QX11Info>
-#include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xcomposite.h>
 
@@ -81,7 +74,7 @@ TrayIcon::TrayIcon(Window iconId, SysTray * tray)
     int sizeDevPx = mIconSize * devicePixelRatioF();
     auto mask = CWColormap | CWBackPixel | CWBorderPixel;
     mWindowId =
-        XCreateWindow(mDisplay, this->winId(), 0, 0, sizeDevPx, sizeDevPx, 0,
+        XCreateWindow(mDisplay, winId(), 0, 0, sizeDevPx, sizeDevPx, 0,
                       attr.depth, InputOutput, attr.visual, mask, &set_attr);
 
     xError = false;
