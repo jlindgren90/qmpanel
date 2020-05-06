@@ -139,7 +139,7 @@ void TrayIcon::paintEvent(QPaintEvent *)
     if (!mWindowId)
         return;
 
-    XWindowAttributes attr, attr2;
+    XWindowAttributes attr{}, attr2{};
     if (!XGetWindowAttributes(mDisplay, mIconId, &attr) ||
         !XGetWindowAttributes(mDisplay, mWindowId, &attr2))
     {
