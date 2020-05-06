@@ -29,44 +29,36 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QStyle>
-#include <QTimer>
 #include <QX11Info>
-#include <algorithm>
-#include <vector>
-#include "trayicon.h"
 
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <X11/extensions/Xrender.h>
 #include <X11/extensions/Xdamage.h>
-#include <xcb/xcb.h>
+#include <X11/extensions/Xrender.h>
 #include <xcb/damage.h>
+#include <xcb/xcb.h>
 
 #include "lxqttray.h"
+#include "trayicon.h"
 
 #define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
 #define SYSTEM_TRAY_REQUEST_DOCK 0
 
-LXQtTray::LXQtTray(QWidget *parent):
-    QFrame(parent),
-    mTrayId(0),
-    mDamageEvent(0),
-    mDamageError(0),
-    mLayout(new QHBoxLayout(this)),
-    mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
-    mDisplay(QX11Info::display()),
-    mScreen(QX11Info::appScreen()),
-    mAtoms{
-        XInternAtom(mDisplay, "MANAGER", false),
-        XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_ICON_SIZE", false),
-        XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_OPCODE", false),
-        XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_ORIENTATION", false),
-        XInternAtom(mDisplay, QString("_NET_SYSTEM_TRAY_S%1").arg(mScreen).toUtf8(), false),
-        XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_VISUAL", false),
-        XInternAtom(mDisplay, "_XEMBED", false),
-        XInternAtom(mDisplay, "_XEMBED_INFO", false)
-    }
+LXQtTray::LXQtTray(QWidget * parent)
+    : QFrame(parent), mLayout(new QHBoxLayout(this)),
+      mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
+      mDisplay(QX11Info::display()), mScreen(QX11Info::appScreen()),
+      mAtoms{XInternAtom(mDisplay, "MANAGER", false),
+             XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_ICON_SIZE", false),
+             XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_OPCODE", false),
+             XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_ORIENTATION", false),
+             XInternAtom(mDisplay,
+                         QString("_NET_SYSTEM_TRAY_S%1").arg(mScreen).toUtf8(),
+                         false),
+             XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_VISUAL", false),
+             XInternAtom(mDisplay, "_XEMBED", false),
+             XInternAtom(mDisplay, "_XEMBED_INFO", false)}
 {
     mLayout->setMargin(0);
     mLayout->setSpacing(3); /* TODO: scale by DPI */
@@ -80,7 +72,8 @@ LXQtTray::LXQtTray(QWidget *parent):
     }
 
     mTrayId = XCreateSimpleWindow(mDisplay, root, -1, -1, 1, 1, 0, 0, 0);
-    XSetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn], mTrayId, CurrentTime);
+    XSetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn], mTrayId,
+                       CurrentTime);
     if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != mTrayId)
     {
         qWarning() << "Can't get systray manager";
@@ -88,27 +81,15 @@ LXQtTray::LXQtTray(QWidget *parent):
     }
 
     int orientation = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
-    XChangeProperty(mDisplay,
-                    mTrayId,
-                    mAtoms[_NET_SYSTEM_TRAY_ORIENTATION],
-                    XA_CARDINAL,
-                    32,
-                    PropModeReplace,
-                    (unsigned char *) &orientation,
-                    1);
+    XChangeProperty(mDisplay, mTrayId, mAtoms[_NET_SYSTEM_TRAY_ORIENTATION],
+                    XA_CARDINAL, 32, PropModeReplace,
+                    (unsigned char *)&orientation, 1);
 
     VisualID visualId = getVisual();
     if (visualId)
-    {
-        XChangeProperty(mDisplay,
-                        mTrayId,
-                        mAtoms[_NET_SYSTEM_TRAY_VISUAL],
-                        XA_VISUALID,
-                        32,
-                        PropModeReplace,
-                        (unsigned char*)&visualId,
-                        1);
-    }
+        XChangeProperty(mDisplay, mTrayId, mAtoms[_NET_SYSTEM_TRAY_VISUAL],
+                        XA_VISUALID, 32, PropModeReplace,
+                        (unsigned char *)&visualId, 1);
 
     XClientMessageEvent ev;
     ev.type = ClientMessage;
@@ -120,7 +101,7 @@ LXQtTray::LXQtTray(QWidget *parent):
     ev.data.l[2] = mTrayId;
     ev.data.l[3] = 0;
     ev.data.l[4] = 0;
-    XSendEvent(mDisplay, root, False, StructureNotifyMask, (XEvent*)&ev);
+    XSendEvent(mDisplay, root, False, StructureNotifyMask, (XEvent *)&ev);
 
     XDamageQueryExtension(mDisplay, &mDamageEvent, &mDamageError);
 
@@ -129,82 +110,62 @@ LXQtTray::LXQtTray(QWidget *parent):
 
 LXQtTray::~LXQtTray()
 {
-    while(!mLayout->isEmpty())
+    while (!mLayout->isEmpty())
         delete mLayout->itemAt(0)->widget();
 
     if (mTrayId)
-    {
         XDestroyWindow(mDisplay, mTrayId);
-        mTrayId = 0;
-    }
 }
 
-bool LXQtTray::nativeEventFilter(const QByteArray &eventType, void *message, long *)
+bool LXQtTray::nativeEventFilter(const QByteArray & eventType, void * message,
+                                 long *)
 {
     if (eventType != "xcb_generic_event_t")
         return false;
 
-    xcb_generic_event_t* event = static_cast<xcb_generic_event_t *>(message);
-
-    TrayIcon* icon;
+    auto event = (xcb_generic_event_t *)message;
     int event_type = event->response_type & ~0x80;
 
-    switch (event_type)
+    if (event_type == ClientMessage)
     {
-        case ClientMessage:
-            clientMessageEvent(event);
-            break;
-
-        case DestroyNotify: {
-            unsigned long event_window;
-            event_window = reinterpret_cast<xcb_destroy_notify_event_t*>(event)->window;
-            icon = findIcon(event_window);
-            if (icon)
-            {
-                icon->windowDestroyed(event_window);
-                delete icon;
-            }
-            break;
+        clientMessageEvent(event);
+    }
+    else if (event_type == DestroyNotify)
+    {
+        auto event_window = ((xcb_destroy_notify_event_t *)event)->window;
+        auto icon = findIcon(event_window);
+        if (icon)
+        {
+            icon->windowDestroyed(event_window);
+            delete icon;
         }
-        default:
-            if (event_type == mDamageEvent + XDamageNotify)
-            {
-                xcb_damage_notify_event_t* dmg = reinterpret_cast<xcb_damage_notify_event_t*>(event);
-                icon = findIcon(dmg->drawable);
-                if (icon)
-                    icon->update();
-            }
-            break;
+    }
+    else if (event_type == mDamageEvent + XDamageNotify)
+    {
+        auto drawable = ((xcb_damage_notify_event_t *)event)->drawable;
+        auto icon = findIcon(drawable);
+        if (icon)
+            icon->update();
     }
 
     return false;
 }
 
-void LXQtTray::clientMessageEvent(xcb_generic_event_t *e)
+void LXQtTray::clientMessageEvent(xcb_generic_event_t * e)
 {
-    unsigned long opcode;
-    unsigned long message_type;
-    Window id;
-    xcb_client_message_event_t* event = reinterpret_cast<xcb_client_message_event_t*>(e);
-    uint32_t* data32 = event->data.data32;
-    message_type = event->type;
-    opcode = data32[1];
-    if(message_type != mAtoms[_NET_SYSTEM_TRAY_OPCODE])
-        return;
+    auto event = (xcb_client_message_event_t *)e;
 
-    switch (opcode)
+    if (event->type == mAtoms[_NET_SYSTEM_TRAY_OPCODE] &&
+        event->data.data32[1] == SYSTEM_TRAY_REQUEST_DOCK &&
+        event->data.data32[2])
     {
-        case SYSTEM_TRAY_REQUEST_DOCK:
-            id = data32[2];
-            if (id)
-                addIcon(id);
-            break;
+        addIcon(event->data.data32[2]);
     }
 }
 
-TrayIcon* LXQtTray::findIcon(Window id)
+TrayIcon * LXQtTray::findIcon(Window id)
 {
-    for(int idx = 0; idx < mLayout->count(); idx++)
+    for (int idx = 0; idx < mLayout->count(); idx++)
     {
         auto item = mLayout->itemAt(idx);
         auto icon = static_cast<TrayIcon *>(item->widget());
@@ -218,25 +179,23 @@ TrayIcon* LXQtTray::findIcon(Window id)
 VisualID LXQtTray::getVisual()
 {
     VisualID visualId = 0;
-    Display* dsp = mDisplay;
 
     XVisualInfo templ;
     templ.screen = mScreen;
-    templ.depth=32;
-    templ.c_class=TrueColor;
+    templ.depth = 32;
+    templ.c_class = TrueColor;
 
     int nvi;
-    XVisualInfo* xvi = XGetVisualInfo(dsp, VisualScreenMask|VisualDepthMask|VisualClassMask, &templ, &nvi);
+    auto xvi = XGetVisualInfo(
+        mDisplay, VisualScreenMask | VisualDepthMask | VisualClassMask, &templ,
+        &nvi);
 
     if (xvi)
     {
-        int i;
-        XRenderPictFormat* format;
-        for (i = 0; i < nvi; i++)
+        for (int i = 0; i < nvi; i++)
         {
-            format = XRenderFindVisualFormat(dsp, xvi[i].visual);
-            if (format &&
-                format->type == PictTypeDirect &&
+            auto format = XRenderFindVisualFormat(mDisplay, xvi[i].visual);
+            if (format && format->type == PictTypeDirect &&
                 format->direct.alphaMask)
             {
                 visualId = xvi[i].visualid;
@@ -252,15 +211,15 @@ VisualID LXQtTray::getVisual()
 void LXQtTray::addIcon(Window winId)
 {
     // decline to add an icon for a window we already manage
-    TrayIcon *icon = findIcon(winId);
-    if(icon)
+    TrayIcon * icon = findIcon(winId);
+    if (icon)
         return;
 
     icon = new TrayIcon(winId, this);
 
     // add in sorted order
     int idx = 0;
-    for(; idx < mLayout->count(); idx++)
+    for (; idx < mLayout->count(); idx++)
     {
         auto icon2 = static_cast<TrayIcon *>(mLayout->itemAt(idx)->widget());
         if (icon->appName() < icon2->appName())

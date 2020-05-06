@@ -28,20 +28,23 @@
 #ifndef LXQTTRAY_H
 #define LXQTTRAY_H
 
-#include <QFrame>
 #include <QAbstractNativeEventFilter>
+#include <QFrame>
+
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <xcb/xcb_event.h>
+
 #include "fixx11h.h"
 
 class TrayIcon;
 class QHBoxLayout;
 
-class LXQtTray: public QFrame, QAbstractNativeEventFilter
+class LXQtTray : public QFrame, QAbstractNativeEventFilter
 {
 public:
-    enum {
+    enum
+    {
         MANAGER,
         _NET_SYSTEM_TRAY_ICON_SIZE,
         _NET_SYSTEM_TRAY_OPCODE,
@@ -53,39 +56,29 @@ public:
         NUM_ATOMS
     };
 
-    LXQtTray(QWidget* parent);
+    LXQtTray(QWidget * parent);
     ~LXQtTray();
 
     Atom atom(int idx) const { return mAtoms[idx]; }
     int iconSize() const { return mIconSize; }
 
-    bool nativeEventFilter(const QByteArray &eventType, void *message, long *);
+    bool nativeEventFilter(const QByteArray & eventType, void * message,
+                           long *);
 
 private:
     VisualID getVisual();
-
-    void clientMessageEvent(xcb_generic_event_t *e);
-
-    int clientMessage(WId _wid, Atom _msg,
-                      long unsigned int data0,
-                      long unsigned int data1 = 0,
-                      long unsigned int data2 = 0,
-                      long unsigned int data3 = 0,
-                      long unsigned int data4 = 0) const;
-
+    void clientMessageEvent(xcb_generic_event_t * e);
     void addIcon(Window id);
+    TrayIcon * findIcon(Window trayId);
 
-    TrayIcon* findIcon(Window trayId);
-
-    Window mTrayId;
-    int mDamageEvent;
-    int mDamageError;
+    Window mTrayId = 0;
+    int mDamageEvent = 0;
+    int mDamageError = 0;
     QHBoxLayout * const mLayout;
     int const mIconSize;
     Display * const mDisplay;
     int const mScreen;
     Atom const mAtoms[NUM_ATOMS];
 };
-
 
 #endif
