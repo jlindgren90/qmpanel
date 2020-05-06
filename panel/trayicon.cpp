@@ -66,15 +66,7 @@ TrayIcon::TrayIcon(Window iconId, SysTray * tray)
 {
     setFixedSize(mIconSize, mIconSize);
 
-    QTimer::singleShot(200, [this] {
-        init();
-        update();
-    });
-}
-
-void TrayIcon::init()
-{
-    XWindowAttributes attr;
+    XWindowAttributes attr{};
     if (!XGetWindowAttributes(mDisplay, mIconId, &attr))
     {
         qWarning() << "Can't get icon window attrs";

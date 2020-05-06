@@ -51,8 +51,6 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
-    void init();
-
     SysTray * const mTray;
     int const mIconSize;
     Window const mIconId;
