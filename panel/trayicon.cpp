@@ -52,9 +52,9 @@ int windowErrorHandler(Display * d, XErrorEvent * e)
     xError = true;
     if (e->error_code != BadWindow)
     {
-        char str[1024];
-        XGetErrorText(d, e->error_code, str, 1024);
-        qWarning() << "Error handler" << e->error_code << str;
+        char str[100];
+        XGetErrorText(d, e->error_code, str, sizeof(str));
+        qWarning() << "Caught X error:" << str;
     }
     return 0;
 }
@@ -74,33 +74,28 @@ TrayIcon::TrayIcon(Window iconId, SysTray * tray)
 
 void TrayIcon::init()
 {
-    Display * dsp = mDisplay;
-
     XWindowAttributes attr;
-    if (!XGetWindowAttributes(dsp, mIconId, &attr))
+    if (!XGetWindowAttributes(mDisplay, mIconId, &attr))
     {
-        deleteLater();
+        qWarning() << "Can't get icon window attrs";
         return;
     }
 
-    unsigned long mask = 0;
-    XSetWindowAttributes set_attr;
-
-    Visual * visual = attr.visual;
+    XSetWindowAttributes set_attr{};
     set_attr.colormap = attr.colormap;
     set_attr.background_pixel = 0;
     set_attr.border_pixel = 0;
-    mask = CWColormap | CWBackPixel | CWBorderPixel;
 
     int sizeDevPx = mIconSize * devicePixelRatioF();
-    mWindowId = XCreateWindow(dsp, this->winId(), 0, 0, sizeDevPx, sizeDevPx, 0,
-                              attr.depth, InputOutput, visual, mask, &set_attr);
+    auto mask = CWColormap | CWBackPixel | CWBorderPixel;
+    mWindowId =
+        XCreateWindow(mDisplay, this->winId(), 0, 0, sizeDevPx, sizeDevPx, 0,
+                      attr.depth, InputOutput, attr.visual, mask, &set_attr);
 
     xError = false;
-    XErrorHandler old;
-    old = XSetErrorHandler(windowErrorHandler);
-    XReparentWindow(dsp, mIconId, mWindowId, 0, 0);
-    XSync(dsp, false);
+    auto old = XSetErrorHandler(windowErrorHandler);
+    XReparentWindow(mDisplay, mIconId, mWindowId, 0, 0);
+    XSync(mDisplay, false);
     XSetErrorHandler(old);
 
     if (xError)
@@ -109,49 +104,48 @@ void TrayIcon::init()
         return;
     }
 
-    {
-        XEvent e;
-        e.xclient.type = ClientMessage;
-        e.xclient.serial = 0;
-        e.xclient.send_event = True;
-        e.xclient.message_type = mTray->atom(SysTray::_XEMBED);
-        e.xclient.window = mIconId;
-        e.xclient.format = 32;
-        e.xclient.data.l[0] = CurrentTime;
-        e.xclient.data.l[1] = XEMBED_EMBEDDED_NOTIFY;
-        e.xclient.data.l[2] = 0;
-        e.xclient.data.l[3] = mWindowId;
-        e.xclient.data.l[4] = 0;
-        XSendEvent(dsp, mIconId, false, 0xFFFFFF, &e);
-    }
+    XEvent e{};
+    e.xclient.type = ClientMessage;
+    e.xclient.send_event = True;
+    e.xclient.message_type = mTray->atom(SysTray::_XEMBED);
+    e.xclient.window = mIconId;
+    e.xclient.format = 32;
+    e.xclient.data.l[0] = CurrentTime;
+    e.xclient.data.l[1] = XEMBED_EMBEDDED_NOTIFY;
+    e.xclient.data.l[2] = 0;
+    e.xclient.data.l[3] = mWindowId;
+    e.xclient.data.l[4] = 0;
+    XSendEvent(mDisplay, mIconId, false, 0xFFFFFF, &e);
 
-    XSelectInput(dsp, mIconId, StructureNotifyMask);
-    mDamage = XDamageCreate(dsp, mIconId, XDamageReportRawRectangles);
-    XCompositeRedirectWindow(dsp, mWindowId, CompositeRedirectManual);
+    XSelectInput(mDisplay, mIconId, StructureNotifyMask);
 
-    XMapWindow(dsp, mIconId);
-    XMapRaised(dsp, mWindowId);
-    XResizeWindow(dsp, mIconId, sizeDevPx, sizeDevPx);
+    mDamage = XDamageCreate(mDisplay, mIconId, XDamageReportRawRectangles);
+    XCompositeRedirectWindow(mDisplay, mWindowId, CompositeRedirectManual);
+
+    XMapWindow(mDisplay, mIconId);
+    XMapRaised(mDisplay, mWindowId);
+    XResizeWindow(mDisplay, mIconId, sizeDevPx, sizeDevPx);
 }
 
 TrayIcon::~TrayIcon()
 {
-    Display * dsp = mDisplay;
-    XSelectInput(dsp, mIconId, NoEventMask);
+    if (!mWindowId)
+        return;
+
+    XSelectInput(mDisplay, mIconId, NoEventMask);
 
     if (mDamage)
-        XDamageDestroy(dsp, mDamage);
+        XDamageDestroy(mDisplay, mDamage);
 
-    // reparent to root
     xError = false;
-    XErrorHandler old = XSetErrorHandler(windowErrorHandler);
-
-    XUnmapWindow(dsp, mIconId);
-    XReparentWindow(dsp, mIconId, QX11Info::appRootWindow(), 0, 0);
+    auto old = XSetErrorHandler(windowErrorHandler);
+    XUnmapWindow(mDisplay, mIconId);
+    XReparentWindow(mDisplay, mIconId, QX11Info::appRootWindow(), 0, 0);
 
     if (mWindowId)
-        XDestroyWindow(dsp, mWindowId);
-    XSync(dsp, False);
+        XDestroyWindow(mDisplay, mWindowId);
+
+    XSync(mDisplay, False);
     XSetErrorHandler(old);
 }
 
@@ -167,9 +161,9 @@ void TrayIcon::paintEvent(QPaintEvent *)
         return;
     }
 
-    XImage * ximage =
-        XGetImage(mDisplay, mIconId, 0, 0, qMin(attr.width, attr2.width),
-                  qMin(attr.height, attr2.height), AllPlanes, ZPixmap);
+    int w = qMin(attr.width, attr2.width);
+    int h = qMin(attr.height, attr2.height);
+    auto ximage = XGetImage(mDisplay, mIconId, 0, 0, w, h, AllPlanes, ZPixmap);
     if (!ximage)
         return;
 
@@ -179,7 +173,6 @@ void TrayIcon::paintEvent(QPaintEvent *)
 
     QRect drawRect(QPoint(), image.size() / devicePixelRatioF());
     drawRect.moveCenter(rect().center());
-
     QPainter painter(this);
     painter.drawImage(drawRect.topLeft(), image);
 
