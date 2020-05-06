@@ -33,9 +33,8 @@
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
-#include <xcb/xcb_event.h>
 
-#include "fixx11h.h"
+#include <fixx11h.h>
 
 class TrayIcon;
 class QHBoxLayout;
@@ -67,7 +66,6 @@ public:
 
 private:
     VisualID getVisual();
-    void clientMessageEvent(xcb_generic_event_t * e);
     void addIcon(Window id);
     TrayIcon * findIcon(Window trayId);
 

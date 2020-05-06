@@ -64,6 +64,19 @@ SysTray::SysTray(QWidget * parent)
     mLayout->setSpacing(3); /* TODO: scale by DPI */
 
     Window root = QX11Info::appRootWindow();
+    VisualID visualId = getVisual();
+
+    if (!visualId)
+    {
+        qWarning() << "Can't find usable visual";
+        return;
+    }
+
+    if (!XDamageQueryExtension(mDisplay, &mDamageEvent, &mDamageError))
+    {
+        qWarning() << "Damage extension not present";
+        return;
+    }
 
     if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != None)
     {
@@ -71,12 +84,15 @@ SysTray::SysTray(QWidget * parent)
         return;
     }
 
+    qApp->installNativeEventFilter(this);
+
     mTrayId = XCreateSimpleWindow(mDisplay, root, -1, -1, 1, 1, 0, 0, 0);
     XSetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn], mTrayId,
                        CurrentTime);
+
     if (XGetSelectionOwner(mDisplay, mAtoms[_NET_SYSTEM_TRAY_Sn]) != mTrayId)
     {
-        qWarning() << "Can't get systray manager";
+        qWarning() << "Can't get systray selection";
         return;
     }
 
@@ -84,14 +100,11 @@ SysTray::SysTray(QWidget * parent)
     XChangeProperty(mDisplay, mTrayId, mAtoms[_NET_SYSTEM_TRAY_ORIENTATION],
                     XA_CARDINAL, 32, PropModeReplace,
                     (unsigned char *)&orientation, 1);
+    XChangeProperty(mDisplay, mTrayId, mAtoms[_NET_SYSTEM_TRAY_VISUAL],
+                    XA_VISUALID, 32, PropModeReplace,
+                    (unsigned char *)&visualId, 1);
 
-    VisualID visualId = getVisual();
-    if (visualId)
-        XChangeProperty(mDisplay, mTrayId, mAtoms[_NET_SYSTEM_TRAY_VISUAL],
-                        XA_VISUALID, 32, PropModeReplace,
-                        (unsigned char *)&visualId, 1);
-
-    XClientMessageEvent ev;
+    XClientMessageEvent ev{};
     ev.type = ClientMessage;
     ev.window = root;
     ev.message_type = mAtoms[MANAGER];
@@ -99,13 +112,8 @@ SysTray::SysTray(QWidget * parent)
     ev.data.l[0] = CurrentTime;
     ev.data.l[1] = mAtoms[_NET_SYSTEM_TRAY_Sn];
     ev.data.l[2] = mTrayId;
-    ev.data.l[3] = 0;
-    ev.data.l[4] = 0;
+
     XSendEvent(mDisplay, root, False, StructureNotifyMask, (XEvent *)&ev);
-
-    XDamageQueryExtension(mDisplay, &mDamageEvent, &mDamageError);
-
-    qApp->installNativeEventFilter(this);
 }
 
 SysTray::~SysTray()
@@ -128,39 +136,33 @@ bool SysTray::nativeEventFilter(const QByteArray & eventType, void * message,
 
     if (event_type == ClientMessage)
     {
-        clientMessageEvent(event);
+        auto cmev = (xcb_client_message_event_t *)event;
+        if (cmev->type == mAtoms[_NET_SYSTEM_TRAY_OPCODE] &&
+            cmev->data.data32[1] == SYSTEM_TRAY_REQUEST_DOCK &&
+            cmev->data.data32[2])
+        {
+            addIcon(cmev->data.data32[2]);
+        }
     }
     else if (event_type == DestroyNotify)
     {
-        auto event_window = ((xcb_destroy_notify_event_t *)event)->window;
-        auto icon = findIcon(event_window);
+        auto dnev = (xcb_destroy_notify_event_t *)event;
+        auto icon = findIcon(dnev->window);
         if (icon)
         {
-            icon->windowDestroyed(event_window);
+            icon->windowDestroyed(dnev->window);
             delete icon;
         }
     }
     else if (event_type == mDamageEvent + XDamageNotify)
     {
-        auto drawable = ((xcb_damage_notify_event_t *)event)->drawable;
-        auto icon = findIcon(drawable);
+        auto dnev = (xcb_damage_notify_event_t *)event;
+        auto icon = findIcon(dnev->drawable);
         if (icon)
             icon->update();
     }
 
     return false;
-}
-
-void SysTray::clientMessageEvent(xcb_generic_event_t * e)
-{
-    auto event = (xcb_client_message_event_t *)e;
-
-    if (event->type == mAtoms[_NET_SYSTEM_TRAY_OPCODE] &&
-        event->data.data32[1] == SYSTEM_TRAY_REQUEST_DOCK &&
-        event->data.data32[2])
-    {
-        addIcon(event->data.data32[2]);
-    }
 }
 
 TrayIcon * SysTray::findIcon(Window id)
@@ -178,26 +180,23 @@ TrayIcon * SysTray::findIcon(Window id)
 
 VisualID SysTray::getVisual()
 {
-    XVisualInfo templ;
+    XVisualInfo templ{};
     templ.screen = mScreen;
     templ.depth = 32;
     templ.c_class = TrueColor;
 
-    int nvi;
+    int nvi = 0;
     auto mask = VisualScreenMask | VisualDepthMask | VisualClassMask;
     std::unique_ptr<XVisualInfo[], decltype(&XFree)> xvi(
         XGetVisualInfo(mDisplay, mask, &templ, &nvi), XFree);
 
-    if (xvi)
+    for (int i = 0; xvi && i < nvi; i++)
     {
-        for (int i = 0; i < nvi; i++)
+        auto format = XRenderFindVisualFormat(mDisplay, xvi[i].visual);
+        if (format && format->type == PictTypeDirect &&
+            format->direct.alphaMask)
         {
-            auto format = XRenderFindVisualFormat(mDisplay, xvi[i].visual);
-            if (format && format->type == PictTypeDirect &&
-                format->direct.alphaMask)
-            {
-                return xvi[i].visualid;
-            }
+            return xvi[i].visualid;
         }
     }
 
@@ -206,12 +205,10 @@ VisualID SysTray::getVisual()
 
 void SysTray::addIcon(Window winId)
 {
-    // decline to add an icon for a window we already manage
-    TrayIcon * icon = findIcon(winId);
-    if (icon)
+    if (findIcon(winId))
         return;
 
-    icon = new TrayIcon(winId, this);
+    auto icon = new TrayIcon(winId, this);
 
     // add in sorted order
     int idx = 0;
@@ -221,5 +218,6 @@ void SysTray::addIcon(Window winId)
         if (icon->appName() < icon2->appName())
             break;
     }
+
     mLayout->insertWidget(idx, icon);
 }
