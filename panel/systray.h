@@ -29,7 +29,7 @@
 #define SYSTRAY_H
 
 #include <QAbstractNativeEventFilter>
-#include <QFrame>
+#include <QWidget>
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -39,7 +39,7 @@
 class TrayIcon;
 class QHBoxLayout;
 
-class SysTray : public QFrame, QAbstractNativeEventFilter
+class SysTray : public QWidget, QAbstractNativeEventFilter
 {
 public:
     enum

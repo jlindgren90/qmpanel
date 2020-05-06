@@ -25,39 +25,32 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
 #ifndef TRAYICON_H
 #define TRAYICON_H
 
-#include <QObject>
-#include <QFrame>
-#include <QList>
+#include <QWidget>
 
 #include <X11/X.h>
 #include <X11/extensions/Xdamage.h>
 
-#define TRAY_ICON_SIZE_DEFAULT 24
-
-class QWidget;
-class LXQtPanel;
 class SysTray;
 
-class TrayIcon: public QFrame
+class TrayIcon : public QWidget
 {
 public:
     TrayIcon(Window iconId, SysTray * tray);
-    virtual ~TrayIcon();
+    ~TrayIcon();
 
+    QString appName() const { return mAppName; }
     Window iconId() const { return mIconId; }
     Window windowId() const { return mWindowId; }
-    QString appName() const { return mAppName; }
 
     void windowDestroyed(Window w);
 
     QSize sizeHint() const { return QSize(mIconSize, mIconSize); }
 
 protected:
-    bool event(QEvent *event);
+    bool event(QEvent * event);
     void draw();
 
 private:
@@ -66,11 +59,11 @@ private:
 
     SysTray * const mTray;
     int const mIconSize;
-    Window mIconId;
-    Window mWindowId;
-    QString mAppName;
-    Damage mDamage;
-    Display* mDisplay;
+    Window const mIconId;
+    QString const mAppName;
+    Display * const mDisplay;
+    Window mWindowId = 0;
+    Damage mDamage = 0;
 };
 
 #endif // TRAYICON_H

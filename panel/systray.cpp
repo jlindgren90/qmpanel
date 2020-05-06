@@ -44,7 +44,7 @@
 #define SYSTEM_TRAY_REQUEST_DOCK 0
 
 SysTray::SysTray(QWidget * parent)
-    : QFrame(parent), mLayout(new QHBoxLayout(this)),
+    : QWidget(parent), mLayout(new QHBoxLayout(this)),
       mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
       mDisplay(QX11Info::display()), mScreen(QX11Info::appScreen()),
       mAtoms{XInternAtom(mDisplay, "MANAGER", false),

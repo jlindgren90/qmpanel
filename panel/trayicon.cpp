@@ -25,90 +25,57 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
-// Warning: order of those include is important.
-#include <QDebug>
 #include <QApplication>
-#include <QResizeEvent>
-#include <QPainter>
 #include <QBitmap>
-#include <QStyle>
+#include <QDebug>
+#include <QPainter>
+#include <QResizeEvent>
 #include <QScreen>
+#include <QStyle>
 #include <QTimer>
 
-#include "../panel/lxqtpanel.h"
 #include "systray.h"
 #include "trayicon.h"
 
+#include <KWindowInfo>
 #include <QX11Info>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xcomposite.h>
-#include <KWindowInfo>
 
 #define XEMBED_EMBEDDED_NOTIFY 0
 
-
 static bool xError;
 
-/************************************************
-
-************************************************/
-int windowErrorHandler(Display *d, XErrorEvent *e)
+int windowErrorHandler(Display * d, XErrorEvent * e)
 {
     xError = true;
-    if (e->error_code != BadWindow) {
+    if (e->error_code != BadWindow)
+    {
         char str[1024];
-        XGetErrorText(d, e->error_code,  str, 1024);
-        qWarning() << "Error handler" << e->error_code
-                   << str;
+        XGetErrorText(d, e->error_code, str, 1024);
+        qWarning() << "Error handler" << e->error_code << str;
     }
     return 0;
 }
 
-
-/************************************************
-
- ************************************************/
-TrayIcon::TrayIcon(Window iconId, SysTray * tray):
-    QFrame(tray),
-    mTray(tray),
-    mIconSize(tray->iconSize()),
-    mIconId(iconId),
-    mWindowId(0),
-    mAppName(KWindowInfo(iconId, 0, NET::WM2WindowClass).windowClassName()),
-    mDamage(0),
-    mDisplay(QX11Info::display())
+TrayIcon::TrayIcon(Window iconId, SysTray * tray)
+    : QWidget(tray), mTray(tray), mIconSize(tray->iconSize()), mIconId(iconId),
+      mAppName(KWindowInfo(iconId, 0, NET::WM2WindowClass).windowClassName()),
+      mDisplay(QX11Info::display())
 {
-    // NOTE:
-    // it's a good idea to save the return value of QX11Info::display().
-    // In Qt 5, this API is slower and has some limitations which can trigger crashes.
-    // The XDisplay value is actally stored in QScreen object of the primary screen rather than
-    // in a global variable. So when the parimary QScreen is being deleted and becomes invalid,
-    // QX11Info::display() will fail and cause crash. Storing this value improves the efficiency and
-    // also prevent potential crashes caused by this bug.
-
-    setObjectName("TrayIcon");
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    // NOTE:
-    // see https://github.com/lxqt/lxqt/issues/945
-    // workaround: delayed init because of weird behaviour of some icons/windows (claws-mail)
-    // (upon starting the app the window for receiving clicks wasn't correctly sized
-    //  no matter what we've done)
-    QTimer::singleShot(200, [this] { init(); update(); });
+    QTimer::singleShot(200, [this] {
+        init();
+        update();
+    });
 }
 
-
-
-/************************************************
-
- ************************************************/
 void TrayIcon::init()
 {
-    Display* dsp = mDisplay;
+    Display * dsp = mDisplay;
 
     XWindowAttributes attr;
-    if (! XGetWindowAttributes(dsp, mIconId, &attr))
+    if (!XGetWindowAttributes(dsp, mIconId, &attr))
     {
         deleteLater();
         return;
@@ -117,16 +84,16 @@ void TrayIcon::init()
     unsigned long mask = 0;
     XSetWindowAttributes set_attr;
 
-    Visual* visual = attr.visual;
+    Visual * visual = attr.visual;
     set_attr.colormap = attr.colormap;
     set_attr.background_pixel = 0;
     set_attr.border_pixel = 0;
-    mask = CWColormap|CWBackPixel|CWBorderPixel;
+    mask = CWColormap | CWBackPixel | CWBorderPixel;
 
     auto geom = iconGeometry();
-    mWindowId = XCreateWindow(dsp, this->winId(), geom.x(), geom.y(), geom.width(), geom.height(),
-                              0, attr.depth, InputOutput, visual, mask, &set_attr);
-
+    mWindowId = XCreateWindow(dsp, this->winId(), geom.x(), geom.y(),
+                              geom.width(), geom.height(), 0, attr.depth,
+                              InputOutput, visual, mask, &set_attr);
 
     xError = false;
     XErrorHandler old;
@@ -146,17 +113,17 @@ void TrayIcon::init()
         return;
     }
 
-
     {
         Atom acttype;
         int actfmt;
         unsigned long nbitem, bytes;
-        unsigned char *data = 0;
+        unsigned char * data = 0;
         int ret;
 
-        ret = XGetWindowProperty(dsp, mIconId, mTray->atom(SysTray::_XEMBED_INFO),
-                                 0, 2, false, mTray->atom(SysTray::_XEMBED_INFO),
-                                 &acttype, &actfmt, &nbitem, &bytes, &data);
+        ret =
+            XGetWindowProperty(dsp, mIconId, mTray->atom(SysTray::_XEMBED_INFO),
+                               0, 2, false, mTray->atom(SysTray::_XEMBED_INFO),
+                               &acttype, &actfmt, &nbitem, &bytes, &data);
         if (ret == Success)
         {
             if (data)
@@ -197,13 +164,9 @@ void TrayIcon::init()
     XResizeWindow(dsp, mIconId, geom.width(), geom.height());
 }
 
-
-/************************************************
-
- ************************************************/
 TrayIcon::~TrayIcon()
 {
-    Display* dsp = mDisplay;
+    Display * dsp = mDisplay;
     XSelectInput(dsp, mIconId, NoEventMask);
 
     if (mDamage)
@@ -222,11 +185,7 @@ TrayIcon::~TrayIcon()
     XSetErrorHandler(old);
 }
 
-
-/************************************************
-
- ************************************************/
-bool TrayIcon::event(QEvent *event)
+bool TrayIcon::event(QEvent * event)
 {
     if (mWindowId)
     {
@@ -255,13 +214,9 @@ bool TrayIcon::event(QEvent *event)
         }
     }
 
-    return QFrame::event(event);
+    return QWidget::event(event);
 }
 
-
-/************************************************
-
- ************************************************/
 QRect TrayIcon::iconGeometry()
 {
     QRect geom(QPoint(), QSize(mIconSize, mIconSize));
@@ -274,28 +229,22 @@ QRect TrayIcon::iconGeometry()
     return geom;
 }
 
-
-/************************************************
-
- ************************************************/
 void TrayIcon::draw()
 {
     XWindowAttributes attr, attr2;
     if (!XGetWindowAttributes(mDisplay, mIconId, &attr) ||
         !XGetWindowAttributes(mDisplay, mWindowId, &attr2))
     {
-        qWarning() << "Paint error";
         return;
     }
 
-    XImage* ximage = XGetImage(mDisplay, mIconId, 0, 0,
-                               qMin(attr.width, attr2.width),
-                               qMin(attr.height, attr2.height),
-                               AllPlanes, ZPixmap);
-    if(!ximage)
+    XImage * ximage =
+        XGetImage(mDisplay, mIconId, 0, 0, qMin(attr.width, attr2.width),
+                  qMin(attr.height, attr2.height), AllPlanes, ZPixmap);
+    if (!ximage)
         return;
 
-    QImage image((const uchar*)ximage->data, ximage->width, ximage->height,
+    QImage image((const uchar *)ximage->data, ximage->width, ximage->height,
                  ximage->bytes_per_line, QImage::Format_ARGB32_Premultiplied);
     image.setDevicePixelRatio(devicePixelRatioF());
 
@@ -308,13 +257,9 @@ void TrayIcon::draw()
     XDestroyImage(ximage);
 }
 
-
-/************************************************
-
- ************************************************/
 void TrayIcon::windowDestroyed(Window w)
 {
-    //damage is destroyed if it's parent window was destroyed
+    // damage is destroyed if its parent window was destroyed
     if (mIconId == w)
         mDamage = 0;
 }
