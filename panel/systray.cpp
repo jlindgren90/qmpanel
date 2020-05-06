@@ -118,7 +118,7 @@ SysTray::~SysTray()
 }
 
 bool SysTray::nativeEventFilter(const QByteArray & eventType, void * message,
-                                 long *)
+                                long *)
 {
     if (eventType != "xcb_generic_event_t")
         return false;
@@ -178,17 +178,15 @@ TrayIcon * SysTray::findIcon(Window id)
 
 VisualID SysTray::getVisual()
 {
-    VisualID visualId = 0;
-
     XVisualInfo templ;
     templ.screen = mScreen;
     templ.depth = 32;
     templ.c_class = TrueColor;
 
     int nvi;
-    auto xvi = XGetVisualInfo(
-        mDisplay, VisualScreenMask | VisualDepthMask | VisualClassMask, &templ,
-        &nvi);
+    auto mask = VisualScreenMask | VisualDepthMask | VisualClassMask;
+    std::unique_ptr<XVisualInfo[], decltype(&XFree)> xvi(
+        XGetVisualInfo(mDisplay, mask, &templ, &nvi), XFree);
 
     if (xvi)
     {
@@ -198,14 +196,12 @@ VisualID SysTray::getVisual()
             if (format && format->type == PictTypeDirect &&
                 format->direct.alphaMask)
             {
-                visualId = xvi[i].visualid;
-                break;
+                return xvi[i].visualid;
             }
         }
-        XFree(xvi);
     }
 
-    return visualId;
+    return 0;
 }
 
 void SysTray::addIcon(Window winId)
