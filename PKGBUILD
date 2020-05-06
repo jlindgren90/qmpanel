@@ -9,19 +9,15 @@ groups=("lxqt")
 url="https://lxqt.org"
 license=("LGPL2.1")
 depends=(
-	"libdbusmenu-qt5" "libxcomposite" "lxmenu-data"
-	"lxqt-globalkeys" "solid" "libxcb"
-)
-optdepends=(
-	"libpulse: Volume control plugin"
-	"alsa-lib: Volume control plugin"
-	"libstatgrab: CPU monitor and Network monitor plugins"
-	"libsysstat: System Statistics plugin"
-	"lm_sensors: Sensors plugin"
+	"kwindowsystem"
+	"libxcb"
+	"libxcomposite"
+	"libxdamage"
+	"libxrender"
+	"liblxqt"
 )
 makedepends=(
-	"lxqt-build-tools" "liblxqt" "libpulse" "libstatgrab" "libsysstat"
-	"lm_sensors" "libxdamage" "alsa-lib"
+	"lxqt-build-tools"
 )
 
 build() {
