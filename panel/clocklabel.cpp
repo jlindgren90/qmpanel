@@ -31,8 +31,7 @@
 
 #include <QMouseEvent>
 
-ClockLabel::ClockLabel(LXQtPanel * panel)
-    : QLabel(panel), mPanel(panel)
+ClockLabel::ClockLabel(LXQtPanel * panel) : QLabel(panel), mPanel(panel)
 {
     mCalendar.setWindowFlags(Qt::Popup);
     mTimer.setInterval(10000);

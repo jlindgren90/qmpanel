@@ -1,13 +1,9 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
- * LXQt - a lightweight, Qt based, desktop toolset
- * https://lxqt.org
- *
- * Copyright: 2010-2012 Razor team
+ * Copyright: 2020 John Lindgren
  * Authors:
- *   Petr Vanek <petr@scribus.info>
- *   Kuzma Shapran <kuzma.shapran@gmail.com>
+ *   John Lindgren <john@jlindgren.net>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public
@@ -26,21 +22,30 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef QUICKLAUNCH_H
-#define QUICKLAUNCH_H
+#ifndef APPDB_H
+#define APPDB_H
 
-#include <QHBoxLayout>
-#include <QWidget>
+#include <memory>
+#include <string>
+#include <unordered_map>
 
-class AppDB;
+typedef struct _GAppInfo GAppInfo;
+typedef struct _GList GList;
 
-class QuickLaunch : public QWidget
+class QAction;
+class QObject;
+
+using AppInfoPtr = std::unique_ptr<GAppInfo, void (*)(void *)>;
+
+class AppDB
 {
 public:
-    explicit QuickLaunch(const AppDB & appDB, QWidget * parent);
+    AppDB();
+
+    QAction * createAction(const char * appID, QObject * parent) const;
 
 private:
-    QHBoxLayout mLayout;
+    std::unordered_map<std::string, AppInfoPtr> mAppInfos;
 };
 
 #endif

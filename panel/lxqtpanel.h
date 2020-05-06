@@ -32,11 +32,13 @@
 #include <QPointer>
 #include <QWidget>
 
+class AppDB;
+
 // The main panel widget
 class LXQtPanel : public QWidget
 {
 public:
-    LXQtPanel();
+    LXQtPanel(const AppDB & appDB);
 
     QRect calcPopupPos(QPoint const & absolutePos,
                        QSize const & windowSize) const;

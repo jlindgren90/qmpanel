@@ -1,0 +1,94 @@
+/* BEGIN_COMMON_COPYRIGHT_HEADER
+ * (c)LGPL2+
+ *
+ * Copyright: 2020 John Lindgren
+ * Authors:
+ *   John Lindgren <john@jlindgren.net>
+ *
+ * This program or library is free software; you can redistribute it
+ * and/or modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+
+ * You should have received a copy of the GNU Lesser General
+ * Public License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301 USA
+ *
+ * END_COMMON_COPYRIGHT_HEADER */
+
+#include "appdb.h"
+
+#include <QAction>
+#include <QDebug>
+#include <QFileInfo>
+
+#undef signals
+#include <gio/gio.h>
+
+static void freeList(GList * list) { g_list_free_full(list, g_object_unref); }
+
+using CharPtr = std::unique_ptr<char, decltype(&g_free)>;
+using ListPtr = std::unique_ptr<GList, decltype(&freeList)>;
+
+static QIcon getIcon(GAppInfo * info)
+{
+    auto gicon = g_app_info_get_icon(info);
+    if (!gicon)
+        return QIcon();
+
+    CharPtr iconstr(g_icon_to_string(gicon), g_free);
+    if (!iconstr)
+        return QIcon();
+
+    return g_path_is_absolute(iconstr.get()) ? QIcon(iconstr.get())
+                                             : QIcon::fromTheme(iconstr.get());
+}
+
+class AppAction : public QAction
+{
+public:
+    AppAction(GAppInfo * info, QObject * parent)
+        : QAction(getIcon(info), g_app_info_get_display_name(info), parent),
+          mInfo((GAppInfo *)g_object_ref(info), g_object_unref)
+    {
+        connect(this, &QAction::triggered, [info]() {
+            if(!g_app_info_launch(info, nullptr, nullptr, nullptr))
+                qWarning() << "Failed to launch" << g_app_info_get_id(info);
+        });
+    }
+
+private:
+    AppInfoPtr mInfo;
+};
+
+AppDB::AppDB()
+{
+    ListPtr list(g_app_info_get_all(), freeList);
+
+    for (auto node = list.get(); node; node = node->next)
+    {
+        auto app = (GAppInfo *)node->data;
+        if (!g_app_info_should_show(app))
+            continue;
+
+        mAppInfos.emplace(std::piecewise_construct,
+                          std::forward_as_tuple(g_app_info_get_id(app)),
+                          std::forward_as_tuple((GAppInfo *)g_object_ref(app),
+                                                g_object_unref));
+    }
+}
+
+QAction * AppDB::createAction(const char * appID, QObject * parent) const
+{
+    auto iter = mAppInfos.find(appID);
+    if (iter == mAppInfos.end())
+        return nullptr;
+
+    return new AppAction(iter->second.get(), parent);
+}

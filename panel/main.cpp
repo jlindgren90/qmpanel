@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <thread>
 
+#include "appdb.h"
 #include "lxqtpanel.h"
 
 static sigset_t signal_set;
@@ -58,7 +59,8 @@ int main(int argc, char * argv[])
     /* monitor signals once qApp exists */
     std::thread(signal_thread).detach();
 
-    LXQtPanel panel;
+    AppDB appDB;
+    LXQtPanel panel(appDB);
 
     return app.exec();
 }

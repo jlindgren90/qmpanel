@@ -13,6 +13,7 @@ pkg_check_modules(XCB REQUIRED xcb xcb-util xcb-damage)
 pkg_check_modules(XCOMPOSITE REQUIRED xcomposite)
 pkg_check_modules(XDAMAGE REQUIRED xdamage)
 pkg_check_modules(XRENDER REQUIRED xrender)
+pkg_check_modules(GIO REQUIRED gio-2.0 gio-unix-2.0)
 
 remove_definitions("-DQT_NO_CAST_FROM_ASCII")
 remove_definitions("-DQT_NO_CAST_FROM_BYTEARRAY")

@@ -27,42 +27,35 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "quicklaunch.h"
+#include "appdb.h"
 
 #include <QDebug>
 #include <QToolButton>
-#include <XdgAction>
 
-QuickLaunch::QuickLaunch(QWidget * parent) : QWidget(parent), mLayout(this)
+QuickLaunch::QuickLaunch(const AppDB & appDB, QWidget * parent)
+    : QWidget(parent), mLayout(this)
 {
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
 
     /* TODO: make this configurable */
     const QStringList apps = {
-        "/usr/share/applications/nemo.desktop",
-        "/usr/share/applications/xfce4-terminal.desktop",
-        "/usr/share/applications/thunderbird.desktop",
-        "/usr/share/applications/firefox.desktop",
-        "/usr/share/applications/audacious.desktop",
-        "/usr/share/applications/org.qt-project.qtcreator.desktop"};
+        "nemo.desktop",        "xfce4-terminal.desktop",
+        "thunderbird.desktop", "firefox.desktop",
+        "audacious.desktop",   "org.qt-project.qtcreator.desktop"};
 
     for (const QString & desktop : apps)
     {
-        XdgDesktopFile xdg;
-        if (!xdg.load(desktop))
+        auto action = appDB.createAction(desktop.toUtf8(), this);
+        if (!action)
         {
-            qDebug() << "XdgDesktopFile" << desktop << "is not valid";
-            continue;
-        }
-        if (!xdg.isSuitable())
-        {
-            qDebug() << "XdgDesktopFile" << desktop << "is not applicable";
+            qWarning() << "Failed to create action for" << desktop;
             continue;
         }
 
         auto button = new QToolButton(this);
         button->setAutoRaise(true);
-        button->setDefaultAction(new XdgAction(&xdg, this));
+        button->setDefaultAction(action);
         mLayout.addWidget(button);
     }
 }

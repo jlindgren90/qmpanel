@@ -39,7 +39,7 @@
 #include <KWindowSystem/KWindowSystem>
 #include <KWindowSystem/NETWM>
 
-LXQtPanel::LXQtPanel() : mLayout(this)
+LXQtPanel::LXQtPanel(const AppDB & appDB) : mLayout(this)
 {
     setAttribute(Qt::WA_AcceptDrops);
     setAttribute(Qt::WA_AlwaysShowToolTips);
@@ -52,7 +52,7 @@ LXQtPanel::LXQtPanel() : mLayout(this)
     mLayout.setSpacing(0);
 
     mLayout.addWidget(new MainMenuButton(this));
-    mLayout.addWidget(new QuickLaunch(this));
+    mLayout.addWidget(new QuickLaunch(appDB, this));
     mLayout.addWidget(new TaskBar(this));
     mLayout.addWidget(new SysTray(this));
     mLayout.addWidget(new ClockLabel(this));
