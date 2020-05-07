@@ -43,11 +43,14 @@ QIcon AppDB::getIcon(const QString & name)
     if (!icon.isNull())
         return icon;
 
-    for (auto ext : {"svg", "png", "xpm"})
+    for (auto dir : {"/usr/share/icons", "/usr/share/pixmaps"})
     {
-        auto path = QString("/usr/share/pixmaps/%1.%2").arg(name).arg(ext);
-        if (g_file_test(path.toUtf8(), G_FILE_TEST_EXISTS))
-            return QIcon(path);
+        for (auto ext : {"svg", "png", "xpm"})
+        {
+            auto path = QString("%1/%2.%3").arg(dir).arg(name).arg(ext);
+            if (g_file_test(path.toUtf8(), G_FILE_TEST_EXISTS))
+                return QIcon(path);
+        }
     }
 
     return QIcon();
