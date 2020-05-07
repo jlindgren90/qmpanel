@@ -101,15 +101,17 @@ MainMenu::MainMenu(const AppDB & appDB, MainMenuButton * button)
     {
         auto apps = appDB.createCategory(category.internalName, this);
         if (!apps.isEmpty())
-            addMenu(QIcon::fromTheme(category.icon), category.displayName)
-                ->addActions(apps);
+        {
+            auto icon = QIcon::fromTheme(category.icon);
+            addMenu(icon, category.displayName)->addActions(apps);
+            mSearchView.addActions(apps);
+        }
     }
 
     mSearchEdit.setClearButtonEnabled(true);
     mSearchEdit.setPlaceholderText("Search");
     mSearchLayout.setContentsMargins(3, 3, 3, 3); /* TODO: scale by DPI */
     mSearchLayout.addWidget(&mSearchEdit);
-    mSearchView.fillActions(this);
 
     mSearchEditAction.setDefaultWidget(&mSearchFrame);
     mSearchViewAction.setDefaultWidget(&mSearchView);

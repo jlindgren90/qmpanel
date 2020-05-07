@@ -38,7 +38,7 @@ class ActionView : public QListView
 public:
     ActionView(QWidget * parent = nullptr);
 
-    void fillActions(QMenu * menu);
+    void addActions(QList<QAction *> actions);
     void setSearchStr(const QString & str);
     void activateCurrent();
 

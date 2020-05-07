@@ -32,7 +32,6 @@
 #include <QProxyStyle>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
-#include <XdgAction>
 #include <algorithm>
 
 class StringFilter
@@ -112,12 +111,10 @@ public:
 class ActionItem : public QStandardItem
 {
 public:
-    ActionItem(XdgAction * action) : mAction(action)
+    ActionItem(QAction * action) : mAction(action)
     {
-        action->updateIcon();
         setIcon(action->icon());
         setText(action->text());
-        setToolTip(action->toolTip());
     }
 
     void trigger()
@@ -127,7 +124,7 @@ public:
     }
 
 private:
-    QPointer<XdgAction> mAction;
+    QPointer<QAction> mAction;
 };
 
 ActionView::ActionView(QWidget * parent)
@@ -184,17 +181,8 @@ void ActionView::onActivated(QModelIndex const & index)
         item->trigger();
 }
 
-void ActionView::fillActions(QMenu * menu)
+void ActionView::addActions(QList<QAction *> actions)
 {
-    for (auto action : menu->actions())
-    {
-        if (auto xdgAction = qobject_cast<XdgAction *>(action))
-        {
-            mModel->appendRow(new ActionItem(xdgAction));
-        }
-        else if (auto subMenu = action->menu())
-        {
-            fillActions(subMenu);
-        }
-    }
+    for (auto action : actions)
+        mModel->appendRow(new ActionItem(action));
 }
