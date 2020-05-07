@@ -81,12 +81,11 @@ void TrayIcon::initIcon()
     set_attr.background_pixel = 0;
     set_attr.border_pixel = 0;
 
-    auto pos = mapTo(nativeParentWidget(), QPoint()) * devicePixelRatioF();
     int sizeDevPx = mIconSize * devicePixelRatioF();
     auto mask = CWColormap | CWBackPixel | CWBorderPixel;
-    mWindowId = XCreateWindow(mDisplay, effectiveWinId(), pos.x(), pos.y(),
-                              sizeDevPx, sizeDevPx, 0, attr.depth, InputOutput,
-                              attr.visual, mask, &set_attr);
+    mWindowId =
+        XCreateWindow(mDisplay, winId(), 0, 0, sizeDevPx, sizeDevPx, 0,
+                      attr.depth, InputOutput, attr.visual, mask, &set_attr);
 
     xError = false;
     auto old = XSetErrorHandler(windowErrorHandler);
@@ -126,15 +125,6 @@ void TrayIcon::initIcon()
     update();
 }
 
-void TrayIcon::moveIcon()
-{
-    if (!mWindowId)
-        return;
-
-    auto pos = mapTo(nativeParentWidget(), QPoint()) * devicePixelRatioF();
-    XMoveWindow(mDisplay, mWindowId, pos.x(), pos.y());
-}
-
 TrayIcon::~TrayIcon()
 {
     if (!mWindowId)
@@ -158,12 +148,6 @@ void TrayIcon::showEvent(QShowEvent * event)
 {
     QWidget::showEvent(event);
     QTimer::singleShot(0, this, &TrayIcon::initIcon);
-}
-
-void TrayIcon::moveEvent(QMoveEvent * event)
-{
-    QWidget::moveEvent(event);
-    QTimer::singleShot(0, this, &TrayIcon::moveIcon);
 }
 
 void TrayIcon::paintEvent(QPaintEvent *)
