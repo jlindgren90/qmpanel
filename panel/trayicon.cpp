@@ -29,6 +29,7 @@
 #include <KWindowInfo>
 #include <QDebug>
 #include <QPainter>
+#include <QTimer>
 #include <QX11Info>
 
 #include "systray.h"
@@ -60,7 +61,10 @@ TrayIcon::TrayIcon(Window iconId, SysTray * tray)
       mDisplay(QX11Info::display())
 {
     setFixedSize(mIconSize, mIconSize);
+}
 
+void TrayIcon::initIcon()
+{
     XWindowAttributes attr{};
     if (!XGetWindowAttributes(mDisplay, mIconId, &attr))
     {
@@ -73,11 +77,12 @@ TrayIcon::TrayIcon(Window iconId, SysTray * tray)
     set_attr.background_pixel = 0;
     set_attr.border_pixel = 0;
 
+    auto pos = mapTo(nativeParentWidget(), QPoint()) * devicePixelRatioF();
     int sizeDevPx = mIconSize * devicePixelRatioF();
     auto mask = CWColormap | CWBackPixel | CWBorderPixel;
-    mWindowId =
-        XCreateWindow(mDisplay, winId(), 0, 0, sizeDevPx, sizeDevPx, 0,
-                      attr.depth, InputOutput, attr.visual, mask, &set_attr);
+    mWindowId = XCreateWindow(mDisplay, effectiveWinId(), pos.x(), pos.y(),
+                              sizeDevPx, sizeDevPx, 0, attr.depth, InputOutput,
+                              attr.visual, mask, &set_attr);
 
     xError = false;
     auto old = XSetErrorHandler(windowErrorHandler);
@@ -114,6 +119,12 @@ TrayIcon::TrayIcon(Window iconId, SysTray * tray)
     XResizeWindow(mDisplay, mIconId, sizeDevPx, sizeDevPx);
 }
 
+void TrayIcon::moveIcon()
+{
+    auto pos = mapTo(nativeParentWidget(), QPoint()) * devicePixelRatioF();
+    XMoveWindow(mDisplay, mWindowId, pos.x(), pos.y());
+}
+
 TrayIcon::~TrayIcon()
 {
     if (!mWindowId)
@@ -131,6 +142,20 @@ TrayIcon::~TrayIcon()
     XDestroyWindow(mDisplay, mWindowId);
     XSync(mDisplay, False);
     XSetErrorHandler(old);
+}
+
+void TrayIcon::showEvent(QShowEvent * event)
+{
+    QWidget::showEvent(event);
+    if (!mWindowId)
+        QTimer::singleShot(0, this, &TrayIcon::initIcon);
+}
+
+void TrayIcon::moveEvent(QMoveEvent * event)
+{
+    QWidget::moveEvent(event);
+    if (mWindowId)
+        QTimer::singleShot(0, this, &TrayIcon::moveIcon);
 }
 
 void TrayIcon::paintEvent(QPaintEvent *)

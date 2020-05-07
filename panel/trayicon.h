@@ -49,9 +49,14 @@ public:
     void windowDestroyed(Window w);
 
 protected:
+    void showEvent(QShowEvent *) override;
+    void moveEvent(QMoveEvent *) override;
     void paintEvent(QPaintEvent *) override;
 
 private:
+    void initIcon();
+    void moveIcon();
+
     SysTray * const mTray;
     int const mIconSize;
     Window const mIconId;
