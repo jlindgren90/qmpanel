@@ -31,6 +31,7 @@
 #include <QHBoxLayout>
 #include <QStyle>
 #include <QX11Info>
+#include <memory>
 
 #include <X11/Xatom.h>
 #include <X11/extensions/Xdamage.h>
