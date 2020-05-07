@@ -9,6 +9,7 @@ groups=("lxqt")
 url="https://lxqt.org"
 license=("LGPL2.1")
 depends=(
+	"glib2"
 	"kwindowsystem"
 	"libxcb"
 	"libxcomposite"
