@@ -14,10 +14,6 @@ depends=(
 	"libxcomposite"
 	"libxdamage"
 	"libxrender"
-	"liblxqt"
-)
-makedepends=(
-	"lxqt-build-tools"
 )
 
 build() {

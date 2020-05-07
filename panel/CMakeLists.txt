@@ -16,18 +16,17 @@ set(SOURCES
 
 set(LIBRARIES
     ${CMAKE_THREAD_LIBS_INIT}
-    Qt5::Widgets
     KF5::WindowSystem
     ${X11_LIBRARIES}
     ${XCB_LIBRARIES}
-    ${XCOMPOSITE_LIBRARIES}
-    ${XDAMAGE_LIBRARIES}
-    ${XRENDER_LIBRARIES}
     ${GIO_LIBRARIES}
-    lxqt
+    ${QT_LIBRARIES}
 )
 
-include_directories(${GIO_INCLUDE_DIRS})
+include_directories(
+    ${GIO_INCLUDE_DIRS}
+    ${QT_INCLUDE_DIRS}
+)
 
 project(${PROJECT})
 add_executable(${PROJECT} ${SOURCES})
