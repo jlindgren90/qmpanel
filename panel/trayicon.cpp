@@ -122,6 +122,8 @@ void TrayIcon::initIcon()
     XMapWindow(mDisplay, mIconId);
     XMapRaised(mDisplay, mWindowId);
     XResizeWindow(mDisplay, mIconId, sizeDevPx, sizeDevPx);
+
+    update();
 }
 
 void TrayIcon::moveIcon()
