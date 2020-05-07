@@ -65,6 +65,9 @@ TrayIcon::TrayIcon(Window iconId, SysTray * tray)
 
 void TrayIcon::initIcon()
 {
+    if (mWindowId)
+        return;
+
     XWindowAttributes attr{};
     if (!XGetWindowAttributes(mDisplay, mIconId, &attr))
     {
@@ -121,6 +124,9 @@ void TrayIcon::initIcon()
 
 void TrayIcon::moveIcon()
 {
+    if (!mWindowId)
+        return;
+
     auto pos = mapTo(nativeParentWidget(), QPoint()) * devicePixelRatioF();
     XMoveWindow(mDisplay, mWindowId, pos.x(), pos.y());
 }
@@ -147,15 +153,13 @@ TrayIcon::~TrayIcon()
 void TrayIcon::showEvent(QShowEvent * event)
 {
     QWidget::showEvent(event);
-    if (!mWindowId)
-        QTimer::singleShot(0, this, &TrayIcon::initIcon);
+    QTimer::singleShot(0, this, &TrayIcon::initIcon);
 }
 
 void TrayIcon::moveEvent(QMoveEvent * event)
 {
     QWidget::moveEvent(event);
-    if (mWindowId)
-        QTimer::singleShot(0, this, &TrayIcon::moveIcon);
+    QTimer::singleShot(0, this, &TrayIcon::moveIcon);
 }
 
 void TrayIcon::paintEvent(QPaintEvent *)
