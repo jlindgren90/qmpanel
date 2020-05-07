@@ -34,6 +34,7 @@
 #include "utils.h"
 
 class QAction;
+class QIcon;
 class QObject;
 
 typedef struct _GAppInfo GAppInfo;
@@ -42,6 +43,9 @@ class AppDB
 {
 public:
     AppDB();
+
+    static QIcon getIcon(const char * name);
+    static QIcon getIcon(GAppInfo * info);
 
     QAction * createAction(const char * appID, QObject * parent) const;
     QList<QAction *> createCategory(const char * category,

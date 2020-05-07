@@ -34,16 +34,8 @@
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-static QIcon getIcon(GAppInfo * info)
+QIcon AppDB::getIcon(const char * name)
 {
-    auto gicon = g_app_info_get_icon(info);
-    if (!gicon)
-        return QIcon();
-
-    CharPtr name(g_icon_to_string(gicon), g_free);
-    if (!name)
-        return QIcon();
-
     if (g_path_is_absolute(name))
         return QIcon(name);
 
@@ -53,9 +45,8 @@ static QIcon getIcon(GAppInfo * info)
 
     for (auto ext : {".svg", ".png", ".xpm"})
     {
-        CharPtr path(
-            g_strconcat("/usr/share/pixmaps/", name.get(), ext, nullptr),
-            g_free);
+        CharPtr path(g_strconcat("/usr/share/pixmaps/", name, ext, nullptr),
+                     g_free);
 
         if (g_file_test(path, G_FILE_TEST_EXISTS))
             return QIcon(path);
@@ -64,11 +55,25 @@ static QIcon getIcon(GAppInfo * info)
     return QIcon();
 }
 
+QIcon AppDB::getIcon(GAppInfo * info)
+{
+    auto gicon = g_app_info_get_icon(info);
+    if (!gicon)
+        return QIcon();
+
+    CharPtr name(g_icon_to_string(gicon), g_free);
+    if (!name)
+        return QIcon();
+
+    return getIcon(name);
+}
+
 class AppAction : public QAction
 {
 public:
     AppAction(GAppInfo * info, QObject * parent)
-        : QAction(getIcon(info), g_app_info_get_display_name(info), parent),
+        : QAction(AppDB::getIcon(info), g_app_info_get_display_name(info),
+                  parent),
           mInfo((GAppInfo *)g_object_ref(info), g_object_unref)
     {
         connect(this, &QAction::triggered, [info]() {

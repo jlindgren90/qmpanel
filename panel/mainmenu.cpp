@@ -102,7 +102,7 @@ MainMenu::MainMenu(const AppDB & appDB, MainMenuButton * button)
         auto apps = appDB.createCategory(category.internalName, this);
         if (!apps.isEmpty())
         {
-            auto icon = QIcon::fromTheme(category.icon);
+            auto icon = AppDB::getIcon(category.icon);
             addMenu(icon, category.displayName)->addActions(apps);
             mSearchView.addActions(apps);
         }
@@ -189,7 +189,7 @@ MainMenuButton::MainMenuButton(const AppDB & appDB, MainPanel * panel)
 {
     setAutoRaise(true);
     /* TODO: make configurable */
-    setIcon(QIcon("/usr/share/pixmaps/j-login.png"));
+    setIcon(AppDB::getIcon("j-login"));
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     connect(this, &QToolButton::clicked, [this]() {
