@@ -1,12 +1,11 @@
-# Maintainer: Jerome Leclanche <jerome@leclan.ch>
+# Maintainer: John Lindgren <john@jlindgren.net>
 
-pkgname=lxqt-panel
-pkgver=0.14.1
-pkgrel=2
-pkgdesc="The LXQt desktop panel"
+pkgname=qmpanel
+pkgver=0.1
+pkgrel=1
+pkgdesc="A Minimal Qt-Based Desktop Panel"
 arch=("x86_64")
-groups=("lxqt")
-url="https://lxqt.org"
+url="https://github.com/jlindgren90/qmpanel"
 license=("LGPL2.1")
 depends=(
 	"glib2"
