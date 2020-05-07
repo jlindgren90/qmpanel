@@ -43,8 +43,8 @@ public:
     void activateCurrent();
 
 protected:
-    virtual QSize viewportSizeHint() const override;
-    virtual QSize minimumSizeHint() const override { return QSize(); }
+    QSize viewportSizeHint() const override;
+    QSize minimumSizeHint() const override { return QSize(); }
 
 private:
     void onActivated(QModelIndex const & index);

@@ -97,9 +97,9 @@ private:
 class SingleActivateStyle : public QProxyStyle
 {
 public:
-    virtual int styleHint(StyleHint hint, const QStyleOption * option,
-                          const QWidget * widget,
-                          QStyleHintReturn * returnData) const override
+    int styleHint(StyleHint hint, const QStyleOption * option,
+                  const QWidget * widget,
+                  QStyleHintReturn * returnData) const override
     {
         if (hint == QStyle::SH_ItemView_ActivateItemOnSingleClick)
             return 1;
