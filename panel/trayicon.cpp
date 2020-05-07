@@ -72,6 +72,7 @@ void TrayIcon::initIcon()
     if (!XGetWindowAttributes(mDisplay, mIconId, &attr))
     {
         qWarning() << "Can't get icon window attrs";
+        deleteLater();
         return;
     }
 
@@ -96,6 +97,7 @@ void TrayIcon::initIcon()
     if (xError)
     {
         qWarning() << "Can't reparent icon window";
+        deleteLater();
         return;
     }
 
