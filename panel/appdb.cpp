@@ -32,10 +32,6 @@
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-using namespace Utils;
-
-static void freeList(GList * list) { g_list_free_full(list, g_object_unref); }
-
 static QIcon getIcon(GAppInfo * info)
 {
     auto gicon = g_app_info_get_icon(info);
@@ -85,7 +81,9 @@ private:
 
 AppDB::AppDB()
 {
-    AutoPtr<GList> list(g_app_info_get_all(), freeList);
+    AutoPtr<GList> list(g_app_info_get_all(), [](GList * list) {
+        g_list_free_full(list, g_object_unref);
+    });
 
     for (auto node = list.get(); node; node = node->next)
     {

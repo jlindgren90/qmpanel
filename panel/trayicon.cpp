@@ -32,6 +32,7 @@
 
 #include "systray.h"
 #include "trayicon.h"
+#include "utils.h"
 
 #include <X11/Xutil.h>
 #include <X11/extensions/Xcomposite.h>
@@ -126,10 +127,7 @@ TrayIcon::~TrayIcon()
     auto old = XSetErrorHandler(windowErrorHandler);
     XUnmapWindow(mDisplay, mIconId);
     XReparentWindow(mDisplay, mIconId, QX11Info::appRootWindow(), 0, 0);
-
-    if (mWindowId)
-        XDestroyWindow(mDisplay, mWindowId);
-
+    XDestroyWindow(mDisplay, mWindowId);
     XSync(mDisplay, False);
     XSetErrorHandler(old);
 }
@@ -146,9 +144,13 @@ void TrayIcon::paintEvent(QPaintEvent *)
         return;
     }
 
-    int w = qMin(attr.width, attr2.width);
-    int h = qMin(attr.height, attr2.height);
-    auto ximage = XGetImage(mDisplay, mIconId, 0, 0, w, h, AllPlanes, ZPixmap);
+    int w = std::min(attr.width, attr2.width);
+    int h = std::min(attr.height, attr2.height);
+
+    AutoPtr<XImage> ximage(
+        XGetImage(mDisplay, mIconId, 0, 0, w, h, AllPlanes, ZPixmap),
+        [](XImage * image) { XDestroyImage(image); });
+
     if (!ximage)
         return;
 
@@ -160,8 +162,6 @@ void TrayIcon::paintEvent(QPaintEvent *)
     drawRect.moveCenter(rect().center());
     QPainter painter(this);
     painter.drawImage(drawRect.topLeft(), image);
-
-    XDestroyImage(ximage);
 }
 
 void TrayIcon::windowDestroyed(Window w)

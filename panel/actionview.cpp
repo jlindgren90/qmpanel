@@ -170,7 +170,7 @@ QSize ActionView::viewportSizeHint() const
     if (count == 0)
         return QSize();
 
-    return {sizeHintForColumn(0), sizeHintForRow(0) * qMin(count, 10)};
+    return {sizeHintForColumn(0), sizeHintForRow(0) * std::min(count, 10)};
 }
 
 void ActionView::onActivated(QModelIndex const & index)

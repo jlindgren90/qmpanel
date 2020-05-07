@@ -46,7 +46,7 @@ public:
                                     QObject * parent) const;
 
 private:
-    std::unordered_map<std::string, Utils::AutoPtrV<GAppInfo>> mAppInfos;
+    std::unordered_map<std::string, AutoPtrV<GAppInfo>> mAppInfos;
 };
 
 #endif

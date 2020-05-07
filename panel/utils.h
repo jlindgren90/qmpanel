@@ -28,9 +28,6 @@
 #include <QString>
 #include <memory>
 
-namespace Utils
-{
-
 template<typename T>
 using AutoPtr = std::unique_ptr<T, void (*)(T *)>;
 template<typename T>
@@ -43,7 +40,5 @@ public:
     operator const char *() const { return get(); }
     operator QString() const { return get(); }
 };
-
-} // namespace Utils
 
 #endif
