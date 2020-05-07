@@ -116,5 +116,9 @@ QList<QAction *> AppDB::createCategory(const char * category,
             actions.append(new AppAction(info, parent));
     }
 
+    std::sort(actions.begin(), actions.end(), [](QAction * a, QAction * b) {
+        return (a->text().compare(b->text(), Qt::CaseInsensitive) < 0);
+    });
+
     return actions;
 }
