@@ -38,7 +38,7 @@
 class ClockLabel : public QToolButton
 {
 public:
-    ClockLabel(QWidget * parent);
+    explicit ClockLabel(QWidget * parent);
 
 protected:
     void timerEvent(QTimerEvent *) override;

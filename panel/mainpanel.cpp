@@ -106,22 +106,3 @@ void MainPanel::updateGeometry()
                                     /* bottom */ screenBottom + 1 - rect.top(),
                                     rect.left(), rect.right() + 1);
 }
-
-QRect MainPanel::calcPopupPos(QPoint const & absolutePos,
-                              QSize const & windowSize) const
-{
-    QRect screen = QApplication::primaryScreen()->geometry();
-    QRect pos(QPoint(absolutePos.x(), geometry().top() - windowSize.height()),
-              windowSize);
-
-    if (pos.right() > screen.right())
-        pos.moveRight(screen.right());
-
-    return pos;
-}
-
-QRect MainPanel::calcPopupPos(QWidget * widget, const QSize & windowSize) const
-{
-    return calcPopupPos(geometry().topLeft() + widget->geometry().topLeft(),
-                        windowSize);
-}

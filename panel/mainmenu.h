@@ -32,18 +32,11 @@
 #include <QToolButton>
 
 class MainPanel;
-class MainMenu;
 
 class MainMenuButton : public QToolButton
 {
 public:
     explicit MainMenuButton(MainPanel * panel);
-
-    MainPanel * panel() const { return mPanel; }
-
-private:
-    MainPanel * const mPanel;
-    MainMenu * const mMenu;
 };
 
 #endif

@@ -41,10 +41,6 @@ class MainPanel : public QWidget
 public:
     MainPanel();
 
-    QRect calcPopupPos(QPoint const & absolutePos,
-                       QSize const & windowSize) const;
-    QRect calcPopupPos(QWidget * widget, const QSize & windowSize) const;
-
     const AppDB & appDB() { return mAppDB; }
     const Settings & settings() { return mSettings; }
 

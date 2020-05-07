@@ -55,7 +55,7 @@ public:
         NUM_ATOMS
     };
 
-    SysTray(QWidget * parent);
+    explicit SysTray(QWidget * parent);
     ~SysTray();
 
     Atom atom(int idx) const { return mAtoms[idx]; }

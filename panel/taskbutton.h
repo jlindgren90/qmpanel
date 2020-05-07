@@ -37,7 +37,7 @@
 class TaskButton : public QToolButton
 {
 public:
-    explicit TaskButton(const WId window, QWidget * parent);
+    TaskButton(const WId window, QWidget * parent);
 
     void updateText();
     void updateIcon();

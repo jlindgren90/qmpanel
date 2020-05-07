@@ -46,7 +46,7 @@ struct Category
 class MainMenu : public QMenu
 {
 public:
-    MainMenu(MainMenuButton * button);
+    MainMenu(MainPanel * panel, QWidget * parent);
 
 protected:
     void actionEvent(QActionEvent * e) override;
@@ -57,7 +57,6 @@ protected:
 private:
     void searchTextChanged(const QString & text);
 
-    MainMenuButton * const mButton;
     QWidgetAction mSearchEditAction;
     QWidgetAction mSearchViewAction;
     QWidget mSearchFrame;
@@ -67,9 +66,9 @@ private:
     bool mUpdatesInhibited = false;
 };
 
-MainMenu::MainMenu(MainMenuButton * button)
-    : QMenu(button), mButton(button), mSearchEditAction(this),
-      mSearchViewAction(this), mSearchLayout(&mSearchFrame)
+MainMenu::MainMenu(MainPanel * panel, QWidget * parent)
+    : QMenu(parent), mSearchEditAction(this), mSearchViewAction(this),
+      mSearchLayout(&mSearchFrame)
 {
     static const Category categories[] = {
         {"applications-accessories", "Accessories", "Utility"},
@@ -83,8 +82,8 @@ MainMenu::MainMenu(MainMenuButton * button)
         {"preferences-desktop", "Settings", "Settings"},
         {"applications-system", "System", "System"}};
 
-    auto & appDB = button->panel()->appDB();
-    auto & settings = button->panel()->settings();
+    auto & appDB = panel->appDB();
+    auto & settings = panel->settings();
 
     for (auto app : settings.pinnedMenuApps)
     {
@@ -153,7 +152,9 @@ void MainMenu::keyPressEvent(QKeyEvent * e)
 
 void MainMenu::resizeEvent(QResizeEvent * e)
 {
-    move(mButton->panel()->calcPopupPos(mButton, e->size()).topLeft());
+    // anchor the bottom edge
+    if (isVisible())
+        move(x(), y() + e->oldSize().height() - height());
 }
 
 void MainMenu::showEvent(QShowEvent *)
@@ -185,12 +186,11 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-MainMenuButton::MainMenuButton(MainPanel * panel)
-    : QToolButton(panel), mPanel(panel), mMenu(new MainMenu(this))
+MainMenuButton::MainMenuButton(MainPanel * panel) : QToolButton(panel)
 {
     setAutoRaise(true);
     setIcon(AppDB::getIcon(panel->settings().menuIcon));
-    setMenu(mMenu);
+    setMenu(new MainMenu(panel, this));
     setPopupMode(InstantPopup);
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 }

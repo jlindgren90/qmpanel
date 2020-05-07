@@ -29,7 +29,8 @@
 
 #include "clocklabel.h"
 
-ClockLabel::ClockLabel(QWidget * parent) : QToolButton(parent), mCalendarAction(this)
+ClockLabel::ClockLabel(QWidget * parent)
+    : QToolButton(parent), mCalendarAction(this)
 {
     mCalendarAction.setDefaultWidget(&mCalendar);
     mMenu.addAction(&mCalendarAction);
