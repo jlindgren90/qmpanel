@@ -190,15 +190,7 @@ MainMenuButton::MainMenuButton(MainPanel * panel)
 {
     setAutoRaise(true);
     setIcon(AppDB::getIcon(panel->settings().menuIcon));
+    setMenu(mMenu);
+    setPopupMode(InstantPopup);
     setToolButtonStyle(Qt::ToolButtonIconOnly);
-
-    connect(this, &QToolButton::clicked, [this]() {
-        if (mMenu->isVisible())
-            mMenu->hide();
-        else
-        {
-            auto pos = mPanel->calcPopupPos(this, mMenu->sizeHint());
-            mMenu->popup(pos.topLeft());
-        }
-    });
 }
