@@ -22,31 +22,28 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef APPDB_H
-#define APPDB_H
+#ifndef UTILS_H
+#define UTILS_H
 
-#include <QList>
-#include <string>
-#include <unordered_map>
+#include <QString>
+#include <memory>
 
-#include "utils.h"
+namespace Utils
+{
 
-class QAction;
-class QObject;
+template<typename T>
+using AutoPtr = std::unique_ptr<T, void (*)(T *)>;
+template<typename T>
+using AutoPtrV = std::unique_ptr<T, void (*)(void *)>;
 
-typedef struct _GAppInfo GAppInfo;
-
-class AppDB
+class CharPtr : public AutoPtrV<char>
 {
 public:
-    AppDB();
-
-    QAction * createAction(const char * appID, QObject * parent) const;
-    QList<QAction *> createCategory(const char * category,
-                                    QObject * parent) const;
-
-private:
-    std::unordered_map<std::string, Utils::AutoPtrV<GAppInfo>> mAppInfos;
+    using unique_ptr::unique_ptr;
+    operator const char *() const { return get(); }
+    operator QString() const { return get(); }
 };
+
+} // namespace Utils
 
 #endif

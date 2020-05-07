@@ -32,10 +32,9 @@
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-static void freeList(GList * list) { g_list_free_full(list, g_object_unref); }
+using namespace Utils;
 
-using CharPtr = std::unique_ptr<char, decltype(&g_free)>;
-using ListPtr = std::unique_ptr<GList, decltype(&freeList)>;
+static void freeList(GList * list) { g_list_free_full(list, g_object_unref); }
 
 static QIcon getIcon(GAppInfo * info)
 {
@@ -43,12 +42,28 @@ static QIcon getIcon(GAppInfo * info)
     if (!gicon)
         return QIcon();
 
-    CharPtr iconstr(g_icon_to_string(gicon), g_free);
-    if (!iconstr)
+    CharPtr name(g_icon_to_string(gicon), g_free);
+    if (!name)
         return QIcon();
 
-    return g_path_is_absolute(iconstr.get()) ? QIcon(iconstr.get())
-                                             : QIcon::fromTheme(iconstr.get());
+    if (g_path_is_absolute(name))
+        return QIcon(name);
+
+    auto icon = QIcon::fromTheme(name);
+    if (!icon.isNull())
+        return icon;
+
+    for (auto ext : {".svg", ".png", ".xpm"})
+    {
+        CharPtr path(
+            g_strconcat("/usr/share/pixmaps/", name.get(), ext, nullptr),
+            g_free);
+
+        if (g_file_test(path, G_FILE_TEST_EXISTS))
+            return QIcon(path);
+    }
+
+    return QIcon();
 }
 
 class AppAction : public QAction
@@ -65,12 +80,12 @@ public:
     }
 
 private:
-    AppInfoPtr mInfo;
+    AutoPtrV<GAppInfo> mInfo;
 };
 
 AppDB::AppDB()
 {
-    ListPtr list(g_app_info_get_all(), freeList);
+    AutoPtr<GList> list(g_app_info_get_all(), freeList);
 
     for (auto node = list.get(); node; node = node->next)
     {
