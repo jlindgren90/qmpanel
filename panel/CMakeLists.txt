@@ -1,4 +1,4 @@
-set(PROJECT lxqt-panel)
+set(PROJECT qmpanel)
 
 set(SOURCES
     actionview.cpp
@@ -6,7 +6,7 @@ set(SOURCES
     clocklabel.cpp
     main.cpp
     mainmenu.cpp
-    lxqtpanel.cpp
+    mainpanel.cpp
     quicklaunch.cpp
     systray.cpp
     taskbar.cpp

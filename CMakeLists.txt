@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
-project(lxqt-panel)
+project(qmpanel)
 
 find_package(Threads REQUIRED)
 find_package(KF5WindowSystem REQUIRED)
