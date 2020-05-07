@@ -95,9 +95,10 @@ MainMenu::MainMenu(MainMenuButton * button)
 
     addSeparator();
 
+    std::unordered_set<QString> added;
     for (auto & category : categories)
     {
-        auto apps = appDB.createCategory(category.internalName, this);
+        auto apps = appDB.createCategory(category.internalName, added, this);
         if (!apps.isEmpty())
         {
             auto icon = AppDB::getIcon(category.icon);

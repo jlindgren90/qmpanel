@@ -116,6 +116,7 @@ QAction * AppDB::createAction(const QString & appID, QObject * parent) const
 }
 
 QList<QAction *> AppDB::createCategory(const QString & category,
+                                       std::unordered_set<QString> & added,
                                        QObject * parent) const
 {
     QList<QAction *> actions;
@@ -130,8 +131,12 @@ QList<QAction *> AppDB::createCategory(const QString & category,
             QString(g_desktop_app_info_get_categories((GDesktopAppInfo *)info))
                 .split(';', QString::SkipEmptyParts);
 
-        if (categories.contains(category, Qt::CaseInsensitive))
+        // only add if not already in another category
+        if (categories.contains(category, Qt::CaseInsensitive) &&
+            added.insert(g_app_info_get_id(info)).second)
+        {
             actions.append(new AppAction(info, parent));
+        }
     }
 
     std::sort(actions.begin(), actions.end(), [](QAction * a, QAction * b) {

@@ -29,6 +29,7 @@
 
 #include <QList>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "utils.h"
 
@@ -47,7 +48,9 @@ public:
     static QIcon getIcon(GAppInfo * info);
 
     QAction * createAction(const QString & appID, QObject * parent) const;
+
     QList<QAction *> createCategory(const QString & category,
+                                    std::unordered_set<QString> & added,
                                     QObject * parent) const;
 
 private:
