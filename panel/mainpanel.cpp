@@ -48,10 +48,8 @@ MainPanel::MainPanel() : mSettings(loadSettings()), mLayout(this)
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus |
                    Qt::WindowStaysOnTopHint);
 
-    int sp = logicalDpiX() / 24;
-    // make sure menu button touches left edge
-    mLayout.setContentsMargins(0, 0, sp, 0);
-    mLayout.setSpacing(sp);
+    mLayout.setContentsMargins(QMargins());
+    mLayout.setSpacing(logicalDpiX() / 24);
 
     mLayout.addWidget(new MainMenuButton(this));
     mLayout.addWidget(new QuickLaunch(this));

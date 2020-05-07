@@ -28,42 +28,21 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "clocklabel.h"
-#include "mainpanel.h"
 
-#include <QMouseEvent>
-
-ClockLabel::ClockLabel(MainPanel * panel) : QLabel(panel), mPanel(panel)
+ClockLabel::ClockLabel(QWidget * parent) : QToolButton(parent), mCalendarAction(this)
 {
-    mCalendar.setWindowFlags(Qt::Popup);
-    mTimer.setInterval(10000);
-    mTimer.start();
+    mCalendarAction.setDefaultWidget(&mCalendar);
+    mMenu.addAction(&mCalendarAction);
 
-    QObject::connect(&mTimer, &QTimer::timeout, this, &ClockLabel::updateTime);
+    setAutoRaise(true);
+    setMenu(&mMenu);
+    setPopupMode(InstantPopup);
 
-    updateTime();
+    startTimer(10000);
+    timerEvent(nullptr);
 }
 
-void ClockLabel::mousePressEvent(QMouseEvent * e)
-{
-    if (e->button() == Qt::LeftButton)
-    {
-        if (mCalendar.isVisible())
-            mCalendar.hide();
-        else
-        {
-            auto size = mCalendar.sizeHint();
-            mCalendar.move(mPanel->calcPopupPos(this, size).topLeft());
-            mCalendar.show();
-        }
-
-        e->accept();
-        return;
-    }
-
-    QLabel::mousePressEvent(e);
-}
-
-void ClockLabel::updateTime()
+void ClockLabel::timerEvent(QTimerEvent *)
 {
     setText(QDateTime::currentDateTime().toString("ddd MMM d, h:mm a"));
 }

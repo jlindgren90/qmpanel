@@ -31,25 +31,22 @@
 #define CLOCKLABEL_H
 
 #include <QCalendarWidget>
-#include <QLabel>
-#include <QTimer>
+#include <QMenu>
+#include <QToolButton>
+#include <QWidgetAction>
 
-class MainPanel;
-
-class ClockLabel : public QLabel
+class ClockLabel : public QToolButton
 {
 public:
-    ClockLabel(MainPanel * panel);
+    ClockLabel(QWidget * parent);
 
 protected:
-    void mousePressEvent(QMouseEvent * e) override;
+    void timerEvent(QTimerEvent *) override;
 
 private:
-    void updateTime();
-
-    MainPanel * const mPanel;
+    QMenu mMenu;
+    QWidgetAction mCalendarAction;
     QCalendarWidget mCalendar;
-    QTimer mTimer;
 };
 
 #endif // CLOCKLABEL_H
