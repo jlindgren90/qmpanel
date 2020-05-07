@@ -29,6 +29,8 @@
 #include <string>
 #include <unordered_map>
 
+#include <QList>
+
 typedef struct _GAppInfo GAppInfo;
 typedef struct _GList GList;
 
@@ -43,6 +45,8 @@ public:
     AppDB();
 
     QAction * createAction(const char * appID, QObject * parent) const;
+    QList<QAction *> createCategory(const char * category,
+                                    QObject * parent) const;
 
 private:
     std::unordered_map<std::string, AppInfoPtr> mAppInfos;

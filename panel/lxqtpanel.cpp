@@ -51,7 +51,7 @@ LXQtPanel::LXQtPanel(const AppDB & appDB) : mLayout(this)
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
 
-    mLayout.addWidget(new MainMenuButton(this));
+    mLayout.addWidget(new MainMenuButton(appDB, this));
     mLayout.addWidget(new QuickLaunch(appDB, this));
     mLayout.addWidget(new TaskBar(this));
     mLayout.addWidget(new SysTray(this));

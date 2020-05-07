@@ -27,19 +27,27 @@
 
 #include "mainmenu.h"
 #include "actionview.h"
+#include "appdb.h"
 
 #include "../panel/lxqtpanel.h"
 
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QMenu>
 #include <QResizeEvent>
 #include <QWidgetAction>
-#include <XdgMenuWidget>
 
-class MainMenu : public XdgMenuWidget
+struct Category
+{
+    const char * icon;
+    const char * displayName;
+    const char * internalName;
+};
+
+class MainMenu : public QMenu
 {
 public:
-    MainMenu(const XdgMenu & xdgMenu, MainMenuButton * button);
+    MainMenu(const AppDB & appDB, MainMenuButton * button);
 
 protected:
     void actionEvent(QActionEvent * e) override;
@@ -60,11 +68,43 @@ private:
     bool mUpdatesInhibited = false;
 };
 
-MainMenu::MainMenu(const XdgMenu & xdgMenu, MainMenuButton * button)
-    : XdgMenuWidget(xdgMenu, QString(), button), mButton(button),
-      mSearchEditAction(this), mSearchViewAction(this),
-      mSearchLayout(&mSearchFrame)
+MainMenu::MainMenu(const AppDB & appDB, MainMenuButton * button)
+    : QMenu(button), mButton(button), mSearchEditAction(this),
+      mSearchViewAction(this), mSearchLayout(&mSearchFrame)
 {
+    /* TODO: make configurable */
+    static const char * pinnedApps[] = {"logout.desktop", "run.desktop"};
+
+    /* TODO: make configurable */
+    static const Category categories[] = {
+        {"applications-accessories", "Accessories", "Utility"},
+        {"applications-development", "Development", "Development"},
+        {"applications-science", "Education", "Education"},
+        {"applications-games", "Games", "Game"},
+        {"applications-graphics", "Graphics", "Graphics"},
+        {"applications-multimedia", "Multimedia", "AudioVideo"},
+        {"applications-internet", "Internet", "Network"},
+        {"applications-office", "Office", "Office"},
+        {"preferences-desktop", "Settings", "Settings"},
+        {"applications-system", "System", "System"}};
+
+    for (auto app : pinnedApps)
+    {
+        auto action = appDB.createAction(app, this);
+        if (action)
+            addAction(action);
+    }
+
+    addSeparator();
+
+    for (auto & category : categories)
+    {
+        auto apps = appDB.createCategory(category.internalName, this);
+        if (!apps.isEmpty())
+            addMenu(QIcon::fromTheme(category.icon), category.displayName)
+                ->addActions(apps);
+    }
+
     mSearchEdit.setClearButtonEnabled(true);
     mSearchEdit.setPlaceholderText("Search");
     mSearchLayout.setContentsMargins(3, 3, 3, 3); /* TODO: scale by DPI */
@@ -97,7 +137,7 @@ MainMenu::MainMenu(const XdgMenu & xdgMenu, MainMenuButton * button)
 void MainMenu::actionEvent(QActionEvent * e)
 {
     if (!mUpdatesInhibited)
-        XdgMenuWidget::actionEvent(e);
+        QMenu::actionEvent(e);
 }
 
 void MainMenu::keyPressEvent(QKeyEvent * e)
@@ -105,7 +145,7 @@ void MainMenu::keyPressEvent(QKeyEvent * e)
     if (e->key() == Qt::Key_Escape && !mSearchEdit.text().isEmpty())
         mSearchEdit.clear();
     else
-        XdgMenuWidget::keyPressEvent(e);
+        QMenu::keyPressEvent(e);
 }
 
 void MainMenu::resizeEvent(QResizeEvent * e)
@@ -142,20 +182,13 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-MainMenuButton::MainMenuButton(LXQtPanel * panel)
-    : QToolButton(panel), mPanel(panel)
+MainMenuButton::MainMenuButton(const AppDB & appDB, LXQtPanel * panel)
+    : QToolButton(panel), mPanel(panel), mMenu(new MainMenu(appDB, this))
 {
     setAutoRaise(true);
     /* TODO: make configurable */
     setIcon(QIcon("/usr/share/pixmaps/j-login.png"));
     setToolButtonStyle(Qt::ToolButtonIconOnly);
-
-    mXdgMenu.setEnvironments(QStringList() << "X-LXQT"
-                                           << "LXQt");
-    /* TODO: rework menu */
-    mXdgMenu.read("/home/john/.config/menus/programs.menu");
-
-    mMenu = new MainMenu(mXdgMenu, this);
 
     connect(this, &QToolButton::clicked, [this]() {
         if (mMenu->isVisible())

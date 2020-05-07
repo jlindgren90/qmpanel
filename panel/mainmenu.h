@@ -29,22 +29,21 @@
 #define MAINMENU_H
 
 #include <QToolButton>
-#include <XdgMenu>
 
+class AppDB;
 class LXQtPanel;
 class MainMenu;
 
 class MainMenuButton : public QToolButton
 {
 public:
-    explicit MainMenuButton(LXQtPanel * panel);
+    explicit MainMenuButton(const AppDB & appDB, LXQtPanel * panel);
 
     LXQtPanel * panel() const { return mPanel; }
 
 private:
     LXQtPanel * const mPanel;
-    MainMenu * mMenu;
-    XdgMenu mXdgMenu;
+    MainMenu * const mMenu;
 };
 
 #endif

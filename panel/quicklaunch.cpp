@@ -48,10 +48,7 @@ QuickLaunch::QuickLaunch(const AppDB & appDB, QWidget * parent)
     {
         auto action = appDB.createAction(desktop.toUtf8(), this);
         if (!action)
-        {
-            qWarning() << "Failed to create action for" << desktop;
             continue;
-        }
 
         auto button = new QToolButton(this);
         button->setAutoRaise(true);

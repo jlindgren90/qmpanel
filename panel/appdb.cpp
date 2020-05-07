@@ -29,6 +29,7 @@
 #include <QFileInfo>
 
 #undef signals
+#include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
 static void freeList(GList * list) { g_list_free_full(list, g_object_unref); }
@@ -58,7 +59,7 @@ public:
           mInfo((GAppInfo *)g_object_ref(info), g_object_unref)
     {
         connect(this, &QAction::triggered, [info]() {
-            if(!g_app_info_launch(info, nullptr, nullptr, nullptr))
+            if (!g_app_info_launch(info, nullptr, nullptr, nullptr))
                 qWarning() << "Failed to launch" << g_app_info_get_id(info);
         });
     }
@@ -88,7 +89,32 @@ QAction * AppDB::createAction(const char * appID, QObject * parent) const
 {
     auto iter = mAppInfos.find(appID);
     if (iter == mAppInfos.end())
+    {
+        qWarning() << "Failed to create action for" << appID;
         return nullptr;
+    }
 
     return new AppAction(iter->second.get(), parent);
+}
+
+QList<QAction *> AppDB::createCategory(const char * category,
+                                       QObject * parent) const
+{
+    QList<QAction *> actions;
+
+    for (auto & pair : mAppInfos)
+    {
+        auto info = pair.second.get();
+        if (!G_IS_DESKTOP_APP_INFO(info))
+            continue;
+
+        auto categories =
+            QString(g_desktop_app_info_get_categories((GDesktopAppInfo *)info))
+                .split(';', QString::SkipEmptyParts);
+
+        if (categories.contains(category, Qt::CaseInsensitive))
+            actions.append(new AppAction(info, parent));
+    }
+
+    return actions;
 }
