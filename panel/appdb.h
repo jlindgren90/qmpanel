@@ -1,6 +1,8 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
+ * qmpanel - a minimal Qt-based desktop panel
+ *
  * Copyright: 2020 John Lindgren
  * Authors:
  *   John Lindgren <john@jlindgren.net>

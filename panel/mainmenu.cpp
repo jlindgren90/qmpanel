@@ -1,12 +1,13 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
- * LXQt - a lightweight, Qt based, desktop toolset
- * https://lxqt.org
+ * qmpanel - a minimal Qt-based desktop panel
  *
  * Copyright: 2010-2011 Razor team
+ *            2020 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
+ *   John Lindgren <john@jlindgren.net>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public
@@ -28,8 +29,7 @@
 #include "mainmenu.h"
 #include "actionview.h"
 #include "appdb.h"
-
-#include "../panel/lxqtpanel.h"
+#include "mainpanel.h"
 
 #include <QKeyEvent>
 #include <QLineEdit>
@@ -184,7 +184,7 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-MainMenuButton::MainMenuButton(const AppDB & appDB, LXQtPanel * panel)
+MainMenuButton::MainMenuButton(const AppDB & appDB, MainPanel * panel)
     : QToolButton(panel), mPanel(panel), mMenu(new MainMenu(appDB, this))
 {
     setAutoRaise(true);

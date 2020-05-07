@@ -1,12 +1,13 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
- * LXQt - a lightweight, Qt based, desktop toolset
- * https://lxqt.org
+ * qmpanel - a minimal Qt-based desktop panel
  *
  * Copyright: 2010-2011 Razor team
+ *            2020 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
+ *   John Lindgren <john@jlindgren.net>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public
@@ -25,8 +26,8 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef LXQTPANEL_H
-#define LXQTPANEL_H
+#ifndef MAINPANEL_H
+#define MAINPANEL_H
 
 #include <QHBoxLayout>
 #include <QPointer>
@@ -34,11 +35,10 @@
 
 class AppDB;
 
-// The main panel widget
-class LXQtPanel : public QWidget
+class MainPanel : public QWidget
 {
 public:
-    LXQtPanel(const AppDB & appDB);
+    MainPanel(const AppDB & appDB);
 
     QRect calcPopupPos(QPoint const & absolutePos,
                        QSize const & windowSize) const;
@@ -62,4 +62,4 @@ private:
     void setPanelGeometry();
 };
 
-#endif // LXQTPANEL_H
+#endif // MAINPANEL_H

@@ -1,13 +1,14 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
- * LXQt - a lightweight, Qt based, desktop toolset
- * https://lxqt.org
+ * qmpanel - a minimal Qt-based desktop panel
  *
  * Copyright: 2012-2013 Razor team
  *            2014 LXQt team
+ *            2020 John Lindgren
  * Authors:
  *   Kuzma Shapran <kuzma.shapran@gmail.com>
+ *   John Lindgren <john@jlindgren.net>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public
@@ -33,12 +34,12 @@
 #include <QLabel>
 #include <QTimer>
 
-class LXQtPanel;
+class MainPanel;
 
 class ClockLabel : public QLabel
 {
 public:
-    ClockLabel(LXQtPanel * panel);
+    ClockLabel(MainPanel * panel);
 
 protected:
     void mousePressEvent(QMouseEvent * e) override;
@@ -46,7 +47,7 @@ protected:
 private:
     void updateTime();
 
-    LXQtPanel * const mPanel;
+    MainPanel * const mPanel;
     QCalendarWidget mCalendar;
     QTimer mTimer;
 };

@@ -1,12 +1,13 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
- * LXQt - a lightweight, Qt based, desktop toolset
- * https://lxqt.org
+ * qmpanel - a minimal Qt-based desktop panel
  *
  * Copyright: 2010-2011 Razor team
+ *            2020 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
+ *   John Lindgren <john@jlindgren.net>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public
@@ -25,7 +26,7 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include "lxqtpanel.h"
+#include "mainpanel.h"
 
 #include "clocklabel.h"
 #include "mainmenu.h"
@@ -39,7 +40,7 @@
 #include <KWindowSystem/KWindowSystem>
 #include <KWindowSystem/NETWM>
 
-LXQtPanel::LXQtPanel(const AppDB & appDB) : mLayout(this)
+MainPanel::MainPanel(const AppDB & appDB) : mLayout(this)
 {
     setAttribute(Qt::WA_AcceptDrops);
     setAttribute(Qt::WA_AlwaysShowToolTips);
@@ -69,10 +70,10 @@ LXQtPanel::LXQtPanel(const AppDB & appDB) : mLayout(this)
     KWindowSystem::setType(effectiveWinId(), NET::Dock);
 
     connect(qApp, &QApplication::primaryScreenChanged, this,
-            &LXQtPanel::updateGeometry);
+            &MainPanel::updateGeometry);
 }
 
-void LXQtPanel::updateGeometry()
+void MainPanel::updateGeometry()
 {
     QScreen * screen = QApplication::primaryScreen();
     if (mScreen != screen)
@@ -80,16 +81,16 @@ void LXQtPanel::updateGeometry()
         if (mScreen)
         {
             disconnect(mScreen, &QScreen::geometryChanged, this,
-                       &LXQtPanel::updateGeometry);
+                       &MainPanel::updateGeometry);
             disconnect(mScreen, &QScreen::virtualGeometryChanged, this,
-                       &LXQtPanel::updateGeometry);
+                       &MainPanel::updateGeometry);
         }
 
         mScreen = screen;
         connect(mScreen, &QScreen::geometryChanged, this,
-                &LXQtPanel::updateGeometry);
+                &MainPanel::updateGeometry);
         connect(mScreen, &QScreen::virtualGeometryChanged, this,
-                &LXQtPanel::updateGeometry);
+                &MainPanel::updateGeometry);
     }
 
     QRect rect = screen->geometry();
@@ -111,7 +112,7 @@ void LXQtPanel::updateGeometry()
                                     rect.left(), rect.right() + 1);
 }
 
-QRect LXQtPanel::calcPopupPos(QPoint const & absolutePos,
+QRect MainPanel::calcPopupPos(QPoint const & absolutePos,
                               QSize const & windowSize) const
 {
     QRect screen = QApplication::primaryScreen()->geometry();
@@ -124,7 +125,7 @@ QRect LXQtPanel::calcPopupPos(QPoint const & absolutePos,
     return pos;
 }
 
-QRect LXQtPanel::calcPopupPos(QWidget * widget, const QSize & windowSize) const
+QRect MainPanel::calcPopupPos(QWidget * widget, const QSize & windowSize) const
 {
     return calcPopupPos(geometry().topLeft() + widget->geometry().topLeft(),
                         windowSize);

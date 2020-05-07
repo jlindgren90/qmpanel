@@ -1,12 +1,13 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
- * LXQt - a lightweight, Qt based, desktop toolset
- * https://lxqt.org
+ * qmpanel - a minimal Qt-based desktop panel
  *
  * Copyright: 2010-2011 Razor team
+ *            2020 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
+ *   John Lindgren <john@jlindgren.net>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public
@@ -30,7 +31,7 @@
 #include <thread>
 
 #include "appdb.h"
-#include "lxqtpanel.h"
+#include "mainpanel.h"
 
 static sigset_t signal_set;
 
@@ -60,7 +61,7 @@ int main(int argc, char * argv[])
     std::thread(signal_thread).detach();
 
     AppDB appDB;
-    LXQtPanel panel(appDB);
+    MainPanel panel(appDB);
 
     return app.exec();
 }
