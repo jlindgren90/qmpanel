@@ -126,7 +126,7 @@ void TaskBar::onActiveWindowChanged(WId window)
 
     for (auto & pair : mKnownWindows)
     {
-        if (pair.second != active->second)
+        if (active == mKnownWindows.end() || pair.second != active->second)
             pair.second->setChecked(false);
     }
 
