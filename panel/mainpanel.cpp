@@ -34,11 +34,10 @@
 #include "systray.h"
 #include "taskbar.h"
 
+#include <KWindowSystem>
+#include <NETWM>
 #include <QApplication>
 #include <QScreen>
-
-#include <KWindowSystem/KWindowSystem>
-#include <KWindowSystem/NETWM>
 
 MainPanel::MainPanel(const AppDB & appDB) : mLayout(this)
 {

@@ -1,0 +1,10 @@
+/usr/include/gio-unix-2.0
+/usr/include/glib-2.0
+/usr/include/KF5
+/usr/include/KF5/KWindowSystem
+/usr/include/qt
+/usr/include/qt/QtCore
+/usr/include/qt/QtGui
+/usr/include/qt/QtWidgets
+/usr/include/qt/QtX11Extras
+panel
