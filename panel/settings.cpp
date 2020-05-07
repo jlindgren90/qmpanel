@@ -25,13 +25,28 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "settings.h"
+#include "utils.h"
+
+#include <glib.h>
 
 Settings loadSettings()
 {
-    /* TODO: make configurable */
-    return {"j-login",
-            {"logout.desktop", "run.desktop"},
-            {"nemo.desktop", "xfce4-terminal.desktop", "thunderbird.desktop",
-             "firefox.desktop", "audacious.desktop",
-             "org.qt-project.qtcreator.desktop"}};
+    AutoPtr<GKeyFile> kf(g_key_file_new(), g_key_file_unref);
+    auto path = QString(g_get_user_config_dir()) + "/qmpanel.ini";
+
+    g_key_file_load_from_file(kf.get(), path.toUtf8(), G_KEY_FILE_NONE,
+                              nullptr);
+
+    auto getSetting = [&](const char * key) {
+        return CharPtr(g_key_file_get_value(kf.get(), "Settings", key, nullptr),
+                       g_free);
+    };
+
+    QString menuIcon = getSetting("MenuIcon");
+    QString pinnedMenuApps = getSetting("PinnedMenuApps");
+    QString quickLaunchApps = getSetting("QuickLaunchApps");
+
+    return {menuIcon.isEmpty() ? "start-here" : menuIcon,
+            pinnedMenuApps.split(';', QString::SkipEmptyParts),
+            quickLaunchApps.split(';', QString::SkipEmptyParts)};
 }

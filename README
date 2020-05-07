@@ -29,8 +29,8 @@ qmpanel - A Minimal Qt-Based Desktop Panel
     - Applications menu
        - Icon-only QToolButton, icon configurable
        - Predefined application category sub-menus
-       - Configurable list of applications and separators at top of menu
-       - Integrated application search (name only) at bottom of menu
+       - Configurable list of applications "pinned" to top of menu
+       - Integrated application search at bottom of menu
 
     - Quick launch
        - Configurable list of applications
@@ -53,3 +53,14 @@ qmpanel - A Minimal Qt-Based Desktop Panel
     - Date and time
        - e.g. "Thu Apr 23, 2:25 pm"
        - click to show/hide a QCalendarWidget
+
+ - Configuration:
+
+   - No configuration GUI
+   - Settings are read from $HOME/.config/qmpanel.ini
+   - Example qmpanel.ini:
+
+      [Settings]
+      MenuIcon=<icon-name>
+      PinnedMenuApps=<app-name>.desktop;<app-name>.desktop
+      QuickLaunchApps=<app-name>.desktop;<app-name>.desktop
