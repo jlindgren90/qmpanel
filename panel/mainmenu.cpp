@@ -75,7 +75,6 @@ MainMenu::MainMenu(const AppDB & appDB, MainMenuButton * button)
     /* TODO: make configurable */
     static const char * pinnedApps[] = {"logout.desktop", "run.desktop"};
 
-    /* TODO: make configurable */
     static const Category categories[] = {
         {"applications-accessories", "Accessories", "Utility"},
         {"applications-development", "Development", "Development"},
