@@ -59,7 +59,7 @@ SysTray::SysTray(QWidget * parent)
              XInternAtom(mDisplay, "_XEMBED", false)}
 {
     mLayout->setMargin(0);
-    mLayout->setSpacing(3); /* TODO: scale by DPI */
+    mLayout->setSpacing(logicalDpiX() / 32);
 
     Window root = QX11Info::appRootWindow();
     VisualID visualId = getVisual();

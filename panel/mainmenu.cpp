@@ -109,7 +109,9 @@ MainMenu::MainMenu(const AppDB & appDB, MainMenuButton * button)
 
     mSearchEdit.setClearButtonEnabled(true);
     mSearchEdit.setPlaceholderText("Search");
-    mSearchLayout.setContentsMargins(3, 3, 3, 3); /* TODO: scale by DPI */
+
+    int margin = logicalDpiX() / 32;
+    mSearchLayout.setContentsMargins(margin, margin, margin, margin);
     mSearchLayout.addWidget(&mSearchEdit);
 
     mSearchEditAction.setDefaultWidget(&mSearchFrame);

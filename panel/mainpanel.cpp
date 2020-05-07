@@ -59,9 +59,10 @@ MainPanel::MainPanel(const AppDB & appDB) : mLayout(this)
 
     mLayout.setStretch(2, 1); // stretch taskbar
 
-    mLayout.insertSpacing(3, 6); /* TODO: scale with DPI */
-    mLayout.insertSpacing(5, 6); /* TODO: scale with DPI */
-    mLayout.insertSpacing(7, 6); /* TODO: scale with DPI */
+    int spacing = logicalDpiX() / 16;
+    mLayout.insertSpacing(3, spacing);
+    mLayout.insertSpacing(5, spacing);
+    mLayout.insertSpacing(7, spacing);
 
     show();
 

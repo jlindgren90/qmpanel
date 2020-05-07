@@ -86,8 +86,7 @@ void TaskButton::updateIcon()
 
 QSize TaskButton::sizeHint() const
 {
-    return {200, /* TODO: scale with DPI */
-            QToolButton::sizeHint().height()};
+    return {2 * logicalDpiX(), QToolButton::sizeHint().height()};
 }
 
 void TaskButton::dragEnterEvent(QDragEnterEvent * event)
