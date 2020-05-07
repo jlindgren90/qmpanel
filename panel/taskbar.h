@@ -36,7 +36,7 @@
 
 #include <NETWM>
 #include <QHBoxLayout>
-#include <QMap>
+#include <unordered_map>
 
 class TaskBar : public QWidget
 {
@@ -52,7 +52,7 @@ private:
     void onWindowChanged(WId window, NET::Properties prop,
                          NET::Properties2 prop2);
 
-    QMap<WId, TaskButton *> mKnownWindows;
+    std::unordered_map<WId, TaskButton *> mKnownWindows;
     QHBoxLayout mLayout;
 };
 

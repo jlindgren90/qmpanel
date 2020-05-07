@@ -102,7 +102,7 @@ void TaskBar::removeWindow(WId window)
     auto pos = mKnownWindows.find(window);
     if (pos != mKnownWindows.end())
     {
-        auto button = *pos;
+        auto button = pos->second;
         mKnownWindows.erase(pos);
         delete button;
     }
@@ -117,21 +117,21 @@ void TaskBar::onWindowAdded(WId window)
 
 void TaskBar::onActiveWindowChanged(WId window)
 {
-    auto active = mKnownWindows.value(window);
-    if (!active)
+    auto active = mKnownWindows.find(window);
+    if (active == mKnownWindows.end())
     {
         KWindowInfo info(window, 0, NET::WM2TransientFor);
-        active = mKnownWindows.value(info.transientFor());
+        active = mKnownWindows.find(info.transientFor());
     }
 
-    for (auto button : mKnownWindows)
+    for (auto & pair : mKnownWindows)
     {
-        if (button != active)
-            button->setChecked(false);
+        if (pair.second != active->second)
+            pair.second->setChecked(false);
     }
 
-    if (active)
-        active->setChecked(true);
+    if (active != mKnownWindows.end())
+        active->second->setChecked(true);
 }
 
 void TaskBar::onWindowChanged(WId window, NET::Properties prop,
@@ -146,12 +146,12 @@ void TaskBar::onWindowChanged(WId window, NET::Properties prop,
             removeWindow(window);
     }
 
-    auto button = mKnownWindows.value(window);
-    if (!button)
+    auto pos = mKnownWindows.find(window);
+    if (pos == mKnownWindows.end())
         return;
 
     if (prop.testFlag(NET::WMVisibleName) || prop.testFlag(NET::WMName))
-        button->updateText();
+        pos->second->updateText();
     if (prop.testFlag(NET::WMIcon))
-        button->updateIcon();
+        pos->second->updateIcon();
 }
