@@ -34,21 +34,19 @@
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-QIcon AppDB::getIcon(const char * name)
+QIcon AppDB::getIcon(const QString & name)
 {
-    if (g_path_is_absolute(name))
+    if (g_path_is_absolute(name.toUtf8()))
         return QIcon(name);
 
     auto icon = QIcon::fromTheme(name);
     if (!icon.isNull())
         return icon;
 
-    for (auto ext : {".svg", ".png", ".xpm"})
+    for (auto ext : {"svg", "png", "xpm"})
     {
-        CharPtr path(g_strconcat("/usr/share/pixmaps/", name, ext, nullptr),
-                     g_free);
-
-        if (g_file_test(path, G_FILE_TEST_EXISTS))
+        auto path = QString("/usr/share/pixmaps/%1.%2").arg(name).arg(ext);
+        if (g_file_test(path.toUtf8(), G_FILE_TEST_EXISTS))
             return QIcon(path);
     }
 
@@ -105,7 +103,7 @@ AppDB::AppDB()
     }
 }
 
-QAction * AppDB::createAction(const char * appID, QObject * parent) const
+QAction * AppDB::createAction(const QString & appID, QObject * parent) const
 {
     auto iter = mAppInfos.find(appID);
     if (iter == mAppInfos.end())
@@ -117,7 +115,7 @@ QAction * AppDB::createAction(const char * appID, QObject * parent) const
     return new AppAction(iter->second.get(), parent);
 }
 
-QList<QAction *> AppDB::createCategory(const char * category,
+QList<QAction *> AppDB::createCategory(const QString & category,
                                        QObject * parent) const
 {
     QList<QAction *> actions;

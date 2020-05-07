@@ -30,7 +30,6 @@
 #include <signal.h>
 #include <thread>
 
-#include "appdb.h"
 #include "mainpanel.h"
 
 static sigset_t signal_set;
@@ -60,8 +59,7 @@ int main(int argc, char * argv[])
     /* monitor signals once qApp exists */
     std::thread(signal_thread).detach();
 
-    AppDB appDB;
-    MainPanel panel(appDB);
+    MainPanel panel;
 
     return app.exec();
 }

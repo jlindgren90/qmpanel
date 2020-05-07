@@ -24,34 +24,14 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef APPDB_H
-#define APPDB_H
+#include "settings.h"
 
-#include <QList>
-#include <unordered_map>
-
-#include "utils.h"
-
-class QAction;
-class QIcon;
-class QObject;
-
-typedef struct _GAppInfo GAppInfo;
-
-class AppDB
+Settings loadSettings()
 {
-public:
-    AppDB();
-
-    static QIcon getIcon(const QString & name);
-    static QIcon getIcon(GAppInfo * info);
-
-    QAction * createAction(const QString & appID, QObject * parent) const;
-    QList<QAction *> createCategory(const QString & category,
-                                    QObject * parent) const;
-
-private:
-    std::unordered_map<QString, AutoPtrV<GAppInfo>> mAppInfos;
-};
-
-#endif
+    /* TODO: make configurable */
+    return {"j-login",
+            {"logout.desktop", "run.desktop"},
+            {"nemo.desktop", "xfce4-terminal.desktop", "thunderbird.desktop",
+             "firefox.desktop", "audacious.desktop",
+             "org.qt-project.qtcreator.desktop"}};
+}

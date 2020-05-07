@@ -28,26 +28,22 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "quicklaunch.h"
-#include "appdb.h"
+#include "mainpanel.h"
 
 #include <QDebug>
 #include <QToolButton>
 
-QuickLaunch::QuickLaunch(const AppDB & appDB, QWidget * parent)
-    : QWidget(parent), mLayout(this)
+QuickLaunch::QuickLaunch(MainPanel * panel) : QWidget(panel), mLayout(this)
 {
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
 
-    /* TODO: make this configurable */
-    const QStringList apps = {
-        "nemo.desktop",        "xfce4-terminal.desktop",
-        "thunderbird.desktop", "firefox.desktop",
-        "audacious.desktop",   "org.qt-project.qtcreator.desktop"};
+    auto & appDB = panel->appDB();
+    auto & settings = panel->settings();
 
-    for (const QString & desktop : apps)
+    for (auto app : settings.quickLaunchApps)
     {
-        auto action = appDB.createAction(desktop.toUtf8(), this);
+        auto action = appDB.createAction(app, this);
         if (!action)
             continue;
 

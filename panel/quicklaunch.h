@@ -33,12 +33,12 @@
 #include <QHBoxLayout>
 #include <QWidget>
 
-class AppDB;
+class MainPanel;
 
 class QuickLaunch : public QWidget
 {
 public:
-    explicit QuickLaunch(const AppDB & appDB, QWidget * parent);
+    explicit QuickLaunch(MainPanel * panel);
 
 private:
     QHBoxLayout mLayout;

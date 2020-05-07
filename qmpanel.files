@@ -14,6 +14,8 @@ panel/mainpanel.cpp
 panel/mainpanel.h
 panel/quicklaunch.cpp
 panel/quicklaunch.h
+panel/settings.cpp
+panel/settings.h
 panel/systray.cpp
 panel/systray.h
 panel/taskbar.cpp

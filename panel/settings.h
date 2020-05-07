@@ -24,34 +24,18 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef APPDB_H
-#define APPDB_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-#include <QList>
-#include <unordered_map>
+#include <QStringList>
 
-#include "utils.h"
-
-class QAction;
-class QIcon;
-class QObject;
-
-typedef struct _GAppInfo GAppInfo;
-
-class AppDB
+struct Settings
 {
-public:
-    AppDB();
-
-    static QIcon getIcon(const QString & name);
-    static QIcon getIcon(GAppInfo * info);
-
-    QAction * createAction(const QString & appID, QObject * parent) const;
-    QList<QAction *> createCategory(const QString & category,
-                                    QObject * parent) const;
-
-private:
-    std::unordered_map<QString, AutoPtrV<GAppInfo>> mAppInfos;
+    QString menuIcon;
+    QStringList pinnedMenuApps;
+    QStringList quickLaunchApps;
 };
 
-#endif
+Settings loadSettings();
+
+#endif // SETTINGS_H

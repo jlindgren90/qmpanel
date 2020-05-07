@@ -39,7 +39,7 @@
 #include <QApplication>
 #include <QScreen>
 
-MainPanel::MainPanel(const AppDB & appDB) : mLayout(this)
+MainPanel::MainPanel() : mSettings(loadSettings()), mLayout(this)
 {
     setAttribute(Qt::WA_AcceptDrops);
     setAttribute(Qt::WA_AlwaysShowToolTips);
@@ -51,8 +51,8 @@ MainPanel::MainPanel(const AppDB & appDB) : mLayout(this)
     mLayout.setMargin(0);
     mLayout.setSpacing(0);
 
-    mLayout.addWidget(new MainMenuButton(appDB, this));
-    mLayout.addWidget(new QuickLaunch(appDB, this));
+    mLayout.addWidget(new MainMenuButton(this));
+    mLayout.addWidget(new QuickLaunch(this));
     mLayout.addWidget(new TaskBar(this));
     mLayout.addWidget(new SysTray(this));
     mLayout.addWidget(new ClockLabel(this));

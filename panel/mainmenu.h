@@ -31,14 +31,13 @@
 
 #include <QToolButton>
 
-class AppDB;
 class MainPanel;
 class MainMenu;
 
 class MainMenuButton : public QToolButton
 {
 public:
-    explicit MainMenuButton(const AppDB & appDB, MainPanel * panel);
+    explicit MainMenuButton(MainPanel * panel);
 
     MainPanel * panel() const { return mPanel; }
 

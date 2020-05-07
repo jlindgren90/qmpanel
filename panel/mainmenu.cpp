@@ -28,7 +28,6 @@
 
 #include "mainmenu.h"
 #include "actionview.h"
-#include "appdb.h"
 #include "mainpanel.h"
 
 #include <QKeyEvent>
@@ -47,7 +46,7 @@ struct Category
 class MainMenu : public QMenu
 {
 public:
-    MainMenu(const AppDB & appDB, MainMenuButton * button);
+    MainMenu(MainMenuButton * button);
 
 protected:
     void actionEvent(QActionEvent * e) override;
@@ -68,13 +67,10 @@ private:
     bool mUpdatesInhibited = false;
 };
 
-MainMenu::MainMenu(const AppDB & appDB, MainMenuButton * button)
+MainMenu::MainMenu(MainMenuButton * button)
     : QMenu(button), mButton(button), mSearchEditAction(this),
       mSearchViewAction(this), mSearchLayout(&mSearchFrame)
 {
-    /* TODO: make configurable */
-    static const char * pinnedApps[] = {"logout.desktop", "run.desktop"};
-
     static const Category categories[] = {
         {"applications-accessories", "Accessories", "Utility"},
         {"applications-development", "Development", "Development"},
@@ -87,7 +83,10 @@ MainMenu::MainMenu(const AppDB & appDB, MainMenuButton * button)
         {"preferences-desktop", "Settings", "Settings"},
         {"applications-system", "System", "System"}};
 
-    for (auto app : pinnedApps)
+    auto & appDB = button->panel()->appDB();
+    auto & settings = button->panel()->settings();
+
+    for (auto app : settings.pinnedMenuApps)
     {
         auto action = appDB.createAction(app, this);
         if (action)
@@ -185,12 +184,11 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-MainMenuButton::MainMenuButton(const AppDB & appDB, MainPanel * panel)
-    : QToolButton(panel), mPanel(panel), mMenu(new MainMenu(appDB, this))
+MainMenuButton::MainMenuButton(MainPanel * panel)
+    : QToolButton(panel), mPanel(panel), mMenu(new MainMenu(this))
 {
     setAutoRaise(true);
-    /* TODO: make configurable */
-    setIcon(AppDB::getIcon("j-login"));
+    setIcon(AppDB::getIcon(panel->settings().menuIcon));
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     connect(this, &QToolButton::clicked, [this]() {

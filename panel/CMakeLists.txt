@@ -8,6 +8,7 @@ set(SOURCES
     mainmenu.cpp
     mainpanel.cpp
     quicklaunch.cpp
+    settings.cpp
     systray.cpp
     taskbar.cpp
     taskbutton.cpp

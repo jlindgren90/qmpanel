@@ -33,16 +33,20 @@
 #include <QPointer>
 #include <QWidget>
 
-class AppDB;
+#include "appdb.h"
+#include "settings.h"
 
 class MainPanel : public QWidget
 {
 public:
-    MainPanel(const AppDB & appDB);
+    MainPanel();
 
     QRect calcPopupPos(QPoint const & absolutePos,
                        QSize const & windowSize) const;
     QRect calcPopupPos(QWidget * widget, const QSize & windowSize) const;
+
+    const AppDB & appDB() { return mAppDB; }
+    const Settings & settings() { return mSettings; }
 
 protected:
     void showEvent(QShowEvent * event) override
@@ -52,11 +56,12 @@ protected:
     }
 
 private:
-    void updateGeometry();
-
+    AppDB mAppDB;
+    Settings mSettings;
     QPointer<QScreen> mScreen;
     QHBoxLayout mLayout;
 
+    void updateGeometry();
     void updateWmStrut();
     void loadPlugins();
     void setPanelGeometry();
