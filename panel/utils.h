@@ -39,8 +39,7 @@ class CharPtr : public AutoPtrV<char>
 {
 public:
     using unique_ptr::unique_ptr;
-    operator const char *() const { return get(); }
-    operator QString() const { return get(); }
+    explicit operator QString() const { return get(); }
 };
 
 #endif

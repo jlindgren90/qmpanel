@@ -38,13 +38,13 @@ Settings loadSettings()
                               nullptr);
 
     auto getSetting = [&](const char * key) {
-        return CharPtr(g_key_file_get_value(kf.get(), "Settings", key, nullptr),
-                       g_free);
+        return QString(CharPtr(
+            g_key_file_get_value(kf.get(), "Settings", key, nullptr), g_free));
     };
 
-    QString menuIcon = getSetting("MenuIcon");
-    QString pinnedMenuApps = getSetting("PinnedMenuApps");
-    QString quickLaunchApps = getSetting("QuickLaunchApps");
+    auto menuIcon = getSetting("MenuIcon");
+    auto pinnedMenuApps = getSetting("PinnedMenuApps");
+    auto quickLaunchApps = getSetting("QuickLaunchApps");
 
     return {menuIcon.isEmpty() ? "start-here" : menuIcon,
             pinnedMenuApps.split(';', QString::SkipEmptyParts),

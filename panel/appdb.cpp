@@ -63,7 +63,7 @@ QIcon AppDB::getIcon(GAppInfo * info)
     if (!name)
         return QIcon();
 
-    return getIcon(name);
+    return getIcon(QString(name));
 }
 
 class AppAction : public QAction
