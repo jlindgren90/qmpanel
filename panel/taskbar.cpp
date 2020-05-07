@@ -36,7 +36,7 @@
 
 TaskBar::TaskBar(QWidget * parent) : QWidget(parent), mLayout(this)
 {
-    mLayout.setMargin(0);
+    mLayout.setContentsMargins(QMargins());
     mLayout.setSpacing(0);
     mLayout.addStretch(1);
 

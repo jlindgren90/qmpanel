@@ -35,7 +35,7 @@
 
 QuickLaunch::QuickLaunch(MainPanel * panel) : QWidget(panel), mLayout(this)
 {
-    mLayout.setMargin(0);
+    mLayout.setContentsMargins(QMargins());
     mLayout.setSpacing(0);
 
     auto & appDB = panel->appDB();

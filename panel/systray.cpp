@@ -59,8 +59,8 @@ SysTray::SysTray(QWidget * parent)
              XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_VISUAL", false),
              XInternAtom(mDisplay, "_XEMBED", false)}
 {
-    mLayout->setMargin(0);
-    mLayout->setSpacing(logicalDpiX() / 32);
+    mLayout->setContentsMargins(QMargins());
+    mLayout->setSpacing(logicalDpiX() / 24);
 
     Window root = QX11Info::appRootWindow();
     VisualID visualId = getVisual();
