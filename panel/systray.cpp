@@ -214,7 +214,7 @@ void SysTray::addIcon(Window winId)
     for (; idx < mLayout->count(); idx++)
     {
         auto icon2 = static_cast<TrayIcon *>(mLayout->itemAt(idx)->widget());
-        if (icon->appName() < icon2->appName())
+        if (icon->appName().compare(icon2->appName(), Qt::CaseInsensitive) < 0)
             break;
     }
 
