@@ -34,6 +34,47 @@
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
+AppInfo::AppInfo(GAppInfo * info)
+    : mInfo((GAppInfo *)g_object_ref(info), g_object_unref)
+{
+}
+
+QStringList AppInfo::categories() const
+{
+    auto info = mInfo.get();
+    if (!G_IS_DESKTOP_APP_INFO(info))
+        return QStringList();
+
+    return QString(g_desktop_app_info_get_categories((GDesktopAppInfo *)info))
+        .split(';', QString::SkipEmptyParts);
+}
+
+QAction * AppInfo::getAction()
+{
+    if (mAction)
+        return mAction.get();
+
+    auto info = mInfo.get();
+    auto getIcon = [info]() {
+        auto gicon = g_app_info_get_icon(info);
+        if (!gicon)
+            return QIcon();
+
+        CharPtr name(g_icon_to_string(gicon), g_free);
+        return name ? Resources::getIcon(QString(name)) : QIcon();
+    };
+
+    auto action = new QAction(getIcon(), g_app_info_get_display_name(info));
+
+    QObject::connect(action, &QAction::triggered, [info]() {
+        if (!g_app_info_launch(info, nullptr, nullptr, nullptr))
+            qWarning() << "Failed to launch" << g_app_info_get_id(info);
+    });
+
+    mAction.reset(action);
+    return action;
+}
+
 QIcon Resources::getIcon(const QString & name)
 {
     if (g_path_is_absolute(name.toUtf8()))
@@ -56,19 +97,6 @@ QIcon Resources::getIcon(const QString & name)
     return QIcon();
 }
 
-QIcon Resources::getIcon(GAppInfo * info)
-{
-    auto gicon = g_app_info_get_icon(info);
-    if (!gicon)
-        return QIcon();
-
-    CharPtr name(g_icon_to_string(gicon), g_free);
-    if (!name)
-        return QIcon();
-
-    return getIcon(QString(name));
-}
-
 Resources::AppInfoMap Resources::loadAppInfos()
 {
     AppInfoMap apps;
@@ -80,13 +108,8 @@ Resources::AppInfoMap Resources::loadAppInfos()
     for (auto node = list.get(); node; node = node->next)
     {
         auto app = (GAppInfo *)node->data;
-        if (!g_app_info_should_show(app))
-            continue;
-
-        apps.emplace(std::piecewise_construct,
-                     std::forward_as_tuple(g_app_info_get_id(app)),
-                     std::forward_as_tuple((GAppInfo *)g_object_ref(app),
-                                           g_object_unref));
+        if (g_app_info_should_show(app))
+            apps.emplace(g_app_info_get_id(app), app);
     }
 
     return apps;
@@ -114,49 +137,28 @@ Resources::Settings Resources::loadSettings()
             quickLaunchApps.split(';', QString::SkipEmptyParts)};
 }
 
-Resources::AppAction::AppAction(GAppInfo * info, QObject * parent)
-    : QAction(getIcon(info), g_app_info_get_display_name(info), parent),
-      mInfoRef((GAppInfo *)g_object_ref(info), g_object_unref)
-{
-    connect(this, &QAction::triggered, [info]() {
-        if (!g_app_info_launch(info, nullptr, nullptr, nullptr))
-            qWarning() << "Failed to launch" << g_app_info_get_id(info);
-    });
-}
-
-QAction * Resources::createAction(const QString & appID, QObject * parent) const
+QAction * Resources::getAction(const QString & appID)
 {
     auto iter = mAppInfos.find(appID);
-    if (iter == mAppInfos.end())
-    {
-        qWarning() << "Failed to create action for" << appID;
-        return nullptr;
-    }
+    if (iter != mAppInfos.end())
+        return iter->second.getAction();
 
-    return new AppAction(iter->second.get(), parent);
+    qWarning() << "Unknown application" << appID;
+    return nullptr;
 }
 
-QList<QAction *> Resources::createCategory(const QString & category,
-                                           std::unordered_set<QString> & added,
-                                           QObject * parent) const
+QList<QAction *> Resources::getCategory(const QString & category,
+                                        std::unordered_set<QString> & added)
 {
     QList<QAction *> actions;
 
     for (auto & pair : mAppInfos)
     {
-        auto info = pair.second.get();
-        if (!G_IS_DESKTOP_APP_INFO(info))
-            continue;
-
-        auto categories =
-            QString(g_desktop_app_info_get_categories((GDesktopAppInfo *)info))
-                .split(';', QString::SkipEmptyParts);
-
         // only add if not already in another category
-        if (categories.contains(category, Qt::CaseInsensitive) &&
-            added.insert(g_app_info_get_id(info)).second)
+        if (pair.second.categories().contains(category, Qt::CaseInsensitive) &&
+            added.insert(pair.first).second)
         {
-            actions.append(new AppAction(info, parent));
+            actions.append(pair.second.getAction());
         }
     }
 

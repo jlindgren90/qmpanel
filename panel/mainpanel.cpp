@@ -39,7 +39,7 @@
 #include <QApplication>
 #include <QScreen>
 
-MainPanel::MainPanel(const Resources & res) : mLayout(this)
+MainPanel::MainPanel(Resources & res) : mLayout(this)
 {
     setAttribute(Qt::WA_AcceptDrops);
     setAttribute(Qt::WA_AlwaysShowToolTips);

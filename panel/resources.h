@@ -36,6 +36,19 @@
 
 typedef struct _GAppInfo GAppInfo;
 
+class AppInfo
+{
+public:
+    explicit AppInfo(GAppInfo * info);
+
+    QStringList categories() const;
+    QAction * getAction();
+
+private:
+    AutoPtrV<GAppInfo> mInfo;
+    std::unique_ptr<QAction> mAction;
+};
+
 class Resources
 {
 public:
@@ -47,34 +60,23 @@ public:
     };
 
     static QIcon getIcon(const QString & name);
-    static QIcon getIcon(GAppInfo * info);
 
     Resources() : mAppInfos(loadAppInfos()), mSettings(loadSettings()) {}
 
     const Settings & settings() const { return mSettings; }
 
-    QAction * createAction(const QString & appID, QObject * parent) const;
+    QAction * getAction(const QString & appID);
 
-    QList<QAction *> createCategory(const QString & category,
-                                    std::unordered_set<QString> & added,
-                                    QObject * parent) const;
+    QList<QAction *> getCategory(const QString & category,
+                                 std::unordered_set<QString> & added);
 
 private:
-    class AppAction : public QAction
-    {
-    public:
-        AppAction(GAppInfo * info, QObject * parent);
-
-    private:
-        AutoPtrV<GAppInfo> mInfoRef;
-    };
-
-    using AppInfoMap = std::unordered_map<QString, AutoPtrV<GAppInfo>>;
+    using AppInfoMap = std::unordered_map<QString, AppInfo>;
 
     static AppInfoMap loadAppInfos();
     static Settings loadSettings();
 
-    const AppInfoMap mAppInfos;
+    AppInfoMap mAppInfos;
     const Settings mSettings;
 };
 

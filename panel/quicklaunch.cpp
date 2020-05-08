@@ -33,7 +33,7 @@
 #include <QDebug>
 #include <QToolButton>
 
-QuickLaunch::QuickLaunch(const Resources & res, QWidget * parent)
+QuickLaunch::QuickLaunch(Resources & res, QWidget * parent)
     : QWidget(parent), mLayout(this)
 {
     mLayout.setContentsMargins(QMargins());
@@ -41,7 +41,7 @@ QuickLaunch::QuickLaunch(const Resources & res, QWidget * parent)
 
     for (auto app : res.settings().quickLaunchApps)
     {
-        auto action = res.createAction(app, this);
+        auto action = res.getAction(app);
         if (!action)
             continue;
 

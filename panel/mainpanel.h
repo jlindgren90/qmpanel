@@ -38,7 +38,7 @@ class Resources;
 class MainPanel : public QWidget
 {
 public:
-    MainPanel(const Resources & res);
+    MainPanel(Resources & res);
 
 protected:
     void showEvent(QShowEvent * event) override

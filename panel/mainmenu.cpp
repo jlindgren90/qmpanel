@@ -47,7 +47,7 @@ struct Category
 class MainMenu : public QMenu
 {
 public:
-    MainMenu(const Resources & res, QWidget * parent);
+    MainMenu(Resources & res, QWidget * parent);
 
 protected:
     void actionEvent(QActionEvent * e) override;
@@ -67,7 +67,7 @@ private:
     bool mUpdatesInhibited = false;
 };
 
-MainMenu::MainMenu(const Resources & res, QWidget * parent)
+MainMenu::MainMenu(Resources & res, QWidget * parent)
     : QMenu(parent), mSearchEditAction(this), mSearchViewAction(this),
       mSearchLayout(&mSearchFrame)
 {
@@ -85,7 +85,7 @@ MainMenu::MainMenu(const Resources & res, QWidget * parent)
 
     for (auto app : res.settings().pinnedMenuApps)
     {
-        auto action = res.createAction(app, this);
+        auto action = res.getAction(app);
         if (action)
             addAction(action);
     }
@@ -95,10 +95,10 @@ MainMenu::MainMenu(const Resources & res, QWidget * parent)
     std::unordered_set<QString> added;
     for (auto & category : categories)
     {
-        auto apps = res.createCategory(category.internalName, added, this);
+        auto apps = res.getCategory(category.internalName, added);
         if (!apps.isEmpty())
         {
-            auto icon = Resources::getIcon(category.icon);
+            auto icon = res.getIcon(category.icon);
             addMenu(icon, category.displayName)->addActions(apps);
             mSearchView.addActions(apps);
         }
@@ -184,11 +184,11 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-MainMenuButton::MainMenuButton(const Resources & res, QWidget * parent)
+MainMenuButton::MainMenuButton(Resources & res, QWidget * parent)
     : QToolButton(parent)
 {
     setAutoRaise(true);
-    setIcon(Resources::getIcon(res.settings().menuIcon));
+    setIcon(res.getIcon(res.settings().menuIcon));
     setMenu(new MainMenu(res, this));
     setPopupMode(InstantPopup);
     setToolButtonStyle(Qt::ToolButtonIconOnly);

@@ -38,7 +38,7 @@ class Resources;
 class QuickLaunch : public QWidget
 {
 public:
-    explicit QuickLaunch(const Resources & res, QWidget * parent);
+    explicit QuickLaunch(Resources & res, QWidget * parent);
 
 private:
     QHBoxLayout mLayout;

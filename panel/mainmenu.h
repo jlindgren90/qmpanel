@@ -36,7 +36,7 @@ class Resources;
 class MainMenuButton : public QToolButton
 {
 public:
-    explicit MainMenuButton(const Resources & res, QWidget * parent);
+    explicit MainMenuButton(Resources & res, QWidget * parent);
 };
 
 #endif
