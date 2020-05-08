@@ -27,6 +27,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <QHash>
 #include <QString>
 #include <memory>
 
