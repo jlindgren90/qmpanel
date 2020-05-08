@@ -1,6 +1,8 @@
 qmpanel - A Minimal Qt-Based Desktop Panel
 ==========================================
 
+![screenshot](/qmpanel.png?raw=true)
+
  - Origin: fork of lxqt-panel 0.14.1
 
  - Reasons for fork:
