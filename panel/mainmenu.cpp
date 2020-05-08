@@ -72,16 +72,16 @@ MainMenu::MainMenu(Resources & res, QWidget * parent)
       mSearchLayout(&mSearchFrame)
 {
     static const Category categories[] = {
-        {"applications-accessories", "Accessories", "Utility"},
         {"applications-development", "Development", "Development"},
         {"applications-science", "Education", "Education"},
         {"applications-games", "Games", "Game"},
         {"applications-graphics", "Graphics", "Graphics"},
         {"applications-multimedia", "Multimedia", "AudioVideo"},
-        {"applications-internet", "Internet", "Network"},
+        {"applications-internet", "Network", "Network"},
         {"applications-office", "Office", "Office"},
         {"preferences-desktop", "Settings", "Settings"},
-        {"applications-system", "System", "System"}};
+        {"applications-system", "System", "System"},
+        {"applications-accessories", "Utility", "Utility"}};
 
     for (auto app : res.settings().pinnedMenuApps)
     {
