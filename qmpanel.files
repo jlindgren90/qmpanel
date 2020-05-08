@@ -3,8 +3,6 @@ PKGBUILD
 panel/CMakeLists.txt
 panel/actionview.cpp
 panel/actionview.h
-panel/appdb.cpp
-panel/appdb.h
 panel/clocklabel.cpp
 panel/clocklabel.h
 panel/main.cpp
@@ -14,8 +12,8 @@ panel/mainpanel.cpp
 panel/mainpanel.h
 panel/quicklaunch.cpp
 panel/quicklaunch.h
-panel/settings.cpp
-panel/settings.h
+panel/resources.cpp
+panel/resources.h
 panel/systray.cpp
 panel/systray.h
 panel/taskbar.cpp

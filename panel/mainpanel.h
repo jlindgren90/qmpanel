@@ -33,16 +33,12 @@
 #include <QPointer>
 #include <QWidget>
 
-#include "appdb.h"
-#include "settings.h"
+class Resources;
 
 class MainPanel : public QWidget
 {
 public:
-    MainPanel();
-
-    const AppDB & appDB() { return mAppDB; }
-    const Settings & settings() { return mSettings; }
+    MainPanel(const Resources & res);
 
 protected:
     void showEvent(QShowEvent * event) override
@@ -52,8 +48,6 @@ protected:
     }
 
 private:
-    AppDB mAppDB;
-    Settings mSettings;
     QPointer<QScreen> mScreen;
     QHBoxLayout mLayout;
 

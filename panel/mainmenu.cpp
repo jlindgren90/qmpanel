@@ -28,8 +28,9 @@
 
 #include "mainmenu.h"
 #include "actionview.h"
-#include "mainpanel.h"
+#include "resources.h"
 
+#include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QMenu>
@@ -46,7 +47,7 @@ struct Category
 class MainMenu : public QMenu
 {
 public:
-    MainMenu(MainPanel * panel, QWidget * parent);
+    MainMenu(const Resources & res, QWidget * parent);
 
 protected:
     void actionEvent(QActionEvent * e) override;
@@ -66,7 +67,7 @@ private:
     bool mUpdatesInhibited = false;
 };
 
-MainMenu::MainMenu(MainPanel * panel, QWidget * parent)
+MainMenu::MainMenu(const Resources & res, QWidget * parent)
     : QMenu(parent), mSearchEditAction(this), mSearchViewAction(this),
       mSearchLayout(&mSearchFrame)
 {
@@ -82,12 +83,9 @@ MainMenu::MainMenu(MainPanel * panel, QWidget * parent)
         {"preferences-desktop", "Settings", "Settings"},
         {"applications-system", "System", "System"}};
 
-    auto & appDB = panel->appDB();
-    auto & settings = panel->settings();
-
-    for (auto app : settings.pinnedMenuApps)
+    for (auto app : res.settings().pinnedMenuApps)
     {
-        auto action = appDB.createAction(app, this);
+        auto action = res.createAction(app, this);
         if (action)
             addAction(action);
     }
@@ -97,10 +95,10 @@ MainMenu::MainMenu(MainPanel * panel, QWidget * parent)
     std::unordered_set<QString> added;
     for (auto & category : categories)
     {
-        auto apps = appDB.createCategory(category.internalName, added, this);
+        auto apps = res.createCategory(category.internalName, added, this);
         if (!apps.isEmpty())
         {
-            auto icon = AppDB::getIcon(category.icon);
+            auto icon = Resources::getIcon(category.icon);
             addMenu(icon, category.displayName)->addActions(apps);
             mSearchView.addActions(apps);
         }
@@ -186,11 +184,12 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-MainMenuButton::MainMenuButton(MainPanel * panel) : QToolButton(panel)
+MainMenuButton::MainMenuButton(const Resources & res, QWidget * parent)
+    : QToolButton(parent)
 {
     setAutoRaise(true);
-    setIcon(AppDB::getIcon(panel->settings().menuIcon));
-    setMenu(new MainMenu(panel, this));
+    setIcon(Resources::getIcon(res.settings().menuIcon));
+    setMenu(new MainMenu(res, this));
     setPopupMode(InstantPopup);
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 }

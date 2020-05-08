@@ -24,39 +24,34 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef APPDB_H
-#define APPDB_H
-
-#include <QList>
-#include <unordered_map>
-#include <unordered_set>
+#ifndef RESOURCES_H
+#define RESOURCES_H
 
 #include "utils.h"
 
-class QAction;
-class QIcon;
-class QObject;
+#include <QAction>
+#include <QStringList>
+#include <unordered_map>
+#include <unordered_set>
 
 typedef struct _GAppInfo GAppInfo;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-template<>
-struct std::hash<QString>
-{
-    std::size_t operator()(const QString & v) const noexcept
-    {
-        return qHash(v);
-    }
-};
-#endif
-
-class AppDB
+class Resources
 {
 public:
-    AppDB();
+    struct Settings
+    {
+        QString menuIcon;
+        QStringList pinnedMenuApps;
+        QStringList quickLaunchApps;
+    };
 
     static QIcon getIcon(const QString & name);
     static QIcon getIcon(GAppInfo * info);
+
+    Resources() : mAppInfos(loadAppInfos()), mSettings(loadSettings()) {}
+
+    const Settings & settings() const { return mSettings; }
 
     QAction * createAction(const QString & appID, QObject * parent) const;
 
@@ -65,7 +60,22 @@ public:
                                     QObject * parent) const;
 
 private:
-    std::unordered_map<QString, AutoPtrV<GAppInfo>> mAppInfos;
+    class AppAction : public QAction
+    {
+    public:
+        AppAction(GAppInfo * info, QObject * parent);
+
+    private:
+        AutoPtrV<GAppInfo> mInfoRef;
+    };
+
+    using AppInfoMap = std::unordered_map<QString, AutoPtrV<GAppInfo>>;
+
+    static AppInfoMap loadAppInfos();
+    static Settings loadSettings();
+
+    const AppInfoMap mAppInfos;
+    const Settings mSettings;
 };
 
 #endif

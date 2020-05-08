@@ -28,22 +28,20 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "quicklaunch.h"
-#include "mainpanel.h"
+#include "resources.h"
 
 #include <QDebug>
 #include <QToolButton>
 
-QuickLaunch::QuickLaunch(MainPanel * panel) : QWidget(panel), mLayout(this)
+QuickLaunch::QuickLaunch(const Resources & res, QWidget * parent)
+    : QWidget(parent), mLayout(this)
 {
     mLayout.setContentsMargins(QMargins());
     mLayout.setSpacing(0);
 
-    auto & appDB = panel->appDB();
-    auto & settings = panel->settings();
-
-    for (auto app : settings.quickLaunchApps)
+    for (auto app : res.settings().quickLaunchApps)
     {
-        auto action = appDB.createAction(app, this);
+        auto action = res.createAction(app, this);
         if (!action)
             continue;
 

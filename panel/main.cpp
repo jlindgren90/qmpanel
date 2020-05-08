@@ -31,6 +31,7 @@
 #include <thread>
 
 #include "mainpanel.h"
+#include "resources.h"
 
 static sigset_t signal_set;
 
@@ -59,7 +60,8 @@ int main(int argc, char * argv[])
     /* monitor signals once qApp exists */
     std::thread(signal_thread).detach();
 
-    MainPanel panel;
+    Resources res;
+    MainPanel panel(res);
 
     return app.exec();
 }

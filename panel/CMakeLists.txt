@@ -2,13 +2,12 @@ set(PROJECT qmpanel)
 
 set(SOURCES
     actionview.cpp
-    appdb.cpp
     clocklabel.cpp
     main.cpp
     mainmenu.cpp
     mainpanel.cpp
     quicklaunch.cpp
-    settings.cpp
+    resources.cpp
     systray.cpp
     taskbar.cpp
     taskbutton.cpp

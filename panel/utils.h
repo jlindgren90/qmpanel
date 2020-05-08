@@ -42,4 +42,15 @@ public:
     explicit operator QString() const { return get(); }
 };
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+template<>
+struct std::hash<QString>
+{
+    std::size_t operator()(const QString & v) const noexcept
+    {
+        return qHash(v);
+    }
+};
+#endif
+
 #endif

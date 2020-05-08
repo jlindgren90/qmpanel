@@ -24,7 +24,7 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include "appdb.h"
+#include "resources.h"
 
 #include <QAction>
 #include <QDebug>
@@ -34,7 +34,7 @@
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-QIcon AppDB::getIcon(const QString & name)
+QIcon Resources::getIcon(const QString & name)
 {
     if (g_path_is_absolute(name.toUtf8()))
         return QIcon(name);
@@ -56,7 +56,7 @@ QIcon AppDB::getIcon(const QString & name)
     return QIcon();
 }
 
-QIcon AppDB::getIcon(GAppInfo * info)
+QIcon Resources::getIcon(GAppInfo * info)
 {
     auto gicon = g_app_info_get_icon(info);
     if (!gicon)
@@ -69,26 +69,10 @@ QIcon AppDB::getIcon(GAppInfo * info)
     return getIcon(QString(name));
 }
 
-class AppAction : public QAction
+Resources::AppInfoMap Resources::loadAppInfos()
 {
-public:
-    AppAction(GAppInfo * info, QObject * parent)
-        : QAction(AppDB::getIcon(info), g_app_info_get_display_name(info),
-                  parent),
-          mInfo((GAppInfo *)g_object_ref(info), g_object_unref)
-    {
-        connect(this, &QAction::triggered, [info]() {
-            if (!g_app_info_launch(info, nullptr, nullptr, nullptr))
-                qWarning() << "Failed to launch" << g_app_info_get_id(info);
-        });
-    }
+    AppInfoMap apps;
 
-private:
-    AutoPtrV<GAppInfo> mInfo;
-};
-
-AppDB::AppDB()
-{
     AutoPtr<GList> list(g_app_info_get_all(), [](GList * list) {
         g_list_free_full(list, g_object_unref);
     });
@@ -99,14 +83,48 @@ AppDB::AppDB()
         if (!g_app_info_should_show(app))
             continue;
 
-        mAppInfos.emplace(std::piecewise_construct,
-                          std::forward_as_tuple(g_app_info_get_id(app)),
-                          std::forward_as_tuple((GAppInfo *)g_object_ref(app),
-                                                g_object_unref));
+        apps.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(g_app_info_get_id(app)),
+                     std::forward_as_tuple((GAppInfo *)g_object_ref(app),
+                                           g_object_unref));
     }
+
+    return apps;
 }
 
-QAction * AppDB::createAction(const QString & appID, QObject * parent) const
+Resources::Settings Resources::loadSettings()
+{
+    AutoPtr<GKeyFile> kf(g_key_file_new(), g_key_file_unref);
+    auto path = QString(g_get_user_config_dir()) + "/qmpanel.ini";
+
+    g_key_file_load_from_file(kf.get(), path.toUtf8(), G_KEY_FILE_NONE,
+                              nullptr);
+
+    auto getSetting = [&](const char * key) {
+        return QString(CharPtr(
+            g_key_file_get_value(kf.get(), "Settings", key, nullptr), g_free));
+    };
+
+    auto menuIcon = getSetting("MenuIcon");
+    auto pinnedMenuApps = getSetting("PinnedMenuApps");
+    auto quickLaunchApps = getSetting("QuickLaunchApps");
+
+    return {menuIcon.isEmpty() ? "start-here" : menuIcon,
+            pinnedMenuApps.split(';', QString::SkipEmptyParts),
+            quickLaunchApps.split(';', QString::SkipEmptyParts)};
+}
+
+Resources::AppAction::AppAction(GAppInfo * info, QObject * parent)
+    : QAction(getIcon(info), g_app_info_get_display_name(info), parent),
+      mInfoRef((GAppInfo *)g_object_ref(info), g_object_unref)
+{
+    connect(this, &QAction::triggered, [info]() {
+        if (!g_app_info_launch(info, nullptr, nullptr, nullptr))
+            qWarning() << "Failed to launch" << g_app_info_get_id(info);
+    });
+}
+
+QAction * Resources::createAction(const QString & appID, QObject * parent) const
 {
     auto iter = mAppInfos.find(appID);
     if (iter == mAppInfos.end())
@@ -118,9 +136,9 @@ QAction * AppDB::createAction(const QString & appID, QObject * parent) const
     return new AppAction(iter->second.get(), parent);
 }
 
-QList<QAction *> AppDB::createCategory(const QString & category,
-                                       std::unordered_set<QString> & added,
-                                       QObject * parent) const
+QList<QAction *> Resources::createCategory(const QString & category,
+                                           std::unordered_set<QString> & added,
+                                           QObject * parent) const
 {
     QList<QAction *> actions;
 
