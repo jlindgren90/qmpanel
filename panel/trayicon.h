@@ -34,12 +34,10 @@
 #include <X11/X.h>
 #include <X11/extensions/Xdamage.h>
 
-class SysTray;
-
 class TrayIcon : public QWidget
 {
 public:
-    TrayIcon(Window iconId, SysTray * tray);
+    TrayIcon(Window iconId, QWidget * parent);
     ~TrayIcon();
 
     QString appName() const { return mAppName; }
@@ -55,7 +53,6 @@ protected:
 private:
     void initIcon();
 
-    SysTray * const mTray;
     int const mIconSize;
     Window const mIconId;
     QString const mAppName;

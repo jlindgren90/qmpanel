@@ -32,11 +32,12 @@
 #ifndef TASKBAR_H
 #define TASKBAR_H
 
-#include "taskbutton.h"
-
 #include <NETWM>
 #include <QHBoxLayout>
+#include <QWidget>
 #include <unordered_map>
+
+class TaskButton;
 
 class TaskBar : public QWidget
 {

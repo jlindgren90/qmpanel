@@ -30,6 +30,7 @@
 #define SYSTRAY_H
 
 #include <QAbstractNativeEventFilter>
+#include <QHBoxLayout>
 #include <QWidget>
 
 #include <X11/X.h>
@@ -43,6 +44,13 @@ class QHBoxLayout;
 class SysTray : public QWidget, QAbstractNativeEventFilter
 {
 public:
+    explicit SysTray(QWidget * parent);
+    ~SysTray();
+
+    bool nativeEventFilter(const QByteArray & eventType, void * message,
+                           long *) override;
+
+private:
     enum
     {
         MANAGER,
@@ -51,20 +59,9 @@ public:
         _NET_SYSTEM_TRAY_ORIENTATION,
         _NET_SYSTEM_TRAY_Sn,
         _NET_SYSTEM_TRAY_VISUAL,
-        _XEMBED,
         NUM_ATOMS
     };
 
-    explicit SysTray(QWidget * parent);
-    ~SysTray();
-
-    Atom atom(int idx) const { return mAtoms[idx]; }
-    int iconSize() const { return mIconSize; }
-
-    bool nativeEventFilter(const QByteArray & eventType, void * message,
-                           long *);
-
-private:
     VisualID getVisual();
     void addIcon(Window id);
     TrayIcon * findIcon(Window trayId);
@@ -72,8 +69,7 @@ private:
     Window mTrayId = 0;
     int mDamageEvent = 0;
     int mDamageError = 0;
-    QHBoxLayout * const mLayout;
-    int const mIconSize;
+    QHBoxLayout mLayout;
     Display * const mDisplay;
     int const mScreen;
     Atom const mAtoms[NUM_ATOMS];

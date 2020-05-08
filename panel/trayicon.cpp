@@ -26,21 +26,23 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
+#include "trayicon.h"
+#include "systray.h"
+#include "utils.h"
+
 #include <KWindowInfo>
 #include <QDebug>
 #include <QPainter>
+#include <QStyle>
 #include <QTimer>
 #include <QX11Info>
-
-#include "systray.h"
-#include "trayicon.h"
-#include "utils.h"
 
 #include <X11/Xutil.h>
 #include <X11/extensions/Xcomposite.h>
 
 #define XEMBED_EMBEDDED_NOTIFY 0
 
+static Atom xEmbed = None;
 static bool xError;
 
 int windowErrorHandler(Display * d, XErrorEvent * e)
@@ -55,11 +57,16 @@ int windowErrorHandler(Display * d, XErrorEvent * e)
     return 0;
 }
 
-TrayIcon::TrayIcon(Window iconId, SysTray * tray)
-    : QWidget(tray), mTray(tray), mIconSize(tray->iconSize()), mIconId(iconId),
+TrayIcon::TrayIcon(Window iconId, QWidget * parent)
+    : QWidget(parent),
+      mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
+      mIconId(iconId),
       mAppName(KWindowInfo(iconId, 0, NET::WM2WindowClass).windowClassName()),
       mDisplay(QX11Info::display())
 {
+    if (xEmbed == None)
+        xEmbed = XInternAtom(mDisplay, "_XEMBED", false);
+
     setFixedSize(mIconSize, mIconSize);
 }
 
@@ -103,7 +110,7 @@ void TrayIcon::initIcon()
     XEvent e{};
     e.xclient.type = ClientMessage;
     e.xclient.send_event = True;
-    e.xclient.message_type = mTray->atom(SysTray::_XEMBED);
+    e.xclient.message_type = xEmbed;
     e.xclient.window = mIconId;
     e.xclient.format = 32;
     e.xclient.data.l[0] = CurrentTime;

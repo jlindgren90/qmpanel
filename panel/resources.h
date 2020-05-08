@@ -61,12 +61,9 @@ public:
 
     static QIcon getIcon(const QString & name);
 
-    Resources() : mAppInfos(loadAppInfos()), mSettings(loadSettings()) {}
-
     const Settings & settings() const { return mSettings; }
 
     QAction * getAction(const QString & appID);
-
     QList<QAction *> getCategory(const QString & category,
                                  std::unordered_set<QString> & added);
 
@@ -76,8 +73,8 @@ private:
     static AppInfoMap loadAppInfos();
     static Settings loadSettings();
 
-    AppInfoMap mAppInfos;
-    const Settings mSettings;
+    AppInfoMap mAppInfos = loadAppInfos();
+    Settings mSettings = loadSettings();
 };
 
 #endif

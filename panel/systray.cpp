@@ -26,10 +26,11 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
+#include "systray.h"
+#include "trayicon.h"
+
 #include <QApplication>
 #include <QDebug>
-#include <QHBoxLayout>
-#include <QStyle>
 #include <QX11Info>
 #include <memory>
 
@@ -39,16 +40,12 @@
 #include <xcb/damage.h>
 #include <xcb/xcb.h>
 
-#include "systray.h"
-#include "trayicon.h"
-
 #define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
 #define SYSTEM_TRAY_REQUEST_DOCK 0
 
 SysTray::SysTray(QWidget * parent)
-    : QWidget(parent), mLayout(new QHBoxLayout(this)),
-      mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
-      mDisplay(QX11Info::display()), mScreen(QX11Info::appScreen()),
+    : QWidget(parent), mLayout(this), mDisplay(QX11Info::display()),
+      mScreen(QX11Info::appScreen()),
       mAtoms{XInternAtom(mDisplay, "MANAGER", false),
              XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_ICON_SIZE", false),
              XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_OPCODE", false),
@@ -56,11 +53,10 @@ SysTray::SysTray(QWidget * parent)
              XInternAtom(mDisplay,
                          QString("_NET_SYSTEM_TRAY_S%1").arg(mScreen).toUtf8(),
                          false),
-             XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_VISUAL", false),
-             XInternAtom(mDisplay, "_XEMBED", false)}
+             XInternAtom(mDisplay, "_NET_SYSTEM_TRAY_VISUAL", false)}
 {
-    mLayout->setContentsMargins(QMargins());
-    mLayout->setSpacing(logicalDpiX() / 24);
+    mLayout.setContentsMargins(QMargins());
+    mLayout.setSpacing(logicalDpiX() / 24);
 
     Window root = QX11Info::appRootWindow();
     VisualID visualId = getVisual();
@@ -117,8 +113,8 @@ SysTray::SysTray(QWidget * parent)
 
 SysTray::~SysTray()
 {
-    while (!mLayout->isEmpty())
-        delete mLayout->itemAt(0)->widget();
+    while (!mLayout.isEmpty())
+        delete mLayout.itemAt(0)->widget();
 
     if (mTrayId)
         XDestroyWindow(mDisplay, mTrayId);
@@ -166,9 +162,9 @@ bool SysTray::nativeEventFilter(const QByteArray & eventType, void * message,
 
 TrayIcon * SysTray::findIcon(Window id)
 {
-    for (int idx = 0; idx < mLayout->count(); idx++)
+    for (int idx = 0; idx < mLayout.count(); idx++)
     {
-        auto item = mLayout->itemAt(idx);
+        auto item = mLayout.itemAt(idx);
         auto icon = static_cast<TrayIcon *>(item->widget());
         if (icon->iconId() == id || icon->windowId() == id)
             return icon;
@@ -211,12 +207,12 @@ void SysTray::addIcon(Window winId)
 
     // add in sorted order
     int idx = 0;
-    for (; idx < mLayout->count(); idx++)
+    for (; idx < mLayout.count(); idx++)
     {
-        auto icon2 = static_cast<TrayIcon *>(mLayout->itemAt(idx)->widget());
+        auto icon2 = static_cast<TrayIcon *>(mLayout.itemAt(idx)->widget());
         if (icon->appName().compare(icon2->appName(), Qt::CaseInsensitive) < 0)
             break;
     }
 
-    mLayout->insertWidget(idx, icon);
+    mLayout.insertWidget(idx, icon);
 }

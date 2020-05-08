@@ -30,6 +30,7 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "taskbar.h"
+#include "taskbutton.h"
 
 #include <KWindowSystem>
 #include <QX11Info>
