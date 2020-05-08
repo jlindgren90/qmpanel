@@ -59,8 +59,9 @@ qmpanel - A Minimal Qt-Based Desktop Panel
     - Settings are read from $HOME/.config/qmpanel.ini
     - Example qmpanel.ini:
 
-
-    [Settings]
-    MenuIcon=<icon-name>
-    PinnedMenuApps=<app-name>.desktop;<app-name>.desktop
-    QuickLaunchApps=<app-name>.desktop;<app-name>.desktop
+```
+[Settings]
+MenuIcon=<icon-name>
+PinnedMenuApps=<app-name>.desktop;<app-name>.desktop
+QuickLaunchApps=<app-name>.desktop;<app-name>.desktop
+```
