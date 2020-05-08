@@ -1,5 +1,4 @@
 qmpanel - A Minimal Qt-Based Desktop Panel
-
 ==========================================
 
  - Origin: fork of lxqt-panel 0.14.1
@@ -56,11 +55,12 @@ qmpanel - A Minimal Qt-Based Desktop Panel
 
  - Configuration:
 
-   - No configuration GUI
-   - Settings are read from $HOME/.config/qmpanel.ini
-   - Example qmpanel.ini:
+    - No configuration GUI
+    - Settings are read from $HOME/.config/qmpanel.ini
+    - Example qmpanel.ini:
 
-      [Settings]
-      MenuIcon=<icon-name>
-      PinnedMenuApps=<app-name>.desktop;<app-name>.desktop
-      QuickLaunchApps=<app-name>.desktop;<app-name>.desktop
+
+    [Settings]
+    MenuIcon=<icon-name>
+    PinnedMenuApps=<app-name>.desktop;<app-name>.desktop
+    QuickLaunchApps=<app-name>.desktop;<app-name>.desktop
