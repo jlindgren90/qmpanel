@@ -104,7 +104,6 @@ MainMenu::MainMenu(Resources & res, QWidget * parent)
         }
     }
 
-    mSearchEdit.setClearButtonEnabled(true);
     mSearchEdit.setPlaceholderText("Search");
 
     int margin = logicalDpiX() / 32;
