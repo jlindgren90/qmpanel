@@ -41,6 +41,9 @@ ClockLabel::ClockLabel(QWidget * parent)
 
     startTimer(10000);
     timerEvent(nullptr);
+
+    connect(&mMenu, &QMenu::aboutToShow,
+            [this]() { mCalendar.setSelectedDate(QDate::currentDate()); });
 }
 
 void ClockLabel::timerEvent(QTimerEvent *)
