@@ -104,5 +104,5 @@ void MainPanel::updateGeometry()
                                     /* right  */ 0, 0, 0,
                                     /* top    */ 0, 0, 0,
                                     /* bottom */ screenBottom + 1 - rect.top(),
-                                    rect.left(), rect.right() + 1);
+                                    rect.left(), rect.right());
 }
