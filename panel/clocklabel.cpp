@@ -38,6 +38,7 @@ ClockLabel::ClockLabel(QWidget * parent)
     setAutoRaise(true);
     setMenu(&mMenu);
     setPopupMode(InstantPopup);
+    setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
     startTimer(10000);
     timerEvent(nullptr);

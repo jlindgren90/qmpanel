@@ -190,5 +190,6 @@ MainMenuButton::MainMenuButton(Resources & res, QWidget * parent)
     setIcon(res.getIcon(res.settings().menuIcon));
     setMenu(new MainMenu(res, this));
     setPopupMode(InstantPopup);
+    setStyleSheet("QToolButton::menu-indicator { image: none; }");
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 }
