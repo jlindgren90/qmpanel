@@ -83,16 +83,19 @@ MainMenu::MainMenu(Resources & res, QWidget * parent)
         {"applications-system", "System", "System"},
         {"applications-accessories", "Utility", "Utility"}};
 
+    std::unordered_set<QString> added;
     for (auto app : res.settings().pinnedMenuApps)
     {
         auto action = res.getAction(app);
         if (action)
+        {
             addAction(action);
+            added.insert(app);
+        }
     }
 
     addSeparator();
 
-    std::unordered_set<QString> added;
     for (auto & category : categories)
     {
         auto apps = res.getCategory(category.internalName, added);
