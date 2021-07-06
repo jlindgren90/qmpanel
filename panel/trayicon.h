@@ -52,13 +52,16 @@ protected:
 
 private:
     void initIcon();
+    void attemptResize();
 
     int const mIconSize;
+    int const mIconSizeDevPx;
     Window const mIconId;
     QString const mAppName;
     Display * const mDisplay;
     Window mWindowId = 0;
     Damage mDamage = 0;
+    bool mAttemptedResize = false;
 };
 
 #endif // TRAYICON_H

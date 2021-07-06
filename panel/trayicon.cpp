@@ -60,6 +60,7 @@ int windowErrorHandler(Display * d, XErrorEvent * e)
 TrayIcon::TrayIcon(Window iconId, QWidget * parent)
     : QWidget(parent),
       mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
+      mIconSizeDevPx(mIconSize * devicePixelRatioF()),
       mIconId(iconId),
       mAppName(KWindowInfo(iconId, 0, NET::WM2WindowClass).windowClassName()),
       mDisplay(QX11Info::display())
@@ -88,11 +89,10 @@ void TrayIcon::initIcon()
     set_attr.background_pixel = 0;
     set_attr.border_pixel = 0;
 
-    int sizeDevPx = mIconSize * devicePixelRatioF();
     auto mask = CWColormap | CWBackPixel | CWBorderPixel;
     mWindowId =
-        XCreateWindow(mDisplay, winId(), 0, 0, sizeDevPx, sizeDevPx, 0,
-                      attr.depth, InputOutput, attr.visual, mask, &set_attr);
+        XCreateWindow(mDisplay, winId(), 0, 0, mIconSizeDevPx, mIconSizeDevPx,
+                      0, attr.depth, InputOutput, attr.visual, mask, &set_attr);
 
     xError = false;
     auto old = XSetErrorHandler(windowErrorHandler);
@@ -127,7 +127,14 @@ void TrayIcon::initIcon()
 
     XMapWindow(mDisplay, mIconId);
     XMapRaised(mDisplay, mWindowId);
-    XResizeWindow(mDisplay, mIconId, sizeDevPx, sizeDevPx);
+    XResizeWindow(mDisplay, mIconId, mIconSizeDevPx, mIconSizeDevPx);
+
+    update();
+}
+
+void TrayIcon::attemptResize()
+{
+    XResizeWindow(mDisplay, mIconId, mIconSizeDevPx, mIconSizeDevPx);
 
     update();
 }
@@ -167,6 +174,18 @@ void TrayIcon::paintEvent(QPaintEvent *)
         !XGetWindowAttributes(mDisplay, mWindowId, &attr2))
     {
         return;
+    }
+
+    // GtkStatusIcon calls XResizeWindow() on itself after embedding,
+    // which causes a race condition with our own XResizeWindow() in
+    // initIcon().  The GTK bug will probably never be fixed (since GTK2
+    // is end-of-life and GtkStatusIcon is deprecated in GTK3), so try
+    // to work around it by resizing the icon window once more.
+    if ((attr.width != mIconSizeDevPx || attr.height != mIconSizeDevPx) &&
+        !mAttemptedResize)
+    {
+        QTimer::singleShot(0, this, &TrayIcon::attemptResize);
+        mAttemptedResize = true;
     }
 
     int w = std::min(attr.width, attr2.width);
