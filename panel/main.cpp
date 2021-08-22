@@ -33,7 +33,7 @@
 #include "mainpanel.h"
 #include "resources.h"
 
-static sigset_t signal_set;
+sigset_t signal_set; // also used in resources.cpp
 
 static void signal_thread()
 {
@@ -50,7 +50,6 @@ int main(int argc, char * argv[])
     sigemptyset(&signal_set);
     sigaddset(&signal_set, SIGHUP);
     sigaddset(&signal_set, SIGINT);
-    sigaddset(&signal_set, SIGQUIT);
     sigaddset(&signal_set, SIGTERM);
     sigprocmask(SIG_BLOCK, &signal_set, nullptr);
 

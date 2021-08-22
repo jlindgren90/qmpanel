@@ -29,23 +29,20 @@
 #include <QAction>
 #include <QDebug>
 #include <QFileInfo>
+#include <signal.h>
 
 #undef signals
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-AppInfo::AppInfo(GAppInfo * info)
-    : mInfo((GAppInfo *)g_object_ref(info), g_object_unref)
+AppInfo::AppInfo(GDesktopAppInfo * info)
+    : mInfo((GDesktopAppInfo *)g_object_ref(info), g_object_unref)
 {
 }
 
 QStringList AppInfo::categories() const
 {
-    auto info = mInfo.get();
-    if (!G_IS_DESKTOP_APP_INFO(info))
-        return QStringList();
-
-    return QString(g_desktop_app_info_get_categories((GDesktopAppInfo *)info))
+    return QString(g_desktop_app_info_get_categories(mInfo.get()))
         .split(';', QString::SkipEmptyParts);
 }
 
@@ -56,7 +53,7 @@ QAction * AppInfo::getAction()
 
     auto info = mInfo.get();
     auto getIcon = [info]() {
-        auto gicon = g_app_info_get_icon(info);
+        auto gicon = g_app_info_get_icon((GAppInfo *)info);
         if (!gicon)
             return QIcon();
 
@@ -64,11 +61,16 @@ QAction * AppInfo::getAction()
         return name ? Resources::getIcon(QString(name)) : QIcon();
     };
 
-    auto action = new QAction(getIcon(), g_app_info_get_display_name(info));
+    auto action =
+        new QAction(getIcon(), g_app_info_get_display_name((GAppInfo *)info));
 
     QObject::connect(action, &QAction::triggered, [info]() {
-        if (!g_app_info_launch(info, nullptr, nullptr, nullptr))
-            qWarning() << "Failed to launch" << g_app_info_get_id(info);
+        if (!g_desktop_app_info_launch_uris_as_manager(
+                info, nullptr, nullptr, G_SPAWN_SEARCH_PATH,
+                [](void *) { sigprocmask(SIG_UNBLOCK, &signal_set, nullptr); },
+                nullptr, nullptr, nullptr, nullptr))
+            qWarning() << "Failed to launch"
+                       << g_app_info_get_id((GAppInfo *)info);
     });
 
     mAction.reset(action);
@@ -108,8 +110,8 @@ Resources::AppInfoMap Resources::loadAppInfos()
     for (auto node = list.get(); node; node = node->next)
     {
         auto app = (GAppInfo *)node->data;
-        if (g_app_info_should_show(app))
-            apps.emplace(g_app_info_get_id(app), app);
+        if (G_IS_DESKTOP_APP_INFO(app) && g_app_info_should_show(app))
+            apps.emplace(g_app_info_get_id(app), (GDesktopAppInfo *)app);
     }
 
     return apps;

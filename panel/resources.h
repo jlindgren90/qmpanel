@@ -34,18 +34,20 @@
 #include <unordered_map>
 #include <unordered_set>
 
-typedef struct _GAppInfo GAppInfo;
+extern sigset_t signal_set; // from main.cpp
+
+typedef struct _GDesktopAppInfo GDesktopAppInfo;
 
 class AppInfo
 {
 public:
-    explicit AppInfo(GAppInfo * info);
+    explicit AppInfo(GDesktopAppInfo * info);
 
     QStringList categories() const;
     QAction * getAction();
 
 private:
-    AutoPtrV<GAppInfo> mInfo;
+    AutoPtrV<GDesktopAppInfo> mInfo;
     std::unique_ptr<QAction> mAction;
 };
 
