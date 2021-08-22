@@ -60,8 +60,7 @@ int windowErrorHandler(Display * d, XErrorEvent * e)
 TrayIcon::TrayIcon(Window iconId, QWidget * parent)
     : QWidget(parent),
       mIconSize(style()->pixelMetric(QStyle::PM_ButtonIconSize)),
-      mIconSizeDevPx(mIconSize * devicePixelRatioF()),
-      mIconId(iconId),
+      mIconSizeDevPx(mIconSize * devicePixelRatioF()), mIconId(iconId),
       mAppName(KWindowInfo(iconId, 0, NET::WM2WindowClass).windowClassName()),
       mDisplay(QX11Info::display())
 {
