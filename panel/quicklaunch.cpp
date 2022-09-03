@@ -48,6 +48,7 @@ QuickLaunch::QuickLaunch(Resources & res, QWidget * parent)
         auto button = new QToolButton(this);
         button->setAutoRaise(true);
         button->setDefaultAction(action);
+        button->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         mLayout.addWidget(button);
     }
 }
