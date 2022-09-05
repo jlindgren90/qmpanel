@@ -81,7 +81,10 @@ void TaskButton::updateIcon()
 {
     int size = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
     size *= devicePixelRatioF();
-    setIcon(KWindowSystem::icon(mWindow, size, size));
+    QIcon icon = KWindowSystem::icon(mWindow, size, size);
+    if (icon.isNull())
+        icon = style()->standardIcon(QStyle::SP_FileIcon);
+    setIcon(icon);
 }
 
 QSize TaskButton::sizeHint() const
