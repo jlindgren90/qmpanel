@@ -20,7 +20,8 @@ depends=(
 build() {
 	mkdir -p ../build
 	cd ../build
-	cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+	cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+	sed -i 's/-fvar-tracking-assignments//' compile_commands.json # for clangd
 	make
 }
 
