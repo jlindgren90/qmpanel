@@ -15,6 +15,7 @@ srcs = [
 ]
 
 deps = [
+  dependency('threads'),
   dependency('gio-2.0'),
   dependency('gio-unix-2.0'),
   dependency('qt5', modules: ['Core', 'Gui', 'Widgets', 'X11Extras']),
