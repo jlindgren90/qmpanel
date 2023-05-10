@@ -7,25 +7,23 @@ pkgdesc="A Minimal Qt-Based Desktop Panel"
 arch=("x86_64")
 url="https://github.com/jlindgren90/qmpanel"
 license=("LGPL2.1")
-makedepends=("cmake")
+makedepends=("meson")
 depends=(
-	"glib2"
-	"kwindowsystem"
-	"libxcb"
-	"libxcomposite"
-	"libxdamage"
-	"libxrender"
+  "glib2"
+  "kwindowsystem"
+  "libxcb"
+  "libxcomposite"
+  "libxdamage"
+  "libxrender"
 )
 
 build() {
-	mkdir -p ../build
-	cd ../build
-	cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_EXPORT_COMPILE_COMMANDS=1
-	sed -i 's/-fvar-tracking-assignments//' compile_commands.json # for clangd
-	make
+  cd ..
+  arch-meson build
+  meson compile -C build
 }
 
 package() {
-	cd ../build
-	make DESTDIR="$pkgdir" install
+  cd ..
+  meson install -C build --destdir "$pkgdir"
 }
