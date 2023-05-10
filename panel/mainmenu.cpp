@@ -56,6 +56,7 @@ protected:
     void showEvent(QShowEvent *) override;
 
 private:
+    void populate(Resources & res);
     void searchTextChanged(const QString & text);
 
     QWidgetAction mSearchEditAction;
@@ -64,6 +65,7 @@ private:
     QHBoxLayout mSearchLayout;
     QLineEdit mSearchEdit;
     ActionView mSearchView;
+    bool mPopulated = false;
     bool mUpdatesInhibited = false;
 };
 
@@ -71,42 +73,6 @@ MainMenu::MainMenu(Resources & res, QWidget * parent)
     : QMenu(parent), mSearchEditAction(this), mSearchViewAction(this),
       mSearchLayout(&mSearchFrame)
 {
-    static const Category categories[] = {
-        {"applications-development", "Development", "Development"},
-        {"applications-science", "Education", "Education"},
-        {"applications-games", "Games", "Game"},
-        {"applications-graphics", "Graphics", "Graphics"},
-        {"applications-multimedia", "Multimedia", "AudioVideo"},
-        {"applications-internet", "Network", "Network"},
-        {"applications-office", "Office", "Office"},
-        {"preferences-desktop", "Settings", "Settings"},
-        {"applications-system", "System", "System"},
-        {"applications-accessories", "Utility", "Utility"}};
-
-    std::unordered_set<QString> added;
-    for (auto app : res.settings().pinnedMenuApps)
-    {
-        auto action = res.getAction(app);
-        if (action)
-        {
-            addAction(action);
-            added.insert(app);
-        }
-    }
-
-    addSeparator();
-
-    for (auto & category : categories)
-    {
-        auto apps = res.getCategory(category.internalName, added);
-        if (!apps.isEmpty())
-        {
-            auto icon = res.getIcon(category.icon);
-            addMenu(icon, category.displayName)->addActions(apps);
-            mSearchView.addActions(apps);
-        }
-    }
-
     mSearchEdit.setPlaceholderText("Search");
 
     int margin = logicalDpiX() / 32;
@@ -115,12 +81,11 @@ MainMenu::MainMenu(Resources & res, QWidget * parent)
 
     mSearchEditAction.setDefaultWidget(&mSearchFrame);
     mSearchViewAction.setDefaultWidget(&mSearchView);
-    addAction(&mSearchViewAction);
-    addAction(&mSearchEditAction);
 
     mSearchView.hide();
     mSearchViewAction.setVisible(false);
 
+    connect(this, &QMenu::aboutToShow, [this, &res]() { populate(res); });
     connect(this, &QMenu::aboutToHide, &mSearchEdit, &QLineEdit::clear);
     connect(this, &QMenu::hovered, [this](QAction * action) {
         if (action == &mSearchEditAction)
@@ -160,6 +125,53 @@ void MainMenu::resizeEvent(QResizeEvent * e)
 void MainMenu::showEvent(QShowEvent *)
 {
     mSearchEdit.setFocus(Qt::OtherFocusReason);
+}
+
+void MainMenu::populate(Resources & res)
+{
+    if (mPopulated)
+        return;
+
+    static const Category categories[] = {
+        {"applications-development", "Development", "Development"},
+        {"applications-science", "Education", "Education"},
+        {"applications-games", "Games", "Game"},
+        {"applications-graphics", "Graphics", "Graphics"},
+        {"applications-multimedia", "Multimedia", "AudioVideo"},
+        {"applications-internet", "Network", "Network"},
+        {"applications-office", "Office", "Office"},
+        {"preferences-desktop", "Settings", "Settings"},
+        {"applications-system", "System", "System"},
+        {"applications-accessories", "Utility", "Utility"}};
+
+    std::unordered_set<QString> added;
+    for (auto app : res.settings().pinnedMenuApps)
+    {
+        auto action = res.getAction(app);
+        if (action)
+        {
+            addAction(action);
+            added.insert(app);
+        }
+    }
+
+    addSeparator();
+
+    for (auto & category : categories)
+    {
+        auto apps = res.getCategory(category.internalName, added);
+        if (!apps.isEmpty())
+        {
+            auto icon = res.getIcon(category.icon);
+            addMenu(icon, category.displayName)->addActions(apps);
+            mSearchView.addActions(apps);
+        }
+    }
+
+    addAction(&mSearchViewAction);
+    addAction(&mSearchEditAction);
+
+    mPopulated = true;
 }
 
 void MainMenu::searchTextChanged(const QString & text)
