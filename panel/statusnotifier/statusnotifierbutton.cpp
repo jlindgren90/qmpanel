@@ -1,14 +1,15 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
- * LXQt - a lightweight, Qt based, desktop toolset
- * https://lxqt.org
+ * qmpanel - a minimal Qt-based desktop panel
  *
  * Copyright: 2015 LXQt team
+ * Copyright: 2023 John Lindgren
  * Authors:
  *  Balázs Béla <balazsbela[at]gmail.com>
  *  Paulo Lieuthier <paulolieuthier@gmail.com>
  *  Palo Kisa <palo.kisa@gmail.com>
+ *  John Lindgren <john@jlindgren.net>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public

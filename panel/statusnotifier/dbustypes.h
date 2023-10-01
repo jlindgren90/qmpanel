@@ -1,8 +1,7 @@
 /* BEGIN_COMMON_COPYRIGHT_HEADER
  * (c)LGPL2+
  *
- * LXQt - a lightweight, Qt based, desktop toolset
- * https://lxqt.org
+ * qmpanel - a minimal Qt-based desktop panel
  *
  * Copyright: 2015 LXQt team
  * Authors:
