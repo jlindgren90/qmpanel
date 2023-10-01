@@ -27,16 +27,14 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "statusnotifierwidget.h"
-#include "../panel/ilxqtpanelplugin.h"
-#include "../panel/pluginsettings.h"
 #include "statusnotifierproxy.h"
 
-StatusNotifierWidget::StatusNotifierWidget(ILXQtPanelPlugin * plugin,
-                                           QWidget * parent)
-    : QWidget(parent), mPlugin(plugin), mAttentionPeriod(5),
-      mForceVisible(false)
+#include <QBoxLayout>
+
+StatusNotifierWidget::StatusNotifierWidget(QWidget * parent)
+    : QWidget(parent), mAttentionPeriod(5), mForceVisible(false)
 {
-    setLayout(new LXQt::GridLayout(this));
+    setLayout(new QHBoxLayout(this));
 
     // The button that shows all hidden items:
     mShowBtn = new QToolButton(this);
@@ -104,8 +102,7 @@ void StatusNotifierWidget::itemAdded(QString serviceAndPath)
     int slash = serviceAndPath.indexOf(QLatin1Char('/'));
     QString serv = serviceAndPath.left(slash);
     QString path = serviceAndPath.mid(slash);
-    StatusNotifierButton * button =
-        new StatusNotifierButton(serv, path, mPlugin, this);
+    StatusNotifierButton * button = new StatusNotifierButton(serv, path, this);
 
     mServices.insert(serviceAndPath, button);
     layout()->addWidget(button);
@@ -200,15 +197,6 @@ void StatusNotifierWidget::itemRemoved(const QString & serviceAndPath)
 
 void StatusNotifierWidget::settingsChanged()
 {
-    mAttentionPeriod = mPlugin->settings()
-                           ->value(QStringLiteral("attentionPeriod"), 5)
-                           .toInt();
-    mAutoHideList = mPlugin->settings()
-                        ->value(QStringLiteral("autoHideList"))
-                        .toStringList();
-    mHideList =
-        mPlugin->settings()->value(QStringLiteral("hideList")).toStringList();
-
     // show/hide items as well as showBtn appropriately
     const auto allButtons = findChildren<StatusNotifierButton *>(
         QString(), Qt::FindDirectChildrenOnly);
@@ -249,22 +237,8 @@ void StatusNotifierWidget::settingsChanged()
 
 void StatusNotifierWidget::realign()
 {
-    LXQt::GridLayout * layout =
-        qobject_cast<LXQt::GridLayout *>(this->layout());
+    QHBoxLayout * layout = qobject_cast<QHBoxLayout *>(this->layout());
     layout->setEnabled(false);
-
-    ILXQtPanel * panel = mPlugin->panel();
-    if (panel->isHorizontal())
-    {
-        layout->setRowCount(panel->lineCount());
-        layout->setColumnCount(0);
-    }
-    else
-    {
-        layout->setColumnCount(panel->lineCount());
-        layout->setRowCount(0);
-    }
-
     layout->setEnabled(true);
 }
 

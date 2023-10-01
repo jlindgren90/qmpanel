@@ -38,7 +38,6 @@
 #include <QToolButton>
 #include <QWheelEvent>
 
-class ILXQtPanelPlugin;
 class SniAsync;
 
 class StatusNotifierButton : public QToolButton
@@ -47,7 +46,7 @@ class StatusNotifierButton : public QToolButton
 
 public:
     StatusNotifierButton(QString service, QString objectPath,
-                         ILXQtPanelPlugin * plugin, QWidget * parent = nullptr);
+                         QWidget * parent = nullptr);
     ~StatusNotifierButton();
 
     enum Status
@@ -81,8 +80,6 @@ private:
     Status mStatus;
 
     QIcon mIcon, mOverlayIcon, mAttentionIcon, mFallbackIcon;
-
-    ILXQtPanelPlugin * mPlugin;
 
     QString mTitle;
     bool mAutoHide;

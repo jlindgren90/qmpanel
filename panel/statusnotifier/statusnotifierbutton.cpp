@@ -28,11 +28,9 @@
 
 #include "statusnotifierbutton.h"
 
-#include "../panel/ilxqtpanelplugin.h"
 #include "sniasync.h"
 #include <QDir>
 #include <QFile>
-#include <XdgIcon>
 #include <dbusmenu-qt5/dbusmenuimporter.h>
 
 namespace {
@@ -47,18 +45,17 @@ public:
 protected:
     QIcon iconForName(const QString & name) override
     {
-        return XdgIcon::fromTheme(name);
+        return QIcon::fromTheme(name);
     }
 };
 } // namespace
 
 StatusNotifierButton::StatusNotifierButton(QString service, QString objectPath,
-                                           ILXQtPanelPlugin * plugin,
                                            QWidget * parent)
     : QToolButton(parent), mMenu(nullptr), mStatus(Passive),
       mFallbackIcon(
           QIcon::fromTheme(QLatin1String("application-x-executable"))),
-      mPlugin(plugin), mAutoHide(false)
+      mAutoHide(false)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setAutoRaise(true);
@@ -366,11 +363,7 @@ void StatusNotifierButton::mouseReleaseEvent(QMouseEvent * event)
     {
         if (mMenu)
         {
-            mPlugin->willShowWindow(mMenu);
-            mMenu->popup(
-                mPlugin->panel()
-                    ->calculatePopupWindowPos(QCursor::pos(), mMenu->sizeHint())
-                    .topLeft());
+            mMenu->popup(event->globalPos());
         }
         else
             interface->ContextMenu(QCursor::pos().x(), QCursor::pos().y());

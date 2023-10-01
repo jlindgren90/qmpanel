@@ -29,8 +29,9 @@
 #include <QStringList>
 #include <memory>
 
+#include "statusnotifierwatcher.h"
+
 class StatusNotifierWidget;
-class StatusNotifierWatcher;
 
 class StatusNotifierProxy : public QObject
 {

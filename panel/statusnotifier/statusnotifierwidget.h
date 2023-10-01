@@ -30,8 +30,6 @@
 
 #include <QTimer>
 
-#include <LXQt/GridLayout>
-
 #include "statusnotifierbutton.h"
 
 class StatusNotifierProxy;
@@ -41,7 +39,7 @@ class StatusNotifierWidget : public QWidget
     Q_OBJECT
 
 public:
-    StatusNotifierWidget(ILXQtPanelPlugin * plugin, QWidget * parent = nullptr);
+    StatusNotifierWidget(QWidget * parent = nullptr);
     ~StatusNotifierWidget() = default;
 
     void settingsChanged();
@@ -60,8 +58,6 @@ protected:
     void enterEvent(QEvent * event) override;
 
 private:
-    ILXQtPanelPlugin * mPlugin;
-
     QTimer mHideTimer;
 
     QHash<QString, StatusNotifierButton *> mServices;
