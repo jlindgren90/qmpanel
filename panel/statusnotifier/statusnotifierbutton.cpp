@@ -76,16 +76,18 @@ void StatusNotifierButton::newToolTip()
 
 void StatusNotifierButton::mouseReleaseEvent(QMouseEvent * event)
 {
+    auto pos = event->globalPos();
+
     if (event->button() == Qt::LeftButton)
-        interface->Activate(QCursor::pos().x(), QCursor::pos().y());
+        interface->Activate(pos.x(), pos.y());
     else if (event->button() == Qt::MiddleButton)
-        interface->SecondaryActivate(QCursor::pos().x(), QCursor::pos().y());
+        interface->SecondaryActivate(pos.x(), pos.y());
     else if (Qt::RightButton == event->button())
     {
         if (mMenu)
-            mMenu->popup(event->globalPos());
+            mMenu->popup(pos);
         else
-            interface->ContextMenu(QCursor::pos().x(), QCursor::pos().y());
+            interface->ContextMenu(pos.x(), pos.y());
     }
 
     QToolButton::mouseReleaseEvent(event);
