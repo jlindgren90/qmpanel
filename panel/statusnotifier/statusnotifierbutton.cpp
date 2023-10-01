@@ -8,6 +8,7 @@
  * Authors:
  *  Balázs Béla <balazsbela[at]gmail.com>
  *  Paulo Lieuthier <paulolieuthier@gmail.com>
+ *  Palo Kisa <palo.kisa@gmail.com>
  *
  * This program or library is free software; you can redistribute it
  * and/or modify it under the terms of the GNU Lesser General Public
@@ -27,7 +28,6 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "statusnotifierbutton.h"
-#include "sniasync.h"
 
 #include <QMenu>
 #include <QMouseEvent>
@@ -35,22 +35,22 @@
 
 StatusNotifierButton::StatusNotifierButton(QString service, QString objectPath,
                                            QWidget * parent)
-    : QToolButton(parent), mMenu(nullptr)
+    : QToolButton(parent),
+      mSni(service, objectPath, QDBusConnection::sessionBus())
 {
     setAutoRaise(true);
-    interface =
-        new SniAsync(service, objectPath, QDBusConnection::sessionBus(), this);
 
-    connect(interface, &SniAsync::NewIcon, this,
+    connect(&mSni, &org::kde::StatusNotifierItem::NewIcon, this,
             &StatusNotifierButton::newIcon);
-    connect(interface, &SniAsync::NewToolTip, this,
+    connect(&mSni, &org::kde::StatusNotifierItem::NewToolTip, this,
             &StatusNotifierButton::newToolTip);
 
-    interface->propertyGetAsync("Menu", [this](QDBusObjectPath path) {
+    getPropertyAsync("Menu", [this](QVariant value) {
+        auto path = qdbus_cast<QDBusObjectPath>(value);
         if (!path.path().isEmpty())
         {
             auto importer =
-                new DBusMenuImporter(interface->service(), path.path(), this);
+                new DBusMenuImporter(mSni.service(), path.path(), this);
             mMenu = importer->menu();
         }
     });
@@ -59,19 +59,40 @@ StatusNotifierButton::StatusNotifierButton(QString service, QString objectPath,
     newToolTip();
 }
 
-StatusNotifierButton::~StatusNotifierButton() { delete interface; }
+void StatusNotifierButton::getPropertyAsync(
+    QString const & name, std::function<void(QVariant)> finished)
+{
+    auto msg = QDBusMessage::createMethodCall(
+        mSni.service(), mSni.path(), "org.freedesktop.DBus.Properties", "Get");
+    msg << mSni.interface() << name;
+    auto call = mSni.connection().asyncCall(msg);
+
+    connect(new QDBusPendingCallWatcher(call, this),
+            &QDBusPendingCallWatcher::finished,
+            [this, finished](QDBusPendingCallWatcher * cw) {
+                QDBusPendingReply<QVariant> reply = *cw;
+                if (reply.isError())
+                    qDebug() << "Error on DBus request(" << mSni.service()
+                             << ',' << mSni.path() << "): " << reply.error();
+                finished(reply.value());
+                cw->deleteLater();
+            });
+}
 
 void StatusNotifierButton::newIcon()
 {
-    interface->propertyGetAsync("IconName", [this](QString iconName) {
+    getPropertyAsync("IconName", [this](QVariant value) {
+        auto iconName = qdbus_cast<QString>(value);
         setIcon(QIcon::fromTheme(iconName));
     });
 }
 
 void StatusNotifierButton::newToolTip()
 {
-    interface->propertyGetAsync(
-        "ToolTip", [this](ToolTip tooltip) { setToolTip(tooltip.title); });
+    getPropertyAsync("ToolTip", [this](QVariant value) {
+        auto tooltip = qdbus_cast<ToolTip>(value);
+        setToolTip(tooltip.title);
+    });
 }
 
 void StatusNotifierButton::mouseReleaseEvent(QMouseEvent * event)
@@ -79,15 +100,15 @@ void StatusNotifierButton::mouseReleaseEvent(QMouseEvent * event)
     auto pos = event->globalPos();
 
     if (event->button() == Qt::LeftButton)
-        interface->Activate(pos.x(), pos.y());
+        mSni.Activate(pos.x(), pos.y());
     else if (event->button() == Qt::MiddleButton)
-        interface->SecondaryActivate(pos.x(), pos.y());
+        mSni.SecondaryActivate(pos.x(), pos.y());
     else if (Qt::RightButton == event->button())
     {
         if (mMenu)
             mMenu->popup(pos);
         else
-            interface->ContextMenu(pos.x(), pos.y());
+            mSni.ContextMenu(pos.x(), pos.y());
     }
 
     QToolButton::mouseReleaseEvent(event);

@@ -2,7 +2,6 @@ project('qmpanel', 'cpp', version: '0.1')
 
 qt5 = import('qt5')
 mocs = qt5.compile_moc(headers: [
-  'panel/statusnotifier/sniasync.h',
   'panel/statusnotifier/statusnotifieriteminterface.h',
   'panel/statusnotifier/statusnotifierproxy.h',
   'panel/statusnotifier/statusnotifierwatcher.h',
@@ -18,7 +17,6 @@ srcs = [
   'panel/quicklaunch.cpp',
   'panel/resources.cpp',
   'panel/statusnotifier/dbustypes.cpp',
-  'panel/statusnotifier/sniasync.cpp',
   'panel/statusnotifier/statusnotifierbutton.cpp',
   'panel/statusnotifier/statusnotifieriteminterface.cpp',
   'panel/statusnotifier/statusnotifierproxy.cpp',

@@ -30,22 +30,25 @@
 #define STATUSNOTIFIERBUTTON_H
 
 #include <QToolButton>
+#include <functional>
 
-class SniAsync;
+#include "statusnotifieriteminterface.h"
 
 class StatusNotifierButton : public QToolButton
 {
 public:
     StatusNotifierButton(QString service, QString objectPath,
                          QWidget * parent = nullptr);
-    ~StatusNotifierButton();
 
 private:
+    void getPropertyAsync(QString const & name,
+                          std::function<void(QVariant)> finished);
+
     void newIcon();
     void newToolTip();
 
-    SniAsync * interface;
-    QMenu * mMenu;
+    org::kde::StatusNotifierItem mSni;
+    QMenu * mMenu = nullptr;
 
 protected:
     void mouseReleaseEvent(QMouseEvent * event);
