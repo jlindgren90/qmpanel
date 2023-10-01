@@ -3,7 +3,6 @@ project('qmpanel', 'cpp', version: '0.1')
 qt5 = import('qt5')
 mocs = qt5.compile_moc(headers: [
   'panel/statusnotifier/statusnotifieriteminterface.h',
-  'panel/statusnotifier/statusnotifierproxy.h',
   'panel/statusnotifier/statusnotifierwatcher.h',
 ])
 
@@ -19,7 +18,6 @@ srcs = [
   'panel/statusnotifier/dbustypes.cpp',
   'panel/statusnotifier/statusnotifierbutton.cpp',
   'panel/statusnotifier/statusnotifieriteminterface.cpp',
-  'panel/statusnotifier/statusnotifierproxy.cpp',
   'panel/statusnotifier/statusnotifierwatcher.cpp',
   'panel/statusnotifier/statusnotifierwidget.cpp',
   'panel/systray.cpp',
@@ -32,8 +30,7 @@ deps = [
   dependency('threads'),
   dependency('gio-2.0'),
   dependency('gio-unix-2.0'),
-  dependency('qt5', modules: ['Core', 'Gui', 'Widgets',
-                              'Concurrent', 'DBus', 'X11Extras']),
+  dependency('qt5', modules: ['Core', 'Gui', 'Widgets', 'DBus', 'X11Extras']),
   dependency('dbusmenu-qt5'),
   dependency('KF5WindowSystem'),
   dependency('xcb'),

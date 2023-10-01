@@ -28,8 +28,8 @@
 
 #include "statusnotifierwidget.h"
 #include "statusnotifierbutton.h"
-#include "statusnotifierproxy.h"
 
+#include <QApplication>
 #include <QBoxLayout>
 
 StatusNotifierWidget::StatusNotifierWidget(QWidget * parent) : QWidget(parent)
@@ -39,13 +39,24 @@ StatusNotifierWidget::StatusNotifierWidget(QWidget * parent) : QWidget(parent)
     hlayout->setSpacing(0);
     setLayout(hlayout);
 
-    StatusNotifierProxy & proxy =
-        StatusNotifierProxy::registerLifetimeUsage(this);
-    connect(&proxy, &StatusNotifierProxy::StatusNotifierItemRegistered, this,
-            &StatusNotifierWidget::itemAdded);
-    connect(&proxy, &StatusNotifierProxy::StatusNotifierItemUnregistered, this,
-            &StatusNotifierWidget::itemRemoved);
-    for (const auto & service : proxy.RegisteredStatusNotifierItems())
+    QString dbusName = QStringLiteral("org.kde.StatusNotifierHost-%1-1")
+                           .arg(QApplication::applicationPid());
+
+    if (QDBusConnection::sessionBus().interface()->registerService(
+            dbusName, QDBusConnectionInterface::DontQueueService) ==
+        QDBusConnectionInterface::ServiceNotRegistered)
+    {
+        qDebug() << "Unable to register service for " << dbusName;
+    }
+
+    mWatcher.RegisterStatusNotifierHost(dbusName);
+
+    connect(&mWatcher, &StatusNotifierWatcher::StatusNotifierItemRegistered,
+            this, &StatusNotifierWidget::itemAdded);
+    connect(&mWatcher, &StatusNotifierWatcher::StatusNotifierItemUnregistered,
+            this, &StatusNotifierWidget::itemRemoved);
+
+    for (const auto & service : mWatcher.RegisteredStatusNotifierItems())
         itemAdded(service);
 }
 
@@ -66,7 +77,7 @@ void StatusNotifierWidget::itemRemoved(const QString & serviceAndPath)
     StatusNotifierButton * button = mServices.value(serviceAndPath, nullptr);
     if (button)
     {
-        button->deleteLater();
         mServices.remove(serviceAndPath);
+        button->deleteLater();
     }
 }

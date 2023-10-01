@@ -26,9 +26,12 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#pragma once
+#ifndef STATUSNOTIFIERWIDGET_H
+#define STATUSNOTIFIERWIDGET_H
 
 #include <QWidget>
+
+#include "statusnotifierwatcher.h"
 
 class StatusNotifierButton;
 
@@ -41,5 +44,8 @@ private:
     void itemAdded(const QString & serviceAndPath);
     void itemRemoved(const QString & serviceAndPath);
 
+    StatusNotifierWatcher mWatcher;
     QHash<QString, StatusNotifierButton *> mServices;
 };
+
+#endif // STATUSNOTIFIERWIDGET_H
