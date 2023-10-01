@@ -98,7 +98,7 @@ void StatusNotifierButton::newToolTip()
 
 void StatusNotifierButton::mouseReleaseEvent(QMouseEvent * event)
 {
-    auto pos = event->globalPos();
+    auto pos = mapToGlobal(QPoint()); // left top corner
 
     if (event->button() == Qt::LeftButton)
         mSni.Activate(pos.x(), pos.y());
