@@ -28,17 +28,16 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "statusnotifierwidget.h"
-#include "statusnotifierbutton.h"
+#include "statusnotifiericon.h"
 
 #include <QApplication>
 #include <QBoxLayout>
 
-StatusNotifierWidget::StatusNotifierWidget(QWidget * parent) : QWidget(parent)
+StatusNotifierWidget::StatusNotifierWidget(QWidget * parent)
+    : QWidget(parent), mLayout(this)
 {
-    auto hlayout = new QHBoxLayout(this);
-    hlayout->setContentsMargins(0, 0, 0, 0);
-    hlayout->setSpacing(0);
-    setLayout(hlayout);
+    mLayout.setContentsMargins(QMargins());
+    mLayout.setSpacing(logicalDpiX() / 24);
 
     QString dbusName = QStringLiteral("org.kde.StatusNotifierHost-%1-1")
                            .arg(QApplication::applicationPid());
@@ -67,7 +66,7 @@ void StatusNotifierWidget::itemAdded(const QString & serviceAndPath)
     int slash = serviceAndPath.indexOf('/');
     QString serv = serviceAndPath.left(slash);
     QString path = serviceAndPath.mid(slash);
-    StatusNotifierButton * button = new StatusNotifierButton(serv, path, this);
+    StatusNotifierIcon * button = new StatusNotifierIcon(serv, path, this);
 
     mServices.insert(serviceAndPath, button);
     layout()->addWidget(button);
@@ -76,7 +75,7 @@ void StatusNotifierWidget::itemAdded(const QString & serviceAndPath)
 
 void StatusNotifierWidget::itemRemoved(const QString & serviceAndPath)
 {
-    StatusNotifierButton * button = mServices.value(serviceAndPath, nullptr);
+    StatusNotifierIcon * button = mServices.value(serviceAndPath, nullptr);
     if (button)
     {
         mServices.remove(serviceAndPath);

@@ -30,11 +30,12 @@
 #ifndef STATUSNOTIFIERWIDGET_H
 #define STATUSNOTIFIERWIDGET_H
 
+#include <QBoxLayout>
 #include <QWidget>
 
 #include "statusnotifierwatcher.h"
 
-class StatusNotifierButton;
+class StatusNotifierIcon;
 
 class StatusNotifierWidget : public QWidget
 {
@@ -46,7 +47,8 @@ private:
     void itemRemoved(const QString & serviceAndPath);
 
     StatusNotifierWatcher mWatcher;
-    QHash<QString, StatusNotifierButton *> mServices;
+    QHash<QString, StatusNotifierIcon *> mServices;
+    QHBoxLayout mLayout;
 };
 
 #endif // STATUSNOTIFIERWIDGET_H

@@ -27,19 +27,21 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef STATUSNOTIFIERBUTTON_H
-#define STATUSNOTIFIERBUTTON_H
+#ifndef STATUSNOTIFIERICON_H
+#define STATUSNOTIFIERICON_H
 
-#include <QToolButton>
+#include <QLabel>
 #include <functional>
 
 #include "statusnotifieriteminterface.h"
 
-class StatusNotifierButton : public QToolButton
+class QMenu;
+
+class StatusNotifierIcon : public QLabel
 {
 public:
-    StatusNotifierButton(QString service, QString objectPath,
-                         QWidget * parent = nullptr);
+    StatusNotifierIcon(QString service, QString objectPath,
+                       QWidget * parent = nullptr);
 
 private:
     void getPropertyAsync(QString const & name,
@@ -52,7 +54,7 @@ private:
     QMenu * mMenu = nullptr;
 
 protected:
-    void mouseReleaseEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent * event);
 };
 
-#endif // STATUSNOTIFIERBUTTON_H
+#endif // STATUSNOTIFIERICON_H

@@ -16,7 +16,7 @@ srcs = [
   'panel/quicklaunch.cpp',
   'panel/resources.cpp',
   'panel/statusnotifier/dbustypes.cpp',
-  'panel/statusnotifier/statusnotifierbutton.cpp',
+  'panel/statusnotifier/statusnotifiericon.cpp',
   'panel/statusnotifier/statusnotifieriteminterface.cpp',
   'panel/statusnotifier/statusnotifierwatcher.cpp',
   'panel/statusnotifier/statusnotifierwidget.cpp',

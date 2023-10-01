@@ -28,23 +28,21 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include "statusnotifierbutton.h"
+#include "statusnotifiericon.h"
 
 #include <QMenu>
 #include <QMouseEvent>
+#include <QStyle>
 #include <dbusmenu-qt5/dbusmenuimporter.h>
 
-StatusNotifierButton::StatusNotifierButton(QString service, QString objectPath,
-                                           QWidget * parent)
-    : QToolButton(parent),
-      mSni(service, objectPath, QDBusConnection::sessionBus())
+StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
+                                       QWidget * parent)
+    : QLabel(parent), mSni(service, objectPath, QDBusConnection::sessionBus())
 {
-    setAutoRaise(true);
-
     connect(&mSni, &org::kde::StatusNotifierItem::NewIcon, this,
-            &StatusNotifierButton::newIcon);
+            &StatusNotifierIcon::newIcon);
     connect(&mSni, &org::kde::StatusNotifierItem::NewToolTip, this,
-            &StatusNotifierButton::newToolTip);
+            &StatusNotifierIcon::newToolTip);
 
     getPropertyAsync("Menu", [this](QVariant value) {
         auto path = qdbus_cast<QDBusObjectPath>(value);
@@ -60,7 +58,7 @@ StatusNotifierButton::StatusNotifierButton(QString service, QString objectPath,
     newToolTip();
 }
 
-void StatusNotifierButton::getPropertyAsync(
+void StatusNotifierIcon::getPropertyAsync(
     QString const & name, std::function<void(QVariant)> finished)
 {
     auto msg = QDBusMessage::createMethodCall(
@@ -80,15 +78,16 @@ void StatusNotifierButton::getPropertyAsync(
             });
 }
 
-void StatusNotifierButton::newIcon()
+void StatusNotifierIcon::newIcon()
 {
     getPropertyAsync("IconName", [this](QVariant value) {
         auto iconName = qdbus_cast<QString>(value);
-        setIcon(QIcon::fromTheme(iconName));
+        setPixmap(QIcon::fromTheme(iconName).pixmap(
+            style()->pixelMetric(QStyle::PM_ButtonIconSize)));
     });
 }
 
-void StatusNotifierButton::newToolTip()
+void StatusNotifierIcon::newToolTip()
 {
     getPropertyAsync("ToolTip", [this](QVariant value) {
         auto tooltip = qdbus_cast<ToolTip>(value);
@@ -96,7 +95,7 @@ void StatusNotifierButton::newToolTip()
     });
 }
 
-void StatusNotifierButton::mouseReleaseEvent(QMouseEvent * event)
+void StatusNotifierIcon::mousePressEvent(QMouseEvent * event)
 {
     auto pos = mapToGlobal(QPoint()); // left top corner
 
@@ -111,6 +110,4 @@ void StatusNotifierButton::mouseReleaseEvent(QMouseEvent * event)
         else
             mSni.ContextMenu(pos.x(), pos.y());
     }
-
-    QToolButton::mouseReleaseEvent(event);
 }
