@@ -34,7 +34,10 @@
 StatusNotifierWidget::StatusNotifierWidget(QWidget * parent)
     : QWidget(parent), mAttentionPeriod(5), mForceVisible(false)
 {
-    setLayout(new QHBoxLayout(this));
+    auto hlayout = new QHBoxLayout(this);
+    hlayout->setContentsMargins(0, 0, 0, 0);
+    hlayout->setSpacing(0);
+    setLayout(hlayout);
 
     // The button that shows all hidden items:
     mShowBtn = new QToolButton(this);
