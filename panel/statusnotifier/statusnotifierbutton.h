@@ -29,69 +29,26 @@
 #ifndef STATUSNOTIFIERBUTTON_H
 #define STATUSNOTIFIERBUTTON_H
 
-#include <QDBusArgument>
-#include <QDBusInterface>
-#include <QDBusMessage>
-#include <QMenu>
-#include <QMouseEvent>
-#include <QTimer>
 #include <QToolButton>
-#include <QWheelEvent>
 
 class SniAsync;
 
 class StatusNotifierButton : public QToolButton
 {
-    Q_OBJECT
-
 public:
     StatusNotifierButton(QString service, QString objectPath,
                          QWidget * parent = nullptr);
     ~StatusNotifierButton();
 
-    enum Status
-    {
-        Passive,
-        Active,
-        NeedsAttention
-    };
-
-    QString title() const { return mTitle; }
-    bool hasAttention() const;
-    void setAutoHide(bool autoHide, int minutes = 5,
-                     bool forcedVisible = false);
-
-signals:
-    void titleFound(const QString & title);
-    void attentionChanged();
-
-public slots:
-    void newIcon();
-    void newAttentionIcon();
-    void newOverlayIcon();
-    void newToolTip();
-    void newStatus(QString status);
-
 private:
-    void onNeedingAttention();
+    void newIcon();
+    void newToolTip();
 
     SniAsync * interface;
     QMenu * mMenu;
-    Status mStatus;
-
-    QIcon mIcon, mOverlayIcon, mAttentionIcon, mFallbackIcon;
-
-    QString mTitle;
-    bool mAutoHide;
-    QTimer mHideTimer;
 
 protected:
-    void contextMenuEvent(QContextMenuEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
-    void wheelEvent(QWheelEvent * event);
-
-    void refetchIcon(Status status, const QString & themePath);
-    void resetIcon();
 };
 
 #endif // STATUSNOTIFIERBUTTON_H

@@ -51,7 +51,7 @@ StatusNotifierWidget::StatusNotifierWidget(QWidget * parent) : QWidget(parent)
 
 void StatusNotifierWidget::itemAdded(const QString & serviceAndPath)
 {
-    int slash = serviceAndPath.indexOf(QLatin1Char('/'));
+    int slash = serviceAndPath.indexOf('/');
     QString serv = serviceAndPath.left(slash);
     QString path = serviceAndPath.mid(slash);
     StatusNotifierButton * button = new StatusNotifierButton(serv, path, this);
