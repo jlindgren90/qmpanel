@@ -28,44 +28,18 @@
 
 #pragma once
 
-#include <QTimer>
+#include <QWidget>
 
-#include "statusnotifierbutton.h"
-
-class StatusNotifierProxy;
+class StatusNotifierButton;
 
 class StatusNotifierWidget : public QWidget
 {
-    Q_OBJECT
-
 public:
     StatusNotifierWidget(QWidget * parent = nullptr);
-    ~StatusNotifierWidget() = default;
-
-    void settingsChanged();
-    QStringList itemTitles() const;
-
-signals:
-
-public slots:
-    void itemAdded(QString serviceAndPath);
-    void itemRemoved(const QString & serviceAndPath);
-
-    void realign();
-
-protected:
-    void leaveEvent(QEvent * event) override;
-    void enterEvent(QEvent * event) override;
 
 private:
-    QTimer mHideTimer;
+    void itemAdded(const QString & serviceAndPath);
+    void itemRemoved(const QString & serviceAndPath);
 
     QHash<QString, StatusNotifierButton *> mServices;
-
-    QStringList mItemTitles;
-    QStringList mAutoHideList;
-    QStringList mHideList;
-    QToolButton * mShowBtn;
-    int mAttentionPeriod;
-    bool mForceVisible;
 };

@@ -7,7 +7,6 @@ mocs = qt5.compile_moc(headers: [
   'panel/statusnotifier/statusnotifieriteminterface.h',
   'panel/statusnotifier/statusnotifierproxy.h',
   'panel/statusnotifier/statusnotifierwatcher.h',
-  'panel/statusnotifier/statusnotifierwidget.h',
 ])
 
 srcs = [
