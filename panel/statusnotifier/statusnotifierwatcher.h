@@ -42,12 +42,15 @@ class StatusNotifierWatcher : public QObject, protected QDBusContext
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.StatusNotifierWatcher")
     Q_SCRIPTABLE Q_PROPERTY(bool IsStatusNotifierHostRegistered READ
-                                isStatusNotifierHostRegistered) Q_SCRIPTABLE
-        Q_PROPERTY(int ProtocolVersion READ protocolVersion) Q_SCRIPTABLE
-        Q_PROPERTY(QStringList RegisteredStatusNotifierItems READ
-                       RegisteredStatusNotifierItems)
+                                isStatusNotifierHostRegistered);
+    Q_SCRIPTABLE
+    Q_PROPERTY(int ProtocolVersion READ protocolVersion);
+    Q_SCRIPTABLE
+    Q_PROPERTY(QStringList RegisteredStatusNotifierItems READ
+                   RegisteredStatusNotifierItems);
 
-            public : explicit StatusNotifierWatcher(QObject * parent = nullptr);
+public:
+    explicit StatusNotifierWatcher(QObject * parent = nullptr);
     ~StatusNotifierWatcher();
 
     bool isStatusNotifierHostRegistered() { return mHosts.count() > 0; }

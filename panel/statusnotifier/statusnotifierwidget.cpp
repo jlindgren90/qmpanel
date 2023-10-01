@@ -46,7 +46,8 @@ StatusNotifierWidget::StatusNotifierWidget(QWidget * parent) : QWidget(parent)
             dbusName, QDBusConnectionInterface::DontQueueService) ==
         QDBusConnectionInterface::ServiceNotRegistered)
     {
-        qDebug() << "Unable to register service for " << dbusName;
+        qWarning() << "StatusNotifier: unable to register service for "
+                   << dbusName;
     }
 
     mWatcher.RegisterStatusNotifierHost(dbusName);

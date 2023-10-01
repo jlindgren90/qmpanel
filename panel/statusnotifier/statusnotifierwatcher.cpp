@@ -39,12 +39,12 @@ StatusNotifierWatcher::StatusNotifierWatcher(QObject * parent) : QObject(parent)
     qRegisterMetaType<ToolTip>("ToolTip");
     qDBusRegisterMetaType<ToolTip>();
 
-    QDBusConnection dbus = QDBusConnection::sessionBus();
-    switch (
-        dbus.interface()
-            ->registerService(QStringLiteral("org.kde.StatusNotifierWatcher"),
-                              QDBusConnectionInterface::QueueService)
-            .value())
+    auto dbus = QDBusConnection::sessionBus();
+    auto reply = dbus.interface()->registerService(
+        "org.kde.StatusNotifierWatcher",
+        QDBusConnectionInterface::QueueService);
+
+    switch (reply.value())
     {
     case QDBusConnectionInterface::ServiceNotRegistered:
         qWarning() << "StatusNotifier: unable to register service for "
@@ -58,9 +58,10 @@ StatusNotifierWatcher::StatusNotifierWatcher(QObject * parent) : QObject(parent)
     case QDBusConnectionInterface::ServiceRegistered:
         break;
     }
-    if (!dbus.registerObject(QStringLiteral("/StatusNotifierWatcher"), this,
+
+    if (!dbus.registerObject("/StatusNotifierWatcher", this,
                              QDBusConnection::ExportScriptableContents))
-        qDebug() << QDBusConnection::sessionBus().lastError().message();
+        qWarning() << QDBusConnection::sessionBus().lastError().message();
 
     mWatcher = new QDBusServiceWatcher(this);
     mWatcher->setConnection(dbus);
@@ -73,14 +74,14 @@ StatusNotifierWatcher::StatusNotifierWatcher(QObject * parent) : QObject(parent)
 StatusNotifierWatcher::~StatusNotifierWatcher()
 {
     QDBusConnection::sessionBus().unregisterService(
-        QStringLiteral("org.kde.StatusNotifierWatcher"));
+        "org.kde.StatusNotifierWatcher");
 }
 
 void StatusNotifierWatcher::RegisterStatusNotifierItem(
     const QString & serviceOrPath)
 {
     QString service = serviceOrPath;
-    QString path = QStringLiteral("/StatusNotifierItem");
+    QString path = "/StatusNotifierItem";
 
     // workaround for sni-qt
     if (service.startsWith(QLatin1Char('/')))
@@ -90,12 +91,10 @@ void StatusNotifierWatcher::RegisterStatusNotifierItem(
     }
 
     QString notifierItemId = service + path;
+    auto dbus = QDBusConnection::sessionBus();
+    auto reply = dbus.interface()->isServiceRegistered(service);
 
-    if (QDBusConnection::sessionBus()
-            .interface()
-            ->isServiceRegistered(service)
-            .value() &&
-        !mServices.contains(notifierItemId))
+    if (reply.value() && !mServices.contains(notifierItemId))
     {
         mServices << notifierItemId;
         mWatcher->addWatchedService(service);
@@ -114,8 +113,6 @@ void StatusNotifierWatcher::RegisterStatusNotifierHost(const QString & service)
 
 void StatusNotifierWatcher::serviceUnregistered(const QString & service)
 {
-    qDebug() << "Service" << service << "unregistered";
-
     mWatcher->removeWatchedService(service);
 
     if (mHosts.contains(service))
