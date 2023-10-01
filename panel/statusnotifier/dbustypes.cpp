@@ -29,7 +29,7 @@
 #include "dbustypes.h"
 
 // Marshall the IconPixmap data into a D-Bus argument
-QDBusArgument &operator<<(QDBusArgument &argument, const IconPixmap &icon)
+QDBusArgument & operator<<(QDBusArgument & argument, const IconPixmap & icon)
 {
     argument.beginStructure();
     argument << icon.width;
@@ -40,7 +40,8 @@ QDBusArgument &operator<<(QDBusArgument &argument, const IconPixmap &icon)
 }
 
 // Retrieve the ImageStruct data from the D-Bus argument
-const QDBusArgument &operator>>(const QDBusArgument &argument, IconPixmap &icon)
+const QDBusArgument & operator>>(const QDBusArgument & argument,
+                                 IconPixmap & icon)
 {
     argument.beginStructure();
     argument >> icon.width;
@@ -51,7 +52,7 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, IconPixmap &icon)
 }
 
 // Marshall the ToolTip data into a D-Bus argument
-QDBusArgument &operator<<(QDBusArgument &argument, const ToolTip &toolTip)
+QDBusArgument & operator<<(QDBusArgument & argument, const ToolTip & toolTip)
 {
     argument.beginStructure();
     argument << toolTip.iconName;
@@ -63,7 +64,8 @@ QDBusArgument &operator<<(QDBusArgument &argument, const ToolTip &toolTip)
 }
 
 // Retrieve the ToolTip data from the D-Bus argument
-const QDBusArgument &operator>>(const QDBusArgument &argument, ToolTip &toolTip)
+const QDBusArgument & operator>>(const QDBusArgument & argument,
+                                 ToolTip & toolTip)
 {
     argument.beginStructure();
     argument >> toolTip.iconName;

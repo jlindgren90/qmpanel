@@ -28,21 +28,17 @@
 
 #include "statusnotifier.h"
 
-StatusNotifier::StatusNotifier(const ILXQtPanelPluginStartupInfo &startupInfo) :
-    QObject(),
-    ILXQtPanelPlugin(startupInfo)
+StatusNotifier::StatusNotifier(const ILXQtPanelPluginStartupInfo & startupInfo)
+    : QObject(), ILXQtPanelPlugin(startupInfo)
 {
     m_widget = new StatusNotifierWidget(this);
 }
 
-QDialog *StatusNotifier::configureDialog()
+QDialog * StatusNotifier::configureDialog()
 {
     auto dialog = new StatusNotifierConfiguration(settings());
     dialog->addItems(m_widget->itemTitles());
     return dialog;
 }
 
-void StatusNotifier::realign()
-{
-    m_widget->realign();
-}
+void StatusNotifier::realign() { m_widget->realign(); }

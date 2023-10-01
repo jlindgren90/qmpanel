@@ -30,13 +30,13 @@
 #define STATUSNOTIFIERBUTTON_H
 
 #include <QDBusArgument>
-#include <QDBusMessage>
 #include <QDBusInterface>
+#include <QDBusMessage>
+#include <QMenu>
 #include <QMouseEvent>
+#include <QTimer>
 #include <QToolButton>
 #include <QWheelEvent>
-#include <QMenu>
-#include <QTimer>
 
 class ILXQtPanelPlugin;
 class SniAsync;
@@ -46,22 +46,24 @@ class StatusNotifierButton : public QToolButton
     Q_OBJECT
 
 public:
-    StatusNotifierButton(QString service, QString objectPath, ILXQtPanelPlugin* plugin,  QWidget *parent = nullptr);
+    StatusNotifierButton(QString service, QString objectPath,
+                         ILXQtPanelPlugin * plugin, QWidget * parent = nullptr);
     ~StatusNotifierButton();
 
     enum Status
     {
-        Passive, Active, NeedsAttention
+        Passive,
+        Active,
+        NeedsAttention
     };
 
-    QString title() const {
-        return mTitle;
-    }
+    QString title() const { return mTitle; }
     bool hasAttention() const;
-    void setAutoHide(bool autoHide, int minutes = 5, bool forcedVisible = false);
+    void setAutoHide(bool autoHide, int minutes = 5,
+                     bool forcedVisible = false);
 
 signals:
-    void titleFound(const QString &title);
+    void titleFound(const QString & title);
     void attentionChanged();
 
 public slots:
@@ -74,13 +76,13 @@ public slots:
 private:
     void onNeedingAttention();
 
-    SniAsync *interface;
-    QMenu *mMenu;
+    SniAsync * interface;
+    QMenu * mMenu;
     Status mStatus;
 
     QIcon mIcon, mOverlayIcon, mAttentionIcon, mFallbackIcon;
 
-    ILXQtPanelPlugin* mPlugin;
+    ILXQtPanelPlugin * mPlugin;
 
     QString mTitle;
     bool mAutoHide;
@@ -88,10 +90,10 @@ private:
 
 protected:
     void contextMenuEvent(QContextMenuEvent * event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent *event);
+    void mouseReleaseEvent(QMouseEvent * event);
+    void wheelEvent(QWheelEvent * event);
 
-    void refetchIcon(Status status, const QString& themePath);
+    void refetchIcon(Status status, const QString & themePath);
     void resetIcon();
 };
 

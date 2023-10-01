@@ -41,7 +41,7 @@ class StatusNotifierWidget : public QWidget
     Q_OBJECT
 
 public:
-    StatusNotifierWidget(ILXQtPanelPlugin *plugin, QWidget *parent = nullptr);
+    StatusNotifierWidget(ILXQtPanelPlugin * plugin, QWidget * parent = nullptr);
     ~StatusNotifierWidget() = default;
 
     void settingsChanged();
@@ -51,25 +51,25 @@ signals:
 
 public slots:
     void itemAdded(QString serviceAndPath);
-    void itemRemoved(const QString &serviceAndPath);
+    void itemRemoved(const QString & serviceAndPath);
 
     void realign();
 
 protected:
-    void leaveEvent(QEvent *event) override;
-    void enterEvent(QEvent *event) override;
+    void leaveEvent(QEvent * event) override;
+    void enterEvent(QEvent * event) override;
 
 private:
-    ILXQtPanelPlugin *mPlugin;
+    ILXQtPanelPlugin * mPlugin;
 
     QTimer mHideTimer;
 
-    QHash<QString, StatusNotifierButton*> mServices;
+    QHash<QString, StatusNotifierButton *> mServices;
 
     QStringList mItemTitles;
     QStringList mAutoHideList;
     QStringList mHideList;
-    QToolButton *mShowBtn;
+    QToolButton * mShowBtn;
     int mAttentionPeriod;
     bool mForceVisible;
 };

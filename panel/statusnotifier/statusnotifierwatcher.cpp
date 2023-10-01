@@ -27,10 +27,10 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "statusnotifierwatcher.h"
-#include <QDebug>
 #include <QDBusConnectionInterface>
+#include <QDebug>
 
-StatusNotifierWatcher::StatusNotifierWatcher(QObject *parent) : QObject(parent)
+StatusNotifierWatcher::StatusNotifierWatcher(QObject * parent) : QObject(parent)
 {
     qRegisterMetaType<IconPixmap>("IconPixmap");
     qDBusRegisterMetaType<IconPixmap>();
@@ -40,33 +40,44 @@ StatusNotifierWatcher::StatusNotifierWatcher(QObject *parent) : QObject(parent)
     qDBusRegisterMetaType<ToolTip>();
 
     QDBusConnection dbus = QDBusConnection::sessionBus();
-    switch (dbus.interface()->registerService(QStringLiteral("org.kde.StatusNotifierWatcher"), QDBusConnectionInterface::QueueService).value())
+    switch (
+        dbus.interface()
+            ->registerService(QStringLiteral("org.kde.StatusNotifierWatcher"),
+                              QDBusConnectionInterface::QueueService)
+            .value())
     {
-        case QDBusConnectionInterface::ServiceNotRegistered:
-            qWarning() << "StatusNotifier: unable to register service for org.kde.StatusNotifierWatcher";
-            break;
-        case QDBusConnectionInterface::ServiceQueued:
-            qWarning() << "StatusNotifier: registration of service org.kde.StatusNotifierWatcher queued, we can become primary after existing one deregisters";
-            break;
-        case QDBusConnectionInterface::ServiceRegistered:
-            break;
+    case QDBusConnectionInterface::ServiceNotRegistered:
+        qWarning() << "StatusNotifier: unable to register service for "
+                      "org.kde.StatusNotifierWatcher";
+        break;
+    case QDBusConnectionInterface::ServiceQueued:
+        qWarning() << "StatusNotifier: registration of service "
+                      "org.kde.StatusNotifierWatcher queued, we can become "
+                      "primary after existing one deregisters";
+        break;
+    case QDBusConnectionInterface::ServiceRegistered:
+        break;
     }
-    if (!dbus.registerObject(QStringLiteral("/StatusNotifierWatcher"), this, QDBusConnection::ExportScriptableContents))
+    if (!dbus.registerObject(QStringLiteral("/StatusNotifierWatcher"), this,
+                             QDBusConnection::ExportScriptableContents))
         qDebug() << QDBusConnection::sessionBus().lastError().message();
 
     mWatcher = new QDBusServiceWatcher(this);
     mWatcher->setConnection(dbus);
     mWatcher->setWatchMode(QDBusServiceWatcher::WatchForUnregistration);
 
-    connect(mWatcher, &QDBusServiceWatcher::serviceUnregistered, this, &StatusNotifierWatcher::serviceUnregistered);
+    connect(mWatcher, &QDBusServiceWatcher::serviceUnregistered, this,
+            &StatusNotifierWatcher::serviceUnregistered);
 }
 
 StatusNotifierWatcher::~StatusNotifierWatcher()
 {
-    QDBusConnection::sessionBus().unregisterService(QStringLiteral("org.kde.StatusNotifierWatcher"));
+    QDBusConnection::sessionBus().unregisterService(
+        QStringLiteral("org.kde.StatusNotifierWatcher"));
 }
 
-void StatusNotifierWatcher::RegisterStatusNotifierItem(const QString &serviceOrPath)
+void StatusNotifierWatcher::RegisterStatusNotifierItem(
+    const QString & serviceOrPath)
 {
     QString service = serviceOrPath;
     QString path = QStringLiteral("/StatusNotifierItem");
@@ -80,8 +91,11 @@ void StatusNotifierWatcher::RegisterStatusNotifierItem(const QString &serviceOrP
 
     QString notifierItemId = service + path;
 
-    if (QDBusConnection::sessionBus().interface()->isServiceRegistered(service).value()
-        && !mServices.contains(notifierItemId))
+    if (QDBusConnection::sessionBus()
+            .interface()
+            ->isServiceRegistered(service)
+            .value() &&
+        !mServices.contains(notifierItemId))
     {
         mServices << notifierItemId;
         mWatcher->addWatchedService(service);
@@ -89,7 +103,7 @@ void StatusNotifierWatcher::RegisterStatusNotifierItem(const QString &serviceOrP
     }
 }
 
-void StatusNotifierWatcher::RegisterStatusNotifierHost(const QString &service)
+void StatusNotifierWatcher::RegisterStatusNotifierHost(const QString & service)
 {
     if (!mHosts.contains(service))
     {
@@ -98,7 +112,7 @@ void StatusNotifierWatcher::RegisterStatusNotifierHost(const QString &service)
     }
 }
 
-void StatusNotifierWatcher::serviceUnregistered(const QString &service)
+void StatusNotifierWatcher::serviceUnregistered(const QString & service)
 {
     qDebug() << "Service" << service << "unregistered";
 

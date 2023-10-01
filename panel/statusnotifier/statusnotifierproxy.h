@@ -51,6 +51,6 @@ private:
     void unregisterUsage();
 
 signals:
-    void StatusNotifierItemRegistered(const QString &service);
-    void StatusNotifierItemUnregistered(const QString &service);
+    void StatusNotifierItemRegistered(const QString & service);
+    void StatusNotifierItemUnregistered(const QString & service);
 };
