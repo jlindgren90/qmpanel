@@ -61,16 +61,33 @@ StatusNotifier::StatusNotifier(QWidget * parent)
         itemAdded(service);
 }
 
+static void insertSorted(QBoxLayout * layout, QWidget * widget)
+{
+    int idx = 0;
+    for (; idx < layout->count(); idx++)
+    {
+        if (widget->objectName().compare(
+                layout->itemAt(idx)->widget()->objectName(),
+                Qt::CaseInsensitive) < 0)
+            break;
+    }
+    layout->insertWidget(idx, widget);
+}
+
 void StatusNotifier::itemAdded(const QString & serviceAndPath)
 {
     int slash = serviceAndPath.indexOf('/');
     QString serv = serviceAndPath.left(slash);
     QString path = serviceAndPath.mid(slash);
-    StatusNotifierIcon * button = new StatusNotifierIcon(serv, path, this);
+    StatusNotifierIcon * icon = new StatusNotifierIcon(serv, path, this);
+    mServices.insert(serviceAndPath, icon);
 
-    mServices.insert(serviceAndPath, button);
-    layout()->addWidget(button);
-    button->show();
+    icon->hide();
+    icon->getPropertyAsync("Title", [this, icon](const QVariant & value) {
+        icon->setObjectName(qdbus_cast<QString>(value));
+        insertSorted(&mLayout, icon);
+        icon->show();
+    });
 }
 
 void StatusNotifier::itemRemoved(const QString & serviceAndPath)

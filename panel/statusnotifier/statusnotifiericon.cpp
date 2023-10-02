@@ -44,7 +44,7 @@ StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
     connect(&mSni, &org::kde::StatusNotifierItem::NewToolTip, this,
             &StatusNotifierIcon::newToolTip);
 
-    getPropertyAsync("Menu", [this](QVariant value) {
+    getPropertyAsync("Menu", [this](const QVariant & value) {
         auto path = qdbus_cast<QDBusObjectPath>(value);
         if (!path.path().isEmpty())
         {
@@ -59,7 +59,7 @@ StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
 }
 
 void StatusNotifierIcon::getPropertyAsync(
-    QString const & name, std::function<void(QVariant)> finished)
+    QString const & name, std::function<void(const QVariant &)> finished)
 {
     auto msg = QDBusMessage::createMethodCall(
         mSni.service(), mSni.path(), "org.freedesktop.DBus.Properties", "Get");
@@ -80,7 +80,7 @@ void StatusNotifierIcon::getPropertyAsync(
 
 void StatusNotifierIcon::newIcon()
 {
-    getPropertyAsync("IconName", [this](QVariant value) {
+    getPropertyAsync("IconName", [this](const QVariant & value) {
         auto iconName = qdbus_cast<QString>(value);
         setPixmap(QIcon::fromTheme(iconName).pixmap(
             style()->pixelMetric(QStyle::PM_ButtonIconSize)));
@@ -89,7 +89,7 @@ void StatusNotifierIcon::newIcon()
 
 void StatusNotifierIcon::newToolTip()
 {
-    getPropertyAsync("ToolTip", [this](QVariant value) {
+    getPropertyAsync("ToolTip", [this](const QVariant & value) {
         auto tooltip = qdbus_cast<ToolTip>(value);
         setToolTip(tooltip.title);
     });

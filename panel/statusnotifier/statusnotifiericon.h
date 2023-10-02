@@ -43,10 +43,10 @@ public:
     StatusNotifierIcon(QString service, QString objectPath,
                        QWidget * parent = nullptr);
 
-private:
     void getPropertyAsync(QString const & name,
-                          std::function<void(QVariant)> finished);
+                          std::function<void(const QVariant &)> finished);
 
+private:
     void newIcon();
     void newToolTip();
 
