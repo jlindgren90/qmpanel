@@ -6,8 +6,6 @@
 */
 #include "dbusmenuimporter.h"
 
-#include "debug.h"
-
 // Qt
 #include <QActionGroup>
 #include <QCoreApplication>
@@ -33,15 +31,18 @@
 // Generated
 #include "dbusmenu_interface.h"
 
+// qmpanel build fix
+#define DBUSMENUQT
+
 // #define BENCHMARK
 #ifdef BENCHMARK
 static QTime sChrono;
 #endif
 
-#define DMRETURN_IF_FAIL(cond)                                                                                                                                 \
-    if (!(cond)) {                                                                                                                                             \
-        qCWarning(DBUSMENUQT) << "Condition failed: " #cond;                                                                                                   \
-        return;                                                                                                                                                \
+#define DMRETURN_IF_FAIL(cond)                                                 \
+    if (!(cond)) {                                                             \
+        qWarning(DBUSMENUQT) << "Condition failed: " #cond;                    \
+        return;                                                                \
     }
 
 static const char *DBUSMENU_PROPERTY_ID = "_dbusmenu_id";
@@ -535,4 +536,10 @@ QIcon DBusMenuImporter::iconForName(const QString &name)
     return QIcon::fromTheme(name);
 }
 
-#include "moc_dbusmenuimporter.cpp"
+// qmpanel build fix
+void DBusMenuImporter::slotItemsPropertiesUpdated(
+    const DBusMenuItemList &updatedList,
+    const DBusMenuItemKeysList &removedList)
+{
+    d->slotItemsPropertiesUpdated(updatedList, removedList);
+}

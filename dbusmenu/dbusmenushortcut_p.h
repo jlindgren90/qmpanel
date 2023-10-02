@@ -18,3 +18,5 @@ public:
     QKeySequence toKeySequence() const;
     static DBusMenuShortcut fromKeySequence(const QKeySequence &);
 };
+
+Q_DECLARE_METATYPE(DBusMenuShortcut)

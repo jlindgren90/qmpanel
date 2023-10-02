@@ -29,11 +29,11 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "statusnotifiericon.h"
+#include "../../dbusmenu/dbusmenuimporter.h"
 
 #include <QMenu>
 #include <QMouseEvent>
 #include <QStyle>
-#include <dbusmenu-qt5/dbusmenuimporter.h>
 
 StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
                                        QWidget * parent)
