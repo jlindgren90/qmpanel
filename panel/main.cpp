@@ -27,13 +27,15 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include <QApplication>
+#include <QDebug>
+#include <glib.h>
 #include <signal.h>
 #include <thread>
 
 #include "mainpanel.h"
 #include "resources.h"
 
-sigset_t signal_set; // also used in resources.cpp
+static sigset_t signal_set;
 
 static void signal_thread()
 {
@@ -43,6 +45,9 @@ static void signal_thread()
     /* request qApp to exit cleanly */
     QMetaObject::invokeMethod(qApp, &QApplication::quit, Qt::QueuedConnection);
 }
+
+// also used in resources.cpp
+void restore_signals(void *) { sigprocmask(SIG_UNBLOCK, &signal_set, nullptr); }
 
 int main(int argc, char * argv[])
 {
@@ -61,6 +66,16 @@ int main(int argc, char * argv[])
 
     Resources res;
     MainPanel panel(res);
+
+    /* launch commands once D-Bus services are registered */
+    for (auto & cmd : res.settings().launchCmds)
+    {
+        char ** args = g_strsplit(cmd.toUtf8(), " ", -1);
+        if (!g_spawn_async(NULL, args, NULL, G_SPAWN_SEARCH_PATH,
+                           restore_signals, NULL, NULL, NULL))
+            qWarning() << "Failed to launch" << cmd;
+        g_strfreev(args);
+    }
 
     return app.exec();
 }

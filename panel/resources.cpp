@@ -66,8 +66,7 @@ QAction * AppInfo::getAction()
 
     QObject::connect(action, &QAction::triggered, [info]() {
         if (!g_desktop_app_info_launch_uris_as_manager(
-                info, nullptr, nullptr, G_SPAWN_SEARCH_PATH,
-                [](void *) { sigprocmask(SIG_UNBLOCK, &signal_set, nullptr); },
+                info, nullptr, nullptr, G_SPAWN_SEARCH_PATH, restore_signals,
                 nullptr, nullptr, nullptr, nullptr))
             qWarning() << "Failed to launch"
                        << g_app_info_get_id((GAppInfo *)info);
@@ -133,10 +132,12 @@ Resources::Settings Resources::loadSettings()
     auto menuIcon = getSetting("MenuIcon");
     auto pinnedMenuApps = getSetting("PinnedMenuApps");
     auto quickLaunchApps = getSetting("QuickLaunchApps");
+    auto launchCmds = getSetting("LaunchCmds");
 
     return {menuIcon.isEmpty() ? "start-here" : menuIcon,
             pinnedMenuApps.split(';', QString::SkipEmptyParts),
-            quickLaunchApps.split(';', QString::SkipEmptyParts)};
+            quickLaunchApps.split(';', QString::SkipEmptyParts),
+            launchCmds.split(';', QString::SkipEmptyParts)};
 }
 
 QAction * Resources::getAction(const QString & appID)

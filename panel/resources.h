@@ -34,7 +34,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-extern sigset_t signal_set; // from main.cpp
+void restore_signals(void *); // from main.cpp
 
 typedef struct _GDesktopAppInfo GDesktopAppInfo;
 
@@ -59,6 +59,7 @@ public:
         QString menuIcon;
         QStringList pinnedMenuApps;
         QStringList quickLaunchApps;
+        QStringList launchCmds;
     };
 
     static QIcon getIcon(const QString & name);
