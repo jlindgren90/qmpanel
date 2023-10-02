@@ -79,7 +79,7 @@ void StatusNotifier::itemAdded(const QString & serviceAndPath)
     int slash = serviceAndPath.indexOf('/');
     QString serv = serviceAndPath.left(slash);
     QString path = serviceAndPath.mid(slash);
-    StatusNotifierIcon * icon = new StatusNotifierIcon(serv, path, this);
+    auto icon = new StatusNotifierIcon(serv, path, this);
     mServices.insert(serviceAndPath, icon);
 
     icon->hide();
@@ -92,10 +92,7 @@ void StatusNotifier::itemAdded(const QString & serviceAndPath)
 
 void StatusNotifier::itemRemoved(const QString & serviceAndPath)
 {
-    StatusNotifierIcon * button = mServices.value(serviceAndPath, nullptr);
-    if (button)
-    {
-        mServices.remove(serviceAndPath);
-        button->deleteLater();
-    }
+    auto icon = mServices.take(serviceAndPath);
+    if (icon)
+        icon->deleteLater();
 }
