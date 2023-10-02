@@ -48,8 +48,10 @@ qmpanel - A Minimal Qt-Based Desktop Panel
 
     - Expanding space
 
-    - System tray (XEmbed)
-       - Icons sorted by window class
+    - System tray (StatusNotifierItem)
+       - Uses KDE's fork of libdbusmenu-qt (same as in plasma-workspace)
+       - Some less common StatusNotifierItem features not supported
+       - Icons sorted by title
 
     - Date and time
        - e.g. "Thu Apr 23, 2:25 pm"
@@ -66,4 +68,18 @@ qmpanel - A Minimal Qt-Based Desktop Panel
 MenuIcon=<icon-name>
 PinnedMenuApps=<app-name>.desktop;<app-name>.desktop
 QuickLaunchApps=<app-name>.desktop;<app-name>.desktop
+# LaunchCmds are executed at startup, after the StatusNotifierItem D-Bus
+# service is registered. You can start system tray applications here.
+LaunchCmds=<command>;<command>
 ```
+
+ - Version history:
+
+    - 0.1 (8 May 2020)
+       - Initial release
+
+    - 0.2 (2 Oct 2023)
+       - Build system changed from CMake to meson
+       - System tray changed from XEmbed StatusNotifierItem
+       - New `LaunchCmds` feature to start system tray icons
+       - Several bug fixes (refer to commit log)
