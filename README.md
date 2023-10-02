@@ -80,6 +80,6 @@ LaunchCmds=<command>;<command>
 
     - 0.2 (2 Oct 2023)
        - Build system changed from CMake to meson
-       - System tray changed from XEmbed StatusNotifierItem
+       - System tray changed from XEmbed to StatusNotifierItem
        - New `LaunchCmds` feature to start system tray icons
        - Several bug fixes (refer to commit log)
