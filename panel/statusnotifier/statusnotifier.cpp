@@ -27,13 +27,13 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include "statusnotifierwidget.h"
+#include "statusnotifier.h"
 #include "statusnotifiericon.h"
 
 #include <QApplication>
 #include <QBoxLayout>
 
-StatusNotifierWidget::StatusNotifierWidget(QWidget * parent)
+StatusNotifier::StatusNotifier(QWidget * parent)
     : QWidget(parent), mLayout(this)
 {
     mLayout.setContentsMargins(QMargins());
@@ -53,15 +53,15 @@ StatusNotifierWidget::StatusNotifierWidget(QWidget * parent)
     mWatcher.RegisterStatusNotifierHost(dbusName);
 
     connect(&mWatcher, &StatusNotifierWatcher::StatusNotifierItemRegistered,
-            this, &StatusNotifierWidget::itemAdded);
+            this, &StatusNotifier::itemAdded);
     connect(&mWatcher, &StatusNotifierWatcher::StatusNotifierItemUnregistered,
-            this, &StatusNotifierWidget::itemRemoved);
+            this, &StatusNotifier::itemRemoved);
 
     for (const auto & service : mWatcher.RegisteredStatusNotifierItems())
         itemAdded(service);
 }
 
-void StatusNotifierWidget::itemAdded(const QString & serviceAndPath)
+void StatusNotifier::itemAdded(const QString & serviceAndPath)
 {
     int slash = serviceAndPath.indexOf('/');
     QString serv = serviceAndPath.left(slash);
@@ -73,7 +73,7 @@ void StatusNotifierWidget::itemAdded(const QString & serviceAndPath)
     button->show();
 }
 
-void StatusNotifierWidget::itemRemoved(const QString & serviceAndPath)
+void StatusNotifier::itemRemoved(const QString & serviceAndPath)
 {
     StatusNotifierIcon * button = mServices.value(serviceAndPath, nullptr);
     if (button)

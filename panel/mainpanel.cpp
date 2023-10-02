@@ -31,7 +31,7 @@
 #include "clocklabel.h"
 #include "mainmenu.h"
 #include "quicklaunch.h"
-#include "statusnotifier/statusnotifierwidget.h"
+#include "statusnotifier/statusnotifier.h"
 #include "taskbar.h"
 
 #include <KWindowSystem>
@@ -54,7 +54,7 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
     mLayout.addWidget(new MainMenuButton(res, this));
     mLayout.addWidget(new QuickLaunch(res, this));
     mLayout.addWidget(new TaskBar(this));
-    mLayout.addWidget(new StatusNotifierWidget(this));
+    mLayout.addWidget(new StatusNotifier(this));
     mLayout.addWidget(new ClockLabel(this));
 
     mLayout.setStretch(2, 1); // stretch taskbar

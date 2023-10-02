@@ -27,8 +27,8 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#ifndef STATUSNOTIFIERWIDGET_H
-#define STATUSNOTIFIERWIDGET_H
+#ifndef STATUSNOTIFIER_H
+#define STATUSNOTIFIER_H
 
 #include <QBoxLayout>
 #include <QWidget>
@@ -37,10 +37,10 @@
 
 class StatusNotifierIcon;
 
-class StatusNotifierWidget : public QWidget
+class StatusNotifier : public QWidget
 {
 public:
-    StatusNotifierWidget(QWidget * parent = nullptr);
+    StatusNotifier(QWidget * parent = nullptr);
 
 private:
     void itemAdded(const QString & serviceAndPath);
@@ -51,4 +51,4 @@ private:
     QHBoxLayout mLayout;
 };
 
-#endif // STATUSNOTIFIERWIDGET_H
+#endif // STATUSNOTIFIER_H
