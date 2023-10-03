@@ -52,6 +52,8 @@ StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
             auto importer =
                 new DBusMenuImporter(mSni.service(), path.path(), this);
             mMenu = importer->menu();
+            connect(importer, &DBusMenuImporter::menuUpdated, this,
+                    &StatusNotifierIcon::menuUpdated);
         }
     });
 
@@ -77,6 +79,29 @@ void StatusNotifierIcon::getPropertyAsync(
                 finished(reply.value());
                 cw->deleteLater();
             });
+}
+
+void StatusNotifierIcon::menuUpdated()
+{
+    // always recreate "Activate" action since
+    // DBusMenuImporter may call deleteLater() on it
+    if (mActivate)
+        mActivate->deleteLater();
+
+    if (!mMenu || mMenu->isEmpty())
+        return;
+
+    mActivate = new QAction("Activate", this);
+    auto font = mActivate->font();
+    font.setBold(true);
+    mActivate->setFont(font);
+
+    connect(mActivate, &QAction::triggered, [this]() {
+        auto pos = mapToGlobal(QPoint()); // left top corner
+        mSni.Activate(pos.x(), pos.y());
+    });
+
+    mMenu->addAction(mActivate);
 }
 
 static QIcon iconFromPixmapList(IconPixmapList & pixmaps)
@@ -136,14 +161,14 @@ void StatusNotifierIcon::mousePressEvent(QMouseEvent * event)
     auto pos = mapToGlobal(QPoint()); // left top corner
 
     if (event->button() == Qt::LeftButton)
-        mSni.Activate(pos.x(), pos.y());
+    {
+        if (mMenu && !mMenu->isEmpty())
+            mMenu->popup(pos);
+        else
+            mSni.Activate(pos.x(), pos.y());
+    }
     else if (event->button() == Qt::MiddleButton)
         mSni.SecondaryActivate(pos.x(), pos.y());
     else if (Qt::RightButton == event->button())
-    {
-        if (mMenu)
-            mMenu->popup(pos);
-        else
-            mSni.ContextMenu(pos.x(), pos.y());
-    }
+        mSni.ContextMenu(pos.x(), pos.y());
 }

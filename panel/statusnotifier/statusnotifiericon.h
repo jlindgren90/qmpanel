@@ -31,6 +31,7 @@
 #define STATUSNOTIFIERICON_H
 
 #include <QLabel>
+#include <QPointer>
 #include <functional>
 
 #include "statusnotifieriteminterface.h"
@@ -47,11 +48,13 @@ public:
                           std::function<void(const QVariant &)> finished);
 
 private:
+    void menuUpdated();
     void newIcon();
     void newToolTip();
 
     org::kde::StatusNotifierItem mSni;
-    QMenu * mMenu = nullptr;
+    QPointer<QMenu> mMenu;
+    QPointer<QAction> mActivate;
 
 protected:
     void mousePressEvent(QMouseEvent * event);
