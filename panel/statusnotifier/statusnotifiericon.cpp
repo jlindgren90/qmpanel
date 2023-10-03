@@ -34,6 +34,7 @@
 #include <QMenu>
 #include <QMouseEvent>
 #include <QStyle>
+#include <QtEndian>
 
 StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
                                        QWidget * parent)
@@ -78,12 +79,47 @@ void StatusNotifierIcon::getPropertyAsync(
             });
 }
 
+static QIcon iconFromPixmapList(IconPixmapList & pixmaps)
+{
+    QIcon icon;
+    for (auto & pixmap : pixmaps)
+    {
+        int w = pixmap.width;
+        int h = pixmap.height;
+
+        if (pixmap.bytes.length() != w * h * 4)
+            continue;
+
+        void * data = pixmap.bytes.data();
+        qFromBigEndian<qint32>(data, w * h, data);
+        icon.addPixmap(QPixmap::fromImage(
+            QImage((uchar *)data, w, h, QImage::Format_ARGB32)));
+    }
+
+    return icon;
+}
+
 void StatusNotifierIcon::newIcon()
 {
     getPropertyAsync("IconName", [this](const QVariant & value) {
         auto iconName = qdbus_cast<QString>(value);
-        setPixmap(QIcon::fromTheme(iconName).pixmap(
-            style()->pixelMetric(QStyle::PM_ButtonIconSize)));
+        if (!iconName.isEmpty())
+        {
+            setPixmap(QIcon::fromTheme(iconName).pixmap(
+                style()->pixelMetric(QStyle::PM_ButtonIconSize)));
+        }
+        else
+        {
+            getPropertyAsync("IconPixmap", [this](const QVariant & value) {
+                auto pixmaps = qdbus_cast<IconPixmapList>(value);
+                auto icon = iconFromPixmapList(pixmaps);
+                if (!icon.isNull())
+                {
+                    setPixmap(icon.pixmap(
+                        style()->pixelMetric(QStyle::PM_ButtonIconSize)));
+                }
+            });
+        }
     });
 }
 
