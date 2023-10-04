@@ -163,7 +163,10 @@ void StatusNotifierIcon::mousePressEvent(QMouseEvent * event)
     if (event->button() == Qt::LeftButton)
     {
         if (mMenu && !mMenu->isEmpty())
+        {
+            pos.ry() -= mMenu->sizeHint().height();
             mMenu->popup(pos);
+        }
         else
             mSni.Activate(pos.x(), pos.y());
     }
