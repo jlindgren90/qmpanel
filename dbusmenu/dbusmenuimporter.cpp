@@ -401,8 +401,9 @@ void DBusMenuImporter::slotGetLayoutFinished(QDBusPendingCallWatcher *watcher)
         newDBusMenuItemIds << item.id;
     }
     for (QAction *action : menu->actions()) {
-        int id = action->property(DBUSMENU_PROPERTY_ID).toInt();
-        if (!newDBusMenuItemIds.contains(id)) {
+        QVariant id = action->property(DBUSMENU_PROPERTY_ID);
+        // jlindgren: ignore externally-added actions
+        if (id.isValid() && !newDBusMenuItemIds.contains(id.toInt())) {
             // Not calling removeAction() as QMenu will immediately close when it becomes empty,
             // which can happen when an application completely reloads this menu.
             // When the action is deleted deferred, it is removed from the menu.
@@ -410,11 +411,12 @@ void DBusMenuImporter::slotGetLayoutFinished(QDBusPendingCallWatcher *watcher)
             if (action->menu()) {
                 action->menu()->deleteLater();
             }
-            d->m_actionForId.remove(id);
+            d->m_actionForId.remove(id.toInt());
         }
     }
 
     // insert or update new actions into our menu
+    int pos = 0;
     for (const DBusMenuLayoutItem &dbusMenuItem : qAsConst(rootItem.children)) {
         DBusMenuImporterPrivate::ActionForId::Iterator it = d->m_actionForId.find(dbusMenuItem.id);
         QAction *action = nullptr;
@@ -435,8 +437,6 @@ void DBusMenuImporter::slotGetLayoutFinished(QDBusPendingCallWatcher *watcher)
                 connect(menuAction, &QMenu::aboutToShow, this, &DBusMenuImporter::slotMenuAboutToShow, Qt::UniqueConnection);
             }
             connect(menu, &QMenu::aboutToHide, this, &DBusMenuImporter::slotMenuAboutToHide, Qt::UniqueConnection);
-
-            menu->addAction(action);
         } else {
             action = *it;
             QStringList filteredKeys = dbusMenuItem.properties.keys();
@@ -444,10 +444,22 @@ void DBusMenuImporter::slotGetLayoutFinished(QDBusPendingCallWatcher *watcher)
             filteredKeys.removeOne(QStringLiteral("toggle-type"));
             filteredKeys.removeOne(QStringLiteral("children-display"));
             d->updateAction(*it, dbusMenuItem.properties, filteredKeys);
-            // Move the action to the tail so we can keep the order same as the dbus request.
-            menu->removeAction(action);
-            menu->addAction(action);
+
+            // jlindgren: don't re-add unless necessary (reduces flicker)
+            auto actions = menu->actions();
+            if (actions.indexOf(action) != pos)
+                menu->removeAction(action);
         }
+
+        // jlindgren: insert before externally-added actions
+        auto actions = menu->actions();
+        if (!actions.contains(action)) {
+            if (pos < actions.size())
+                menu->insertAction(actions.at(pos), action);
+            else
+                menu->addAction(action);
+        }
+        pos++;
     }
 
     Q_EMIT menuUpdated(menu);

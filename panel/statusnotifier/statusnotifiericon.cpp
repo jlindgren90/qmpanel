@@ -83,12 +83,7 @@ void StatusNotifierIcon::getPropertyAsync(
 
 void StatusNotifierIcon::menuUpdated()
 {
-    // always recreate "Activate" action since
-    // DBusMenuImporter may call deleteLater() on it
-    if (mActivate)
-        mActivate->deleteLater();
-
-    if (!mMenu || mMenu->isEmpty())
+    if (!mMenu || mMenu->isEmpty() || mActivate)
         return;
 
     mActivate = new QAction("Activate", this);
