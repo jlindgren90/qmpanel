@@ -117,6 +117,9 @@ public:
         if (map.take(QStringLiteral("children-display")).toString() == QLatin1String("submenu")) {
             QMenu *menu = createMenu(parent);
             action->setMenu(menu);
+            // jlindgren: refresh submenus in advance
+            // (prevents them being displayed offscreen)
+            refresh(id);
         }
 
         QString toggleType = map.take(QStringLiteral("toggle-type")).toString();
