@@ -53,8 +53,13 @@ StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
                 new DBusMenuImporter(mSni.service(), path.path(), this);
             mMenu = importer->menu();
             connect(importer, &DBusMenuImporter::menuUpdated, this,
-                    &StatusNotifierIcon::menuUpdated);
+                    &StatusNotifierIcon::addActivate);
         }
+    });
+
+    getPropertyAsync("Title", [this](const QVariant & value) {
+        mTitle = qdbus_cast<QString>(value);
+        addActivate();
     });
 
     newIcon();
@@ -81,12 +86,13 @@ void StatusNotifierIcon::getPropertyAsync(
             });
 }
 
-void StatusNotifierIcon::menuUpdated()
+void StatusNotifierIcon::addActivate()
 {
-    if (!mMenu || mMenu->isEmpty() || mActivate)
+    if (mActivate || mTitle.isEmpty() || !mMenu || mMenu->isEmpty())
         return;
 
-    mActivate = new QAction("Activate", this);
+    // use title as label for Activate action
+    mActivate = new QAction(mTitle, this);
     auto font = mActivate->font();
     font.setBold(true);
     mActivate->setFont(font);

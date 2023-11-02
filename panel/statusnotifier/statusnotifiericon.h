@@ -48,11 +48,12 @@ public:
                           std::function<void(const QVariant &)> finished);
 
 private:
-    void menuUpdated();
+    void addActivate();
     void newIcon();
     void newToolTip();
 
     org::kde::StatusNotifierItem mSni;
+    QString mTitle;
     QPointer<QMenu> mMenu;
     QPointer<QAction> mActivate;
 
