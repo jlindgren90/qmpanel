@@ -39,6 +39,7 @@
 #include <QApplication>
 #include <QScreen>
 #include <QX11Info>
+#include <stdlib.h>
 
 MainPanel::MainPanel(Resources & res) : mLayout(this)
 {
@@ -76,6 +77,25 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
 void MainPanel::updateGeometry()
 {
     QScreen * screen = QApplication::primaryScreen();
+    QRect rect = screen->geometry();
+
+    // Under XWayland, the primary screen may not be set.
+    // As a workaround, pick the largest/leftmost screen.
+    if (getenv("WAYLAND_DISPLAY"))
+    {
+        for (QScreen * testScreen : screen->virtualSiblings())
+        {
+            QRect testRect = testScreen->geometry();
+            if (testRect.width() > rect.width() ||
+                (testRect.width() == rect.width() &&
+                 testRect.left() < rect.left()))
+            {
+                screen = testScreen;
+                rect = testRect;
+            }
+        }
+    }
+
     if (mScreen != screen)
     {
         if (mScreen)
@@ -93,9 +113,7 @@ void MainPanel::updateGeometry()
                 &MainPanel::updateGeometryTriple);
     }
 
-    QRect rect = screen->geometry();
     rect.setTop(rect.bottom() + 1 - sizeHint().height());
-
     if (rect != geometry())
     {
         setFixedSize(rect.size());
