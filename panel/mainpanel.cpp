@@ -104,12 +104,16 @@ void MainPanel::updateGeometry()
                        &MainPanel::updateGeometryTriple);
             disconnect(mScreen, &QScreen::virtualGeometryChanged, this,
                        &MainPanel::updateGeometryTriple);
+            disconnect(mScreen, &QObject::destroyed, this,
+                       &MainPanel::updateGeometryTriple);
         }
 
         mScreen = screen;
         connect(mScreen, &QScreen::geometryChanged, this,
                 &MainPanel::updateGeometryTriple);
         connect(mScreen, &QScreen::virtualGeometryChanged, this,
+                &MainPanel::updateGeometryTriple);
+        connect(mScreen, &QObject::destroyed, this,
                 &MainPanel::updateGeometryTriple);
     }
 
