@@ -31,6 +31,7 @@
 
 #include <QHBoxLayout>
 #include <QPointer>
+#include <QTimer>
 #include <QWidget>
 
 class Resources;
@@ -50,8 +51,11 @@ protected:
 private:
     QPointer<QScreen> mScreen;
     QHBoxLayout mLayout;
+    QTimer mUpdateTimer;
+    int mUpdateCount = 0;
 
     void updateGeometry();
+    void updateGeometryTriple();
 };
 
 #endif // MAINPANEL_H

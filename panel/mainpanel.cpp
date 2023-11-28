@@ -38,6 +38,7 @@
 #include <NETWM>
 #include <QApplication>
 #include <QScreen>
+#include <QX11Info>
 
 MainPanel::MainPanel(Resources & res) : mLayout(this)
 {
@@ -64,8 +65,12 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
     KWindowSystem::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
     KWindowSystem::setType(effectiveWinId(), NET::Dock);
 
+    mUpdateTimer.setInterval(500);
+    mUpdateTimer.setSingleShot(true);
+
+    connect(&mUpdateTimer, &QTimer::timeout, this, &MainPanel::updateGeometry);
     connect(qApp, &QApplication::primaryScreenChanged, this,
-            &MainPanel::updateGeometry);
+            &MainPanel::updateGeometryTriple);
 }
 
 void MainPanel::updateGeometry()
@@ -76,16 +81,16 @@ void MainPanel::updateGeometry()
         if (mScreen)
         {
             disconnect(mScreen, &QScreen::geometryChanged, this,
-                       &MainPanel::updateGeometry);
+                       &MainPanel::updateGeometryTriple);
             disconnect(mScreen, &QScreen::virtualGeometryChanged, this,
-                       &MainPanel::updateGeometry);
+                       &MainPanel::updateGeometryTriple);
         }
 
         mScreen = screen;
         connect(mScreen, &QScreen::geometryChanged, this,
-                &MainPanel::updateGeometry);
+                &MainPanel::updateGeometryTriple);
         connect(mScreen, &QScreen::virtualGeometryChanged, this,
-                &MainPanel::updateGeometry);
+                &MainPanel::updateGeometryTriple);
     }
 
     QRect rect = screen->geometry();
@@ -105,4 +110,20 @@ void MainPanel::updateGeometry()
                                     /* top    */ 0, 0, 0,
                                     /* bottom */ screenBottom + 1 - rect.top(),
                                     rect.left(), rect.right());
+    xcb_flush(QX11Info::connection());
+
+    if (mUpdateCount > 0)
+    {
+        mUpdateTimer.start();
+        mUpdateCount--;
+    }
+}
+
+void MainPanel::updateGeometryTriple()
+{
+    // Sometimes QScreen::virtualGeometry doesn't update immediately
+    // under XWayland (due to missing RandR events). As a workaround,
+    // check for changes again after 0.5s and after 1s.
+    mUpdateCount = 2;
+    updateGeometry();
 }
