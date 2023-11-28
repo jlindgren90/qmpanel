@@ -52,9 +52,6 @@ private:
     QHBoxLayout mLayout;
 
     void updateGeometry();
-    void updateWmStrut();
-    void loadPlugins();
-    void setPanelGeometry();
 };
 
 #endif // MAINPANEL_H
