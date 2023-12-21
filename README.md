@@ -49,7 +49,7 @@ qmpanel - A Minimal Qt-Based Desktop Panel
     - Expanding space
 
     - System tray (StatusNotifierItem)
-       - Uses KDE's fork of libdbusmenu-qt (same as in plasma-workspace)
+       - Uses patched libdbusmenu-qt, based on KDE's fork
        - Some less common StatusNotifierItem features not supported
        - Icons sorted by title
 
@@ -83,3 +83,7 @@ LaunchCmds=<command>;<command>
        - System tray changed from XEmbed to StatusNotifierItem
        - New `LaunchCmds` feature to start system tray icons
        - Several bug fixes (refer to commit log)
+
+    - 0.3 (21 Dec 2023)
+       - Several bug fixes to StatusNotifierItem system tray
+       - Work around multi-monitor issues under XWayland
