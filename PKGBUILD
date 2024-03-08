@@ -10,7 +10,7 @@ license=("LGPL2.1")
 makedepends=("meson")
 depends=(
   "glib2"
-  "kwindowsystem5"
+  "kwindowsystem"
   "libxcb"
   "libxcomposite"
   "libxdamage"

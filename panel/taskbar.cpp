@@ -32,8 +32,9 @@
 #include "taskbar.h"
 #include "taskbutton.h"
 
-#include <KWindowSystem>
-#include <QX11Info>
+#include <KWindowInfo>
+#include <KX11Extras>
+#include <private/qtx11extras_p.h>
 
 TaskBar::TaskBar(QWidget * parent) : QWidget(parent), mLayout(this)
 {
@@ -43,23 +44,22 @@ TaskBar::TaskBar(QWidget * parent) : QWidget(parent), mLayout(this)
 
     setAcceptDrops(true);
 
-    for (auto window : KWindowSystem::stackingOrder())
+    for (auto window : KX11Extras::stackingOrder())
     {
         if (acceptWindow(window))
             addWindow(window);
     }
 
-    connect(KWindowSystem::self(), &KWindowSystem::windowAdded, this,
+    connect(KX11Extras::self(), &KX11Extras::windowAdded, this,
             &TaskBar::onWindowAdded);
-    connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this,
+    connect(KX11Extras::self(), &KX11Extras::windowRemoved, this,
             &TaskBar::removeWindow);
-    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this,
+    connect(KX11Extras::self(), &KX11Extras::activeWindowChanged, this,
             &TaskBar::onActiveWindowChanged);
 
-    void (KWindowSystem::*windowChanged)(
-        WId, NET::Properties, NET::Properties2) = &KWindowSystem::windowChanged;
-    connect(KWindowSystem::self(), windowChanged, this,
-            &TaskBar::onWindowChanged);
+    void (KX11Extras::*windowChanged)(WId, NET::Properties, NET::Properties2) =
+        &KX11Extras::windowChanged;
+    connect(KX11Extras::self(), windowChanged, this, &TaskBar::onWindowChanged);
 }
 
 bool TaskBar::acceptWindow(WId window) const
@@ -121,7 +121,7 @@ void TaskBar::onActiveWindowChanged(WId window)
     auto active = mKnownWindows.find(window);
     if (active == mKnownWindows.end())
     {
-        KWindowInfo info(window, 0, NET::WM2TransientFor);
+        KWindowInfo info(window, NET::Properties(), NET::WM2TransientFor);
         active = mKnownWindows.find(info.transientFor());
     }
 

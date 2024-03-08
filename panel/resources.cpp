@@ -43,7 +43,7 @@ AppInfo::AppInfo(GDesktopAppInfo * info)
 QStringList AppInfo::categories() const
 {
     return QString(g_desktop_app_info_get_categories(mInfo.get()))
-        .split(';', QString::SkipEmptyParts);
+        .split(';', Qt::SkipEmptyParts);
 }
 
 QAction * AppInfo::getAction()
@@ -135,9 +135,9 @@ Resources::Settings Resources::loadSettings()
     auto launchCmds = getSetting("LaunchCmds");
 
     return {menuIcon.isEmpty() ? "start-here" : menuIcon,
-            pinnedMenuApps.split(';', QString::SkipEmptyParts),
-            quickLaunchApps.split(';', QString::SkipEmptyParts),
-            launchCmds.split(';', QString::SkipEmptyParts)};
+            pinnedMenuApps.split(';', Qt::SkipEmptyParts),
+            quickLaunchApps.split(';', Qt::SkipEmptyParts),
+            launchCmds.split(';', Qt::SkipEmptyParts)};
 }
 
 QAction * Resources::getAction(const QString & appID)

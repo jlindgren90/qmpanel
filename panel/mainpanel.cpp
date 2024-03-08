@@ -34,11 +34,11 @@
 #include "statusnotifier/statusnotifier.h"
 #include "taskbar.h"
 
-#include <KWindowSystem>
+#include <KX11Extras>
 #include <NETWM>
 #include <QApplication>
 #include <QScreen>
-#include <QX11Info>
+#include <private/qtx11extras_p.h>
 #include <stdlib.h>
 
 MainPanel::MainPanel(Resources & res) : mLayout(this)
@@ -63,8 +63,8 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
 
     show();
 
-    KWindowSystem::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
-    KWindowSystem::setType(effectiveWinId(), NET::Dock);
+    KX11Extras::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
+    KX11Extras::setType(effectiveWinId(), NET::Dock);
 
     mUpdateTimer.setInterval(500);
     mUpdateTimer.setSingleShot(true);
@@ -126,12 +126,12 @@ void MainPanel::updateGeometry()
 
     // virtualGeometry() usually matches the X11 screen (not monitor) size
     int screenBottom = screen->virtualGeometry().bottom();
-    KWindowSystem::setExtendedStrut(effectiveWinId(),
-                                    /* left   */ 0, 0, 0,
-                                    /* right  */ 0, 0, 0,
-                                    /* top    */ 0, 0, 0,
-                                    /* bottom */ screenBottom + 1 - rect.top(),
-                                    rect.left(), rect.right());
+    KX11Extras::setExtendedStrut(effectiveWinId(),
+                                 /* left   */ 0, 0, 0,
+                                 /* right  */ 0, 0, 0,
+                                 /* top    */ 0, 0, 0,
+                                 /* bottom */ screenBottom + 1 - rect.top(),
+                                 rect.left(), rect.right());
     xcb_flush(QX11Info::connection());
 
     if (mUpdateCount > 0)

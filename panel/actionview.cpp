@@ -43,12 +43,12 @@ public:
     void setSearchStr(const QString & str)
     {
         mSearchStr = str;
-        mSnippets = str.split(' ', QString::SkipEmptyParts);
+        mSnippets = str.split(' ', Qt::SkipEmptyParts);
     }
 
     bool accepts(const QString & string) const
     {
-        QStringList words = string.split(' ', QString::SkipEmptyParts);
+        QStringList words = string.split(' ', Qt::SkipEmptyParts);
 
         auto snippetNotFound = [&words](const QString & snippet) {
             auto match = std::find_if(

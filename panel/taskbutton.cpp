@@ -30,12 +30,13 @@
 
 #include "taskbutton.h"
 
-#include <KWindowSystem>
+#include <KWindowInfo>
+#include <KX11Extras>
 #include <NETWM>
 #include <QDragEnterEvent>
 #include <QStyle>
 #include <QTimer>
-#include <QX11Info>
+#include <private/qtx11extras_p.h>
 
 TaskButton::TaskButton(const WId window, QWidget * parent)
     : QToolButton(parent), mWindow(window)
@@ -47,7 +48,7 @@ TaskButton::TaskButton(const WId window, QWidget * parent)
     updateText();
     updateIcon();
 
-    if (KWindowSystem::activeWindow() == window)
+    if (KX11Extras::activeWindow() == window)
         setChecked(true);
 
     mTimer.setSingleShot(true);
@@ -55,13 +56,13 @@ TaskButton::TaskButton(const WId window, QWidget * parent)
 
     connect(this, &QToolButton::clicked, [window](bool checked) {
         if (checked)
-            KWindowSystem::forceActiveWindow(window);
+            KX11Extras::forceActiveWindow(window);
         else
-            KWindowSystem::minimizeWindow(window);
+            KX11Extras::minimizeWindow(window);
     });
 
     connect(&mTimer, &QTimer::timeout, [window]() {
-        KWindowSystem::forceActiveWindow(window);
+        KX11Extras::forceActiveWindow(window);
         xcb_flush(QX11Info::connection());
     });
 }
@@ -81,7 +82,7 @@ void TaskButton::updateIcon()
 {
     int size = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
     size *= devicePixelRatioF();
-    QIcon icon = KWindowSystem::icon(mWindow, size, size);
+    QIcon icon = KX11Extras::icon(mWindow, size, size);
     if (icon.isNull())
         icon = style()->standardIcon(QStyle::SP_FileIcon);
     setIcon(icon);
