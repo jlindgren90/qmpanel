@@ -44,20 +44,23 @@ TaskBar::TaskBar(QWidget * parent) : QWidget(parent), mLayout(this)
 
     setAcceptDrops(true);
 
-    for (auto window : KX11Extras::stackingOrder())
+    if (QX11Info::isPlatformX11())
     {
-        if (acceptWindow(window))
-            addWindow(window);
-    }
+        for (auto window : KX11Extras::stackingOrder())
+        {
+            if (acceptWindow(window))
+                addWindow(window);
+        }
 
-    connect(KX11Extras::self(), &KX11Extras::windowAdded, this,
-            &TaskBar::onWindowAdded);
-    connect(KX11Extras::self(), &KX11Extras::windowRemoved, this,
-            &TaskBar::removeWindow);
-    connect(KX11Extras::self(), &KX11Extras::activeWindowChanged, this,
-            &TaskBar::onActiveWindowChanged);
-    connect(KX11Extras::self(), &KX11Extras::windowChanged, this,
-            &TaskBar::onWindowChanged);
+        connect(KX11Extras::self(), &KX11Extras::windowAdded, this,
+                &TaskBar::onWindowAdded);
+        connect(KX11Extras::self(), &KX11Extras::windowRemoved, this,
+                &TaskBar::removeWindow);
+        connect(KX11Extras::self(), &KX11Extras::activeWindowChanged, this,
+                &TaskBar::onActiveWindowChanged);
+        connect(KX11Extras::self(), &KX11Extras::windowChanged, this,
+                &TaskBar::onWindowChanged);
+    }
 }
 
 bool TaskBar::acceptWindow(WId window) const

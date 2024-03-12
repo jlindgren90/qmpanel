@@ -63,8 +63,11 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
 
     show();
 
-    KX11Extras::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
-    KX11Extras::setType(effectiveWinId(), NET::Dock);
+    if (QX11Info::isPlatformX11())
+    {
+        KX11Extras::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
+        KX11Extras::setType(effectiveWinId(), NET::Dock);
+    }
 
     mUpdateTimer.setInterval(500);
     mUpdateTimer.setSingleShot(true);
@@ -124,15 +127,18 @@ void MainPanel::updateGeometry()
         setGeometry(rect);
     }
 
-    // virtualGeometry() usually matches the X11 screen (not monitor) size
-    int screenBottom = screen->virtualGeometry().bottom();
-    KX11Extras::setExtendedStrut(effectiveWinId(),
-                                 /* left   */ 0, 0, 0,
-                                 /* right  */ 0, 0, 0,
-                                 /* top    */ 0, 0, 0,
-                                 /* bottom */ screenBottom + 1 - rect.top(),
-                                 rect.left(), rect.right());
-    xcb_flush(QX11Info::connection());
+    if (QX11Info::isPlatformX11())
+    {
+        // virtualGeometry() usually matches the X11 screen (not monitor) size
+        int screenBottom = screen->virtualGeometry().bottom();
+        KX11Extras::setExtendedStrut(effectiveWinId(),
+                                     /* left   */ 0, 0, 0,
+                                     /* right  */ 0, 0, 0,
+                                     /* top    */ 0, 0, 0,
+                                     /* bottom */ screenBottom + 1 - rect.top(),
+                                     rect.left(), rect.right());
+        xcb_flush(QX11Info::connection());
+    }
 
     if (mUpdateCount > 0)
     {
