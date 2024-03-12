@@ -38,6 +38,7 @@ deps = [
   dependency('qt6', modules: ['Core', 'Gui', 'Widgets', 'DBus'],
              private_headers: true),
   dependency('KF6WindowSystem'),
+  dependency('LayerShellQt', modules: ['LayerShellQt::Interface']),
   dependency('xcb'),
   dependency('xcomposite'),
   dependency('xdamage'),

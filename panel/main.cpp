@@ -29,6 +29,7 @@
 #include "mainpanel.h"
 #include "resources.h"
 
+#include <LayerShellQt/shell.h>
 #include <QApplication>
 #include <QDebug>
 #include <glib.h>
@@ -61,21 +62,29 @@ int main(int argc, char * argv[])
     QApplication app(argc, argv);
     app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
 
+    if (app.nativeInterface<QNativeInterface::QWaylandApplication>())
+        LayerShellQt::Shell::useLayerShell();
+
     /* monitor signals once qApp exists */
     std::thread(signal_thread).detach();
 
     Resources res;
     MainPanel panel(res);
 
-    /* launch commands once D-Bus services are registered */
+    // Launch commands once D-Bus services are registered
+    // Unset QT_WAYLAND_SHELL_INTEGRATION or else all launched
+    // Qt applications will use layer-shell, wanted or not
+    char ** env =
+        g_environ_unsetenv(g_get_environ(), "QT_WAYLAND_SHELL_INTEGRATION");
     for (auto & cmd : res.settings().launchCmds)
     {
         char ** args = g_strsplit(cmd.toUtf8(), " ", -1);
-        if (!g_spawn_async(NULL, args, NULL, G_SPAWN_SEARCH_PATH,
-                           restore_signals, NULL, NULL, NULL))
+        if (!g_spawn_async(nullptr, args, env, G_SPAWN_SEARCH_PATH,
+                           restore_signals, nullptr, nullptr, nullptr))
             qWarning() << "Failed to launch" << cmd;
         g_strfreev(args);
     }
+    g_strfreev(env);
 
     return app.exec();
 }

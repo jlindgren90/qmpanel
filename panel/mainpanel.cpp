@@ -35,6 +35,7 @@
 #include "taskbar.h"
 
 #include <KX11Extras>
+#include <LayerShellQt/window.h>
 #include <NETWM>
 #include <QApplication>
 #include <QScreen>
@@ -60,6 +61,21 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
     mLayout.addWidget(new ClockLabel(this));
 
     mLayout.setStretch(2, 1); // stretch taskbar
+
+    if (qApp->nativeInterface<QNativeInterface::QWaylandApplication>())
+    {
+        (void)winId(); // create native window
+        auto layerShell = LayerShellQt::Window::get(windowHandle());
+        layerShell->setMargins(QMargins());
+        layerShell->setLayer(LayerShellQt::Window::Layer::LayerTop);
+        layerShell->setAnchors(LayerShellQt::Window::Anchors(
+            LayerShellQt::Window::Anchor::AnchorBottom |
+            LayerShellQt::Window::Anchor::AnchorLeft |
+            LayerShellQt::Window::Anchor::AnchorRight));
+        layerShell->setKeyboardInteractivity(
+            LayerShellQt::Window::KeyboardInteractivity::
+                KeyboardInteractivityOnDemand);
+    }
 
     show();
 
@@ -138,6 +154,12 @@ void MainPanel::updateGeometry()
                                      /* bottom */ screenBottom + 1 - rect.top(),
                                      rect.left(), rect.right());
         xcb_flush(QX11Info::connection());
+    }
+
+    if (qApp->nativeInterface<QNativeInterface::QWaylandApplication>())
+    {
+        auto layerShell = LayerShellQt::Window::get(windowHandle());
+        layerShell->setExclusiveZone(height());
     }
 
     if (mUpdateCount > 0)

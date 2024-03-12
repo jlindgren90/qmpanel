@@ -64,11 +64,16 @@ QAction * AppInfo::getAction()
         new QAction(getIcon(), g_app_info_get_display_name((GAppInfo *)info));
 
     QObject::connect(action, &QAction::triggered, [info]() {
+        // Unset QT_WAYLAND_SHELL_INTEGRATION or else all launched
+        // Qt applications will use layer-shell, wanted or not
+        auto context = g_app_launch_context_new();
+        g_app_launch_context_unsetenv(context, "QT_WAYLAND_SHELL_INTEGRATION");
         if (!g_desktop_app_info_launch_uris_as_manager(
-                info, nullptr, nullptr, G_SPAWN_SEARCH_PATH, restore_signals,
+                info, nullptr, context, G_SPAWN_SEARCH_PATH, restore_signals,
                 nullptr, nullptr, nullptr, nullptr))
             qWarning() << "Failed to launch"
                        << g_app_info_get_id((GAppInfo *)info);
+        g_object_unref(context);
     });
 
     mAction.reset(action);
