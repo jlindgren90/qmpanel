@@ -30,10 +30,10 @@
 #ifndef STATUSNOTIFIER_H
 #define STATUSNOTIFIER_H
 
+#include "statusnotifierwatcher.h"
+
 #include <QBoxLayout>
 #include <QWidget>
-
-#include "statusnotifierwatcher.h"
 
 class StatusNotifierIcon;
 

@@ -26,14 +26,14 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
+#include "mainpanel.h"
+#include "resources.h"
+
 #include <QApplication>
 #include <QDebug>
 #include <glib.h>
 #include <signal.h>
 #include <thread>
-
-#include "mainpanel.h"
-#include "resources.h"
 
 static sigset_t signal_set;
 

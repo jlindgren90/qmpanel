@@ -30,11 +30,11 @@
 #ifndef STATUSNOTIFIERICON_H
 #define STATUSNOTIFIERICON_H
 
+#include "statusnotifieriteminterface.h"
+
 #include <QLabel>
 #include <QPointer>
 #include <functional>
-
-#include "statusnotifieriteminterface.h"
 
 class QMenu;
 

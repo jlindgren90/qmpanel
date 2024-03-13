@@ -29,7 +29,6 @@
 #include <QAction>
 #include <QDebug>
 #include <QFileInfo>
-#include <signal.h>
 
 #undef signals
 #include <gio/gdesktopappinfo.h>

@@ -30,8 +30,8 @@
 #include "statusnotifier.h"
 #include "statusnotifiericon.h"
 
-#include <QApplication>
 #include <QBoxLayout>
+#include <unistd.h>
 
 StatusNotifier::StatusNotifier(QWidget * parent)
     : QWidget(parent), mLayout(this)
@@ -39,8 +39,8 @@ StatusNotifier::StatusNotifier(QWidget * parent)
     mLayout.setContentsMargins(QMargins());
     mLayout.setSpacing(logicalDpiX() / 24);
 
-    QString dbusName = QStringLiteral("org.kde.StatusNotifierHost-%1-1")
-                           .arg(QApplication::applicationPid());
+    QString dbusName =
+        QStringLiteral("org.kde.StatusNotifierHost-%1-1").arg(getpid());
 
     if (QDBusConnection::sessionBus().interface()->registerService(
             dbusName, QDBusConnectionInterface::DontQueueService) ==

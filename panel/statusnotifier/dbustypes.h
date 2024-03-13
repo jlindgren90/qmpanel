@@ -25,10 +25,10 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-#include <QDBusArgument>
-
 #ifndef DBUSTYPES_H
 #define DBUSTYPES_H
+
+#include <QDBusArgument>
 
 struct IconPixmap
 {

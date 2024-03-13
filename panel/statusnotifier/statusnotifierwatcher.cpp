@@ -27,7 +27,6 @@
 
 #include "statusnotifierwatcher.h"
 #include <QDBusConnectionInterface>
-#include <QDebug>
 
 StatusNotifierWatcher::StatusNotifierWatcher(QObject * parent) : QObject(parent)
 {
