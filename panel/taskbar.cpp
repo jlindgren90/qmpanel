@@ -56,10 +56,8 @@ TaskBar::TaskBar(QWidget * parent) : QWidget(parent), mLayout(this)
             &TaskBar::removeWindow);
     connect(KX11Extras::self(), &KX11Extras::activeWindowChanged, this,
             &TaskBar::onActiveWindowChanged);
-
-    void (KX11Extras::*windowChanged)(WId, NET::Properties, NET::Properties2) =
-        &KX11Extras::windowChanged;
-    connect(KX11Extras::self(), windowChanged, this, &TaskBar::onWindowChanged);
+    connect(KX11Extras::self(), &KX11Extras::windowChanged, this,
+            &TaskBar::onWindowChanged);
 }
 
 bool TaskBar::acceptWindow(WId window) const
