@@ -11,10 +11,8 @@ makedepends=("meson")
 depends=(
   "glib2"
   "kwindowsystem"
+  "layer-shell-qt"
   "libxcb"
-  "libxcomposite"
-  "libxdamage"
-  "libxrender"
 )
 
 build() {

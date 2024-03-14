@@ -58,9 +58,6 @@ deps = [
   dependency('LayerShellQt', modules: ['LayerShellQt::Interface']),
   dependency('wayland-client'),
   dependency('xcb'),
-  dependency('xcomposite'),
-  dependency('xdamage'),
-  dependency('xrender'),
 ]
 
 # these are harmless and will be addressed later
