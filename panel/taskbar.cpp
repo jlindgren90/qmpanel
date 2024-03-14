@@ -5,7 +5,7 @@
  *
  * Copyright: 2011 Razor team
  *            2014 LXQt team
- *            2020 John Lindgren
+ *            2020-2024 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
  *   Maciej Płaza <plaza.maciej@gmail.com>
@@ -31,12 +31,15 @@
 
 #include "taskbar.h"
 #include "taskbutton.h"
+#include "wlr-foreign-toplevel-management-unstable-v1.h"
 
 #include <KWindowInfo>
 #include <KX11Extras>
+#include <QGuiApplication>
 #include <private/qtx11extras_p.h>
 
-TaskBar::TaskBar(QWidget * parent) : QWidget(parent), mLayout(this)
+TaskBar::TaskBar(Resources & res, QWidget * parent)
+    : QWidget(parent), mRes(res), mLayout(this)
 {
     mLayout.setContentsMargins(QMargins());
     mLayout.setSpacing(0);
@@ -61,6 +64,67 @@ TaskBar::TaskBar(QWidget * parent) : QWidget(parent), mLayout(this)
         connect(KX11Extras::self(), &KX11Extras::windowChanged, this,
                 &TaskBar::onWindowChanged);
     }
+
+    auto waylandApp =
+        qGuiApp->nativeInterface<QNativeInterface::QWaylandApplication>();
+    if (waylandApp)
+    {
+        static const wl_registry_listener registry_listener_impl = {
+            .global =
+                [](void * data, wl_registry * registry, uint32_t name,
+                   const char * interface, uint32_t version) {
+                    auto self = static_cast<TaskBar *>(data);
+                    if (!strcmp(
+                            interface,
+                            zwlr_foreign_toplevel_manager_v1_interface.name))
+                        self->addToplevelManager(registry, name, version);
+                },
+            .global_remove = [](void * data, wl_registry * registry,
+                                uint32_t name) { /* no-op */ }};
+
+        wl_registry_add_listener(wl_display_get_registry(waylandApp->display()),
+                                 &registry_listener_impl, this);
+        // TODO: cleanup listener at exit?
+    }
+}
+
+void TaskBar::addToplevelManager(wl_registry * registry, uint32_t name,
+                                 uint32_t version)
+{
+    version = std::min<uint32_t>(
+        version, zwlr_foreign_toplevel_manager_v1_interface.version);
+    auto manager = static_cast<zwlr_foreign_toplevel_manager_v1 *>(
+        wl_registry_bind(registry, name,
+                         &zwlr_foreign_toplevel_manager_v1_interface, version));
+    if (!manager)
+    {
+        qWarning()
+            << "Could not bind zwlr_foreign_toplevel_manager_v1_interface";
+        return;
+    }
+
+    static const zwlr_foreign_toplevel_manager_v1_listener
+        toplevel_manager_impl = {
+            .toplevel =
+                [](void * data, zwlr_foreign_toplevel_manager_v1 * manager,
+                   zwlr_foreign_toplevel_handle_v1 * handle) {
+                    static_cast<TaskBar *>(data)->addWindow(handle);
+                },
+            .finished =
+                [](void * data, zwlr_foreign_toplevel_manager_v1 * manager) {
+                    /* no-op */
+                },
+        };
+
+    zwlr_foreign_toplevel_manager_v1_add_listener(manager,
+                                                  &toplevel_manager_impl, this);
+    // TODO: cleanup listener at exit?
+}
+
+void TaskBar::addWindow(zwlr_foreign_toplevel_handle_v1 * handle)
+{
+    auto button = new TaskButtonWayland(mRes, handle, this);
+    mLayout.insertWidget(mLayout.count() - 1, button);
 }
 
 bool TaskBar::acceptWindow(WId window) const

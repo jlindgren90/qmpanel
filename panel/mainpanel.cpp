@@ -4,7 +4,7 @@
  * qmpanel - a minimal Qt-based desktop panel
  *
  * Copyright: 2010-2011 Razor team
- *            2020 John Lindgren
+ *            2020-2024 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
  *   John Lindgren <john@jlindgren.net>
@@ -56,7 +56,7 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
 
     mLayout.addWidget(new MainMenuButton(res, this));
     mLayout.addWidget(new QuickLaunch(res, this));
-    mLayout.addWidget(new TaskBar(this));
+    mLayout.addWidget(new TaskBar(res, this));
     mLayout.addWidget(new StatusNotifier(this));
     mLayout.addWidget(new ClockLabel(this));
 

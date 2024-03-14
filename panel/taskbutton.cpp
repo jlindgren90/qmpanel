@@ -29,11 +29,14 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "taskbutton.h"
+#include "resources.h"
+#include "wlr-foreign-toplevel-management-unstable-v1.h"
 
 #include <KWindowInfo>
 #include <KX11Extras>
 #include <NETWM>
 #include <QDragEnterEvent>
+#include <QGuiApplication>
 #include <QStyle>
 #include <QTimer>
 #include <private/qtx11extras_p.h>
@@ -137,4 +140,99 @@ void TaskButtonX11::closeWindow()
 {
     NETRootInfo info(QX11Info::connection(), NET::CloseWindow);
     info.closeWindowRequest(mWindow);
+}
+
+TaskButtonWayland::TaskButtonWayland(Resources & res,
+                                     zwlr_foreign_toplevel_handle_v1 * handle,
+                                     QWidget * parent)
+    : TaskButton(parent), mRes(res), mHandle(handle)
+{
+    static const zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_impl =
+        {
+            .title =
+                [](void * data, zwlr_foreign_toplevel_handle_v1 * handle,
+                   const char * title) {
+                    auto self = static_cast<TaskButtonWayland *>(data);
+                    self->setText(QString(title).replace("&", "&&"));
+                    self->setToolTip(title);
+                },
+            .app_id =
+                [](void * data, zwlr_foreign_toplevel_handle_v1 * handle,
+                   const char * app_id) {
+                    static_cast<TaskButtonWayland *>(data)->setAppName(app_id);
+                },
+            .output_enter =
+                [](void * data, zwlr_foreign_toplevel_handle_v1 * handle,
+                   wl_output * output) {
+                    /* no-op */
+                },
+            .output_leave =
+                [](void * data, zwlr_foreign_toplevel_handle_v1 * handle,
+                   wl_output * output) {
+                    /* no-op */
+                },
+            .state =
+                [](void * data, zwlr_foreign_toplevel_handle_v1 * handle,
+                   wl_array * state) {
+                    auto start = static_cast<const uint32_t *>(state->data);
+                    auto end = start + (state->size / sizeof(uint32_t));
+                    bool activated =
+                        (std::find(
+                             start, end,
+                             ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_ACTIVATED) !=
+                         end);
+                    static_cast<TaskButtonWayland *>(data)->setChecked(
+                        activated);
+                },
+            .done =
+                [](void * data, zwlr_foreign_toplevel_handle_v1 * handle) {
+                    /* no-op */
+                },
+            .closed =
+                [](void * data, zwlr_foreign_toplevel_handle_v1 * handle) {
+                    auto self = static_cast<TaskButtonWayland *>(data);
+                    self->deleteLater();
+                },
+            .parent =
+                [](void * data, zwlr_foreign_toplevel_handle_v1 * handle,
+                   zwlr_foreign_toplevel_handle_v1 * parent) {
+                    /* no-op */
+                },
+        };
+
+    zwlr_foreign_toplevel_handle_v1_add_listener(handle, &toplevel_handle_impl,
+                                                 this);
+
+    // set default icon (usually changed from app_id callback)
+    setIcon(style()->standardIcon(QStyle::SP_FileIcon));
+}
+
+TaskButtonWayland::~TaskButtonWayland()
+{
+    zwlr_foreign_toplevel_handle_v1_destroy(mHandle);
+}
+
+void TaskButtonWayland::activateWindow()
+{
+    auto waylandApp =
+        qGuiApp->nativeInterface<QNativeInterface::QWaylandApplication>();
+    zwlr_foreign_toplevel_handle_v1_unset_minimized(mHandle);
+    zwlr_foreign_toplevel_handle_v1_activate(mHandle, waylandApp->seat());
+}
+
+void TaskButtonWayland::minimizeWindow()
+{
+    zwlr_foreign_toplevel_handle_v1_set_minimized(mHandle);
+}
+
+void TaskButtonWayland::closeWindow()
+{
+    zwlr_foreign_toplevel_handle_v1_close(mHandle);
+}
+
+void TaskButtonWayland::setAppName(const QString & appName)
+{
+    auto icon = mRes.getAppIcon(appName);
+    if (!icon.isNull())
+        setIcon(icon);
 }

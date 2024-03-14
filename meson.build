@@ -1,4 +1,4 @@
-project('qmpanel', 'cpp', version: '0.1')
+project('qmpanel', ['c', 'cpp'], version: '0.1')
 
 qt6 = import('qt6')
 mocs = qt6.compile_moc(headers: [
@@ -8,8 +8,25 @@ mocs = qt6.compile_moc(headers: [
   'panel/statusnotifier/statusnotifierwatcher.h',
 ])
 
+wayland_scanner = find_program('wayland-scanner')
+wayland_scanner_c = generator(
+  wayland_scanner,
+  output: '@BASENAME@.c',
+  arguments: ['private-code', '@INPUT@', '@OUTPUT@'],
+)
+wayland_scanner_h = generator(
+  wayland_scanner,
+  output: '@BASENAME@.h',
+  arguments: ['client-header', '@INPUT@', '@OUTPUT@'],
+)
+protos = [
+  wayland_scanner_c.process('wlr-foreign-toplevel-management-unstable-v1.xml'),
+  wayland_scanner_h.process('wlr-foreign-toplevel-management-unstable-v1.xml'),
+]
+
 srcs = [
   mocs,
+  protos,
   'dbusmenu/dbusmenu_interface.cpp',
   'dbusmenu/dbusmenuimporter.cpp',
   'dbusmenu/dbusmenushortcut_p.cpp',
@@ -39,6 +56,7 @@ deps = [
              private_headers: true),
   dependency('KF6WindowSystem'),
   dependency('LayerShellQt', modules: ['LayerShellQt::Interface']),
+  dependency('wayland-client'),
   dependency('xcb'),
   dependency('xcomposite'),
   dependency('xdamage'),

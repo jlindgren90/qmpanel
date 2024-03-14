@@ -5,7 +5,7 @@
  *
  * Copyright: 2011 Razor team
  *            2014 LXQt team
- *            2020 John Lindgren
+ *            2020-2024 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
  *   Maciej Płaza <plaza.maciej@gmail.com>
@@ -37,12 +37,23 @@
 #include <QWidget>
 #include <unordered_map>
 
+class Resources;
 class TaskButtonX11;
+class TaskButtonWayland;
+
+struct wl_registry;
+struct zwlr_foreign_toplevel_handle_v1;
+struct zwlr_foreign_toplevel_manager_v1;
 
 class TaskBar : public QWidget
 {
 public:
-    explicit TaskBar(QWidget * parent);
+    explicit TaskBar(Resources & res, QWidget * parent);
+
+    // Wayland-specific
+    void addToplevelManager(wl_registry * registry, uint32_t name,
+                            uint32_t version);
+    void addWindow(zwlr_foreign_toplevel_handle_v1 * handle);
 
 private:
     // X11-specific
@@ -54,6 +65,7 @@ private:
     void onWindowChanged(WId window, NET::Properties prop,
                          NET::Properties2 prop2);
 
+    Resources & mRes;
     std::unordered_map<WId, TaskButtonX11 *> mKnownWindows;
     QHBoxLayout mLayout;
 };

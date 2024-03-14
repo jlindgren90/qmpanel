@@ -34,6 +34,9 @@
 #include <QTimer>
 #include <QToolButton>
 
+class Resources;
+struct zwlr_foreign_toplevel_handle_v1;
+
 class TaskButton : public QToolButton
 {
 public:
@@ -71,6 +74,25 @@ protected:
 
 private:
     WId const mWindow;
+};
+
+class TaskButtonWayland : public TaskButton
+{
+public:
+    TaskButtonWayland(Resources & res, zwlr_foreign_toplevel_handle_v1 * handle,
+                      QWidget * parent);
+    ~TaskButtonWayland();
+
+protected:
+    void activateWindow() override;
+    void minimizeWindow() override;
+    void closeWindow() override;
+
+private:
+    void setAppName(const QString & appName);
+
+    Resources & mRes;
+    zwlr_foreign_toplevel_handle_v1 * const mHandle;
 };
 
 #endif // TASKBUTTON_H
