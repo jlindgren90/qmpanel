@@ -29,6 +29,7 @@
 #include <QAction>
 #include <QDebug>
 #include <QFileInfo>
+#include <QRegularExpression>
 
 #undef signals
 #include <gio/gdesktopappinfo.h>
@@ -41,8 +42,21 @@ AppInfo::AppInfo(GDesktopAppInfo * info)
 
 QStringList AppInfo::categories() const
 {
+    if (!g_app_info_should_show((GAppInfo *)mInfo.get()))
+        return QStringList();
+
     return QString(g_desktop_app_info_get_categories(mInfo.get()))
         .split(';', Qt::SkipEmptyParts);
+}
+
+QIcon AppInfo::getIcon() const
+{
+    auto gicon = g_app_info_get_icon((GAppInfo *)mInfo.get());
+    if (!gicon)
+        return QIcon();
+
+    CharPtr name(g_icon_to_string(gicon), g_free);
+    return name ? Resources::getIcon(QString(name)) : QIcon();
 }
 
 QAction * AppInfo::getAction()
@@ -51,15 +65,6 @@ QAction * AppInfo::getAction()
         return mAction.get();
 
     auto info = mInfo.get();
-    auto getIcon = [info]() {
-        auto gicon = g_app_info_get_icon((GAppInfo *)info);
-        if (!gicon)
-            return QIcon();
-
-        CharPtr name(g_icon_to_string(gicon), g_free);
-        return name ? Resources::getIcon(QString(name)) : QIcon();
-    };
-
     auto action =
         new QAction(getIcon(), g_app_info_get_display_name((GAppInfo *)info));
 
@@ -113,11 +118,27 @@ Resources::AppInfoMap Resources::loadAppInfos()
     for (auto node = list.get(); node; node = node->next)
     {
         auto app = (GAppInfo *)node->data;
-        if (G_IS_DESKTOP_APP_INFO(app) && g_app_info_should_show(app))
+        if (G_IS_DESKTOP_APP_INFO(app))
             apps.emplace(g_app_info_get_id(app), (GDesktopAppInfo *)app);
     }
 
     return apps;
+}
+
+// Create mapping of short application name to full .desktop file name
+// Example: thunderbird -> org.mozilla.Thunderbird.desktop
+Resources::AppNameMap Resources::makeAppNameMap(AppInfoMap & appInfos)
+{
+    auto nameMap = AppNameMap();
+    for (auto & pair : appInfos)
+    {
+        QString name = pair.first;
+        name.remove(QRegularExpression("\\.desktop$"));
+        name.remove(QRegularExpression(".*\\."));
+        nameMap.emplace(name.toLower(), pair.first);
+    }
+
+    return nameMap;
 }
 
 Resources::Settings Resources::loadSettings()
@@ -144,6 +165,27 @@ Resources::Settings Resources::loadSettings()
             launchCmds.split(';', Qt::SkipEmptyParts)};
 }
 
+QIcon Resources::getAppIcon(const QString & appName)
+{
+    // try exact match of appName + ".desktop" first
+    auto iter = mAppInfos.find(appName + ".desktop");
+    if (iter != mAppInfos.end())
+        return iter->second.getIcon();
+
+    // try known short application names
+    auto nameIter = mAppNameMap.find(appName.toLower());
+    if (nameIter != mAppNameMap.end())
+    {
+        iter = mAppInfos.find(nameIter->second);
+        if (iter != mAppInfos.end())
+            return iter->second.getIcon();
+    }
+
+    qWarning() << "No icon available for" << appName;
+    return QIcon();
+}
+
+// note: appID includes ".desktop" suffix
 QAction * Resources::getAction(const QString & appID)
 {
     auto iter = mAppInfos.find(appID);

@@ -44,6 +44,7 @@ public:
     explicit AppInfo(GDesktopAppInfo * info);
 
     QStringList categories() const;
+    QIcon getIcon() const;
     QAction * getAction();
 
 private:
@@ -66,17 +67,21 @@ public:
 
     const Settings & settings() const { return mSettings; }
 
+    QIcon getAppIcon(const QString & appName);
     QAction * getAction(const QString & appID);
     QList<QAction *> getCategory(const QString & category,
                                  std::unordered_set<QString> & added);
 
 private:
     using AppInfoMap = std::unordered_map<QString, AppInfo>;
+    using AppNameMap = std::unordered_map<QString, QString>;
 
     static AppInfoMap loadAppInfos();
+    static AppNameMap makeAppNameMap(AppInfoMap & appInfos);
     static Settings loadSettings();
 
     AppInfoMap mAppInfos = loadAppInfos();
+    AppNameMap mAppNameMap = makeAppNameMap(mAppInfos);
     Settings mSettings = loadSettings();
 };
 
