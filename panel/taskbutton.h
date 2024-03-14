@@ -5,7 +5,7 @@
  *
  * Copyright: 2011 Razor team
  *            2014 LXQt team
- *            2020 John Lindgren
+ *            2020-2024 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
  *   Kuzma Shapran <kuzma.shapran@gmail.com>
@@ -37,23 +37,40 @@
 class TaskButton : public QToolButton
 {
 public:
-    TaskButton(const WId window, QWidget * parent);
-
-    void updateText();
-    void updateIcon();
-
     QSize sizeHint() const override;
 
 protected:
+    TaskButton(QWidget * parent);
+
     void dragEnterEvent(QDragEnterEvent * event) override;
     void dragLeaveEvent(QDragLeaveEvent * event) override;
     void dropEvent(QDropEvent * event) override;
     void mousePressEvent(QMouseEvent * event) override;
 
+    virtual void activateWindow() = 0;
+    virtual void minimizeWindow() = 0;
+    virtual void closeWindow() = 0;
+
 private:
-    WId const mWindow;
     QTimer mTimer;
     bool mHideOnRelease = false;
+};
+
+class TaskButtonX11 : public TaskButton
+{
+public:
+    TaskButtonX11(const WId window, QWidget * parent);
+
+    void updateText();
+    void updateIcon();
+
+protected:
+    void activateWindow() override;
+    void minimizeWindow() override;
+    void closeWindow() override;
+
+private:
+    WId const mWindow;
 };
 
 #endif // TASKBUTTON_H

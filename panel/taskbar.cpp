@@ -93,7 +93,7 @@ void TaskBar::addWindow(WId window)
 {
     if (mKnownWindows.find(window) == mKnownWindows.end())
     {
-        auto button = new TaskButton(window, this);
+        auto button = new TaskButtonX11(window, this);
         mLayout.insertWidget(mLayout.count() - 1, button);
         mKnownWindows[window] = button;
     }

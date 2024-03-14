@@ -5,7 +5,7 @@
  *
  * Copyright: 2011 Razor team
  *            2014 LXQt team
- *            2020 John Lindgren
+ *            2020-2024 John Lindgren
  * Authors:
  *   Alexander Sokoloff <sokoloff.a@gmail.com>
  *   Kuzma Shapran <kuzma.shapran@gmail.com>
@@ -38,54 +38,23 @@
 #include <QTimer>
 #include <private/qtx11extras_p.h>
 
-TaskButton::TaskButton(const WId window, QWidget * parent)
-    : QToolButton(parent), mWindow(window)
+TaskButton::TaskButton(QWidget * parent) : QToolButton(parent)
 {
     setCheckable(true);
     setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     setAcceptDrops(true);
 
-    updateText();
-    updateIcon();
-
-    if (KX11Extras::activeWindow() == window)
-        setChecked(true);
-
     mTimer.setSingleShot(true);
     mTimer.setInterval(500);
 
-    connect(this, &QToolButton::clicked, [window](bool checked) {
+    connect(this, &QToolButton::clicked, [this](bool checked) {
         if (checked)
-            KX11Extras::forceActiveWindow(window);
+            activateWindow();
         else
-            KX11Extras::minimizeWindow(window);
+            minimizeWindow();
     });
 
-    connect(&mTimer, &QTimer::timeout, [window]() {
-        KX11Extras::forceActiveWindow(window);
-        xcb_flush(QX11Info::connection());
-    });
-}
-
-void TaskButton::updateText()
-{
-    KWindowInfo info(mWindow, NET::WMVisibleName | NET::WMName);
-    QString title = info.visibleName();
-    if (title.isEmpty())
-        title = info.name();
-
-    setText(title.replace("&", "&&"));
-    setToolTip(title);
-}
-
-void TaskButton::updateIcon()
-{
-    int size = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
-    size *= devicePixelRatioF();
-    QIcon icon = KX11Extras::icon(mWindow, size, size);
-    if (icon.isNull())
-        icon = style()->standardIcon(QStyle::SP_FileIcon);
-    setIcon(icon);
+    connect(&mTimer, &QTimer::timeout, this, &TaskButton::activateWindow);
 }
 
 QSize TaskButton::sizeHint() const
@@ -116,11 +85,56 @@ void TaskButton::mousePressEvent(QMouseEvent * event)
 {
     if (event->button() == Qt::MiddleButton)
     {
-        NETRootInfo info(QX11Info::connection(), NET::CloseWindow);
-        info.closeWindowRequest(mWindow);
+        closeWindow();
         event->accept();
         return;
     }
 
     QToolButton::mousePressEvent(event);
+}
+
+TaskButtonX11::TaskButtonX11(const WId window, QWidget * parent)
+    : TaskButton(parent), mWindow(window)
+{
+    updateText();
+    updateIcon();
+
+    if (KX11Extras::activeWindow() == window)
+        setChecked(true);
+}
+
+void TaskButtonX11::updateText()
+{
+    KWindowInfo info(mWindow, NET::WMVisibleName | NET::WMName);
+    QString title = info.visibleName();
+    if (title.isEmpty())
+        title = info.name();
+
+    setText(title.replace("&", "&&"));
+    setToolTip(title);
+}
+
+void TaskButtonX11::updateIcon()
+{
+    int size = style()->pixelMetric(QStyle::PM_ToolBarIconSize);
+    size *= devicePixelRatioF();
+    QIcon icon = KX11Extras::icon(mWindow, size, size);
+    if (icon.isNull())
+        icon = style()->standardIcon(QStyle::SP_FileIcon);
+    setIcon(icon);
+}
+
+void TaskButtonX11::activateWindow()
+{
+    KX11Extras::forceActiveWindow(mWindow);
+    // need to flush if called from timer
+    xcb_flush(QX11Info::connection());
+}
+
+void TaskButtonX11::minimizeWindow() { KX11Extras::minimizeWindow(mWindow); }
+
+void TaskButtonX11::closeWindow()
+{
+    NETRootInfo info(QX11Info::connection(), NET::CloseWindow);
+    info.closeWindowRequest(mWindow);
 }

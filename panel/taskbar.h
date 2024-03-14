@@ -37,7 +37,7 @@
 #include <QWidget>
 #include <unordered_map>
 
-class TaskButton;
+class TaskButtonX11;
 
 class TaskBar : public QWidget
 {
@@ -45,6 +45,7 @@ public:
     explicit TaskBar(QWidget * parent);
 
 private:
+    // X11-specific
     bool acceptWindow(WId window) const;
     void addWindow(WId window);
     void removeWindow(WId window);
@@ -53,7 +54,7 @@ private:
     void onWindowChanged(WId window, NET::Properties prop,
                          NET::Properties2 prop2);
 
-    std::unordered_map<WId, TaskButton *> mKnownWindows;
+    std::unordered_map<WId, TaskButtonX11 *> mKnownWindows;
     QHBoxLayout mLayout;
 };
 
