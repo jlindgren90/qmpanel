@@ -39,7 +39,7 @@ public:
     /**
      * The menu created from listening to the DBusMenuExporter over DBus
      */
-    QMenu *menu() const;
+    QMenu *menu(QWidget * parent = nullptr) const;
 
 public Q_SLOTS:
     /**

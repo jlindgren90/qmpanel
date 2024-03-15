@@ -319,10 +319,11 @@ void DBusMenuImporter::processPendingLayoutUpdates()
     }
 }
 
-QMenu *DBusMenuImporter::menu() const
+// jlindgren: added "parent"
+QMenu *DBusMenuImporter::menu(QWidget * parent) const
 {
     if (!d->m_menu) {
-        d->m_menu = d->createMenu(nullptr);
+        d->m_menu = d->createMenu(parent);
     }
     return d->m_menu;
 }

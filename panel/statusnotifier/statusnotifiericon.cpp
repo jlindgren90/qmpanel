@@ -51,7 +51,7 @@ StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
         {
             auto importer =
                 new DBusMenuImporter(mSni.service(), path.path(), this);
-            mMenu = importer->menu();
+            mMenu = importer->menu(this);
             connect(importer, &DBusMenuImporter::menuUpdated, this,
                     &StatusNotifierIcon::addActivate);
         }
