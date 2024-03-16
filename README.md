@@ -3,75 +3,80 @@ qmpanel - A Minimal Qt-Based Desktop Panel
 
 ![screenshot](/qmpanel.png?raw=true)
 
- - Origin: fork of lxqt-panel 0.14.1
+ - What is this?
 
- - Reasons for fork:
+    - A standalone desktop panel with a simple, traditional design
+    - Lightly customizable, but with a "Just Works" mentality
+    - Originally a fork of lxqt-panel
 
-    - Feature creep and number of bugs in lxqt-panel and LXQt libraries
-    - Small number of lxqt-panel developers with other priorities
+ - Features
 
- - Design goals:
+    - Searchable applications menu
+    - Configurable quick-launch toolbar
+    - Taskbar (showing running applications)
+    - Status icon area ("system tray")
+    - Date & time display with pop-up calendar
+
+ - Where to use qmpanel
+
+    - Currently, qmpanel works best under X11, for example with Openbox
+    - It can also be used in labwc (with a few patches) via XWayland
+    - Native Wayland support is experimental (see issue #7)
+
+ - Getting qmpanel
+
+    - In Arch Linux, qmpanel is available via the AUR
+    - Otherwise, you can clone the repository and compile from source
+    - First ensure you have the required dependencies installed:
+
+       - Qt 6.5+
+       - GLib 2.32+
+       - KWindowSystem 6.0+
+       - LayerShellQt 6.0+
+       - meson (build dependency)
+       - a C++ compiler (such as GCC)
+
+    - To build, run `meson setup build && meson compile -C build`
+    - To run, simply invoke `./build/qmpanel`
+
+  - Configuration (optional)
+
+    - You can run qmpanel with no configuration at all
+    - To customize it, first create the file `$HOME/.config/qmpanel.ini`
+    - The file contents should match the following format:
+
+       ```
+       [Settings]
+       # Sets the icon displayed for the applications menu
+       MenuIcon=<icon-name>
+       # Pins favorite applications to the top of the menu
+       PinnedMenuApps=<app-name>.desktop;<app-name>.desktop
+       # Adds applications to the quick-launch toolbar
+       QuickLaunchApps=<app-name>.desktop;<app-name>.desktop
+       # Runs commands (e.g. system tray icons) at startup
+       LaunchCmds=<command>;<command>
+       ```
+
+    - All lines except the first (`[Settings]`) are optional
+
+ - Design philosophy:
 
     - Stay small, value correctness above features
     - Work "out of the box" with minimal configuration
-    - Follow Qt settings from environment (no custom colors/themes)
-    - Depend only on widely-used libraries (Qt, KWindowSystem, GIO)
-    - No optional parts (build options, loadable plugins)
-    - Support only US English initially
+    - Depend only on widely-used libraries (GLib, Qt, KWindowSystem)
 
- - Type of panel:
+ - Potential future development:
 
-    - Single panel with a traditional, fixed layout
-    - Always displayed at bottom of primary monitor
-    - Height automatically computed
+    - Better native Wayland support
+    - Upstream libdbusmenu-qt changes (or find a replacement)
+    - Non-English translations
 
- - Panel items:
+ - Features NOT planned:
 
-    - Applications menu
-       - Icon-only QToolButton, icon configurable
-       - Predefined application category sub-menus
-       - Configurable list of applications "pinned" to top of menu
-       - Integrated application search at bottom of menu
-
-    - Quick launch
-       - Configurable list of applications
-       - Icon-only QToolButtons
-       - Tooltip shows application name
-
-    - Task bar / window list
-       - Buttons with text beside icon
-       - Tooltip shows full window title
-       - Sorted by creation time (no drag to reorder)
-       - No window grouping
-       - Left-click to show/minimize, middle-click to close
-       - Activate window by hover during drag-and-drop
-
-    - Expanding space
-
-    - System tray (StatusNotifierItem)
-       - Uses patched libdbusmenu-qt, based on KDE's fork
-       - Some less common StatusNotifierItem features not supported
-       - Icons sorted by title
-
-    - Date and time
-       - e.g. "Thu Apr 23, 2:25 pm"
-       - click to show/hide a QCalendarWidget
-
- - Configuration:
-
-    - No configuration GUI
-    - Settings are read from $HOME/.config/qmpanel.ini
-    - Example qmpanel.ini:
-
-```
-[Settings]
-MenuIcon=<icon-name>
-PinnedMenuApps=<app-name>.desktop;<app-name>.desktop
-QuickLaunchApps=<app-name>.desktop;<app-name>.desktop
-# LaunchCmds are executed at startup, after the StatusNotifierItem D-Bus
-# service is registered. You can start system tray applications here.
-LaunchCmds=<command>;<command>
-```
+    - Plugins/extensions
+    - Custom colors/themes (beyond the Qt theme)
+    - Custom panel layouts or multiple panels
+    - Grouping/ordering of taskbar buttons
 
  - Version history:
 
