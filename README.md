@@ -92,3 +92,7 @@ qmpanel - A Minimal Qt-Based Desktop Panel
     - 0.3 (21 Dec 2023)
        - Several bug fixes to StatusNotifierItem system tray
        - Work around multi-monitor issues under XWayland
+
+    - 0.4 (future)
+       - Port to Qt 6 and KWindowSystem 6
+       - Experimental native Wayland support using LayerShellQt
