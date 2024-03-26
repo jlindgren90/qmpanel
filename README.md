@@ -83,7 +83,7 @@ Features _not_ planned:
  - Custom panel layouts or multiple panels
  - Grouping/ordering of taskbar buttons
 
-## Version history:
+## Version history
 
 ### 0.1 (8 May 2020)
 
@@ -101,7 +101,7 @@ Features _not_ planned:
  - Several bug fixes to StatusNotifierItem system tray
  - Work around multi-monitor issues under XWayland
 
-### 0.4 (future)
+### 0.4 (25 Mar 2024)
 
  - Port to Qt 6 and KWindowSystem 6
  - Experimental native Wayland support using LayerShellQt
