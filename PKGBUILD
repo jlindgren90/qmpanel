@@ -7,7 +7,10 @@ pkgdesc="A Minimal Qt-Based Desktop Panel"
 arch=("x86_64")
 url="https://github.com/jlindgren90/qmpanel"
 license=("LGPL2.1")
-makedepends=("meson")
+makedepends=(
+  "meson"
+  "cmake" # needed to find layer-shell-qt
+)
 depends=(
   "glib2"
   "kwindowsystem"
