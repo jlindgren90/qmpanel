@@ -28,12 +28,26 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "clocklabel.h"
+#include <LayerShellQt/shell.h>
+#include <QtWaylandClient/private/qwayland-xdg-shell.h>
 
 ClockLabel::ClockLabel(QWidget * parent)
     : QToolButton(parent), mCalendarAction(this)
 {
     mCalendarAction.setDefaultWidget(&mCalendar);
     mMenu.addAction(&mCalendarAction);
+
+    mMenu.show();
+    mMenu.windowHandle()->setProperty(
+        "_q_waylandPopupAnchor", QVariant::fromValue(Qt::Edge::BottomEdge));
+    mMenu.windowHandle()->setProperty(
+        "_q_waylandPopupGravity", QVariant::fromValue(Qt::Edge::BottomEdge));
+    mMenu.windowHandle()->setProperty(
+        "_q_waylandPopupConstraintAdjustment",
+        static_cast<unsigned int>(
+            QtWayland::xdg_positioner::constraint_adjustment_slide_x |
+            QtWayland::xdg_positioner::constraint_adjustment_flip_y));
+    mMenu.hide();
 
     setAutoRaise(true);
     setMenu(&mMenu);
@@ -43,8 +57,11 @@ ClockLabel::ClockLabel(QWidget * parent)
     startTimer(10000);
     timerEvent(nullptr);
 
-    connect(&mMenu, &QMenu::aboutToShow,
-            [this]() { mCalendar.setSelectedDate(QDate::currentDate()); });
+    connect(&mMenu, &QMenu::aboutToShow, [this]() {
+        mMenu.windowHandle()->setProperty("_q_waylandPopupAnchorRect",
+                                          geometry());
+        mCalendar.setSelectedDate(QDate::currentDate());
+    });
 }
 
 void ClockLabel::timerEvent(QTimerEvent *)
