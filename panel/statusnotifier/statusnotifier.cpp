@@ -28,13 +28,14 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "statusnotifier.h"
+#include "../mainpanel.h"
 #include "statusnotifiericon.h"
 
 #include <QBoxLayout>
 #include <unistd.h>
 
-StatusNotifier::StatusNotifier(QWidget * parent)
-    : QWidget(parent), mLayout(this)
+StatusNotifier::StatusNotifier(MainPanel * panel)
+    : QWidget(panel), mPanel(panel), mLayout(this)
 {
     mLayout.setContentsMargins(QMargins());
     mLayout.setSpacing(logicalDpiX() / 24);
@@ -60,6 +61,8 @@ StatusNotifier::StatusNotifier(QWidget * parent)
     for (const auto & service : mWatcher.RegisteredStatusNotifierItems())
         itemAdded(service);
 }
+
+void StatusNotifier::registerMenu(QMenu * menu) { mPanel->registerMenu(menu); }
 
 static void insertSorted(QBoxLayout * layout, QWidget * widget)
 {

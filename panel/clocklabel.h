@@ -35,10 +35,12 @@
 #include <QToolButton>
 #include <QWidgetAction>
 
+class MainPanel;
+
 class ClockLabel : public QToolButton
 {
 public:
-    explicit ClockLabel(QWidget * parent);
+    explicit ClockLabel(MainPanel * panel);
 
 protected:
     void timerEvent(QTimerEvent *) override;

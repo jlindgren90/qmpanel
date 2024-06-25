@@ -31,12 +31,13 @@
 
 #include <QToolButton>
 
+class MainPanel;
 class Resources;
 
 class MainMenuButton : public QToolButton
 {
 public:
-    explicit MainMenuButton(Resources & res, QWidget * parent);
+    explicit MainMenuButton(Resources & res, MainPanel * panel);
 };
 
 #endif

@@ -28,6 +28,7 @@
 
 #include "mainmenu.h"
 #include "actionview.h"
+#include "mainpanel.h"
 #include "resources.h"
 
 #include <QHBoxLayout>
@@ -198,12 +199,15 @@ void MainMenu::searchTextChanged(const QString & text)
     event(&e);
 }
 
-MainMenuButton::MainMenuButton(Resources & res, QWidget * parent)
-    : QToolButton(parent)
+MainMenuButton::MainMenuButton(Resources & res, MainPanel * panel)
+    : QToolButton(panel)
 {
+    auto menu = new MainMenu(res, this);
+    panel->registerMenu(menu);
+
     setAutoRaise(true);
     setIcon(res.getIcon(res.settings().menuIcon));
-    setMenu(new MainMenu(res, this));
+    setMenu(menu);
     setPopupMode(InstantPopup);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     setStyleSheet("QToolButton::menu-indicator { image: none; }");

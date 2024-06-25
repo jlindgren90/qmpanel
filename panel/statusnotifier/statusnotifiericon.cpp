@@ -30,6 +30,7 @@
 
 #include "statusnotifiericon.h"
 #include "../../dbusmenu/dbusmenuimporter.h"
+#include "statusnotifier.h"
 
 #include <QMenu>
 #include <QMouseEvent>
@@ -37,7 +38,7 @@
 #include <QtEndian>
 
 StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
-                                       QWidget * parent)
+                                       StatusNotifier * parent)
     : QLabel(parent), mSni(service, objectPath, QDBusConnection::sessionBus())
 {
     connect(&mSni, &org::kde::StatusNotifierItem::NewIcon, this,
@@ -45,13 +46,14 @@ StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
     connect(&mSni, &org::kde::StatusNotifierItem::NewToolTip, this,
             &StatusNotifierIcon::newToolTip);
 
-    getPropertyAsync("Menu", [this](const QVariant & value) {
+    getPropertyAsync("Menu", [this, parent](const QVariant & value) {
         auto path = qdbus_cast<QDBusObjectPath>(value);
         if (!path.path().isEmpty())
         {
             auto importer =
                 new DBusMenuImporter(mSni.service(), path.path(), this);
             mMenu = importer->menu(this);
+            parent->registerMenu(mMenu);
             connect(importer, &DBusMenuImporter::menuUpdated, this,
                     &StatusNotifierIcon::addActivate);
         }

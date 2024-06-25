@@ -37,12 +37,13 @@
 #include <functional>
 
 class QMenu;
+class StatusNotifier;
 
 class StatusNotifierIcon : public QLabel
 {
 public:
     StatusNotifierIcon(QString service, QString objectPath,
-                       QWidget * parent = nullptr);
+                       StatusNotifier * parent);
 
     void getPropertyAsync(QString const & name,
                           std::function<void(const QVariant &)> finished);

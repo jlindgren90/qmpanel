@@ -31,15 +31,18 @@
 
 #include <QHBoxLayout>
 #include <QPointer>
+#include <QSet>
 #include <QTimer>
 #include <QWidget>
 
+class QMenu;
 class Resources;
 
 class MainPanel : public QWidget
 {
 public:
     MainPanel(Resources & res);
+    void registerMenu(QMenu * menu);
 
 protected:
     void showEvent(QShowEvent * event) override
@@ -51,11 +54,13 @@ protected:
 private:
     QPointer<QScreen> mScreen;
     QHBoxLayout mLayout;
+    QSet<QMenu *> mMenusShown;
     QTimer mUpdateTimer;
     int mUpdateCount = 0;
 
     void updateGeometry();
     void updateGeometryTriple();
+    void updateKeyboardInteractivity();
 };
 
 #endif // MAINPANEL_H

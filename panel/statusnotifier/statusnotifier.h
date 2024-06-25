@@ -35,17 +35,20 @@
 #include <QBoxLayout>
 #include <QWidget>
 
+class MainPanel;
 class StatusNotifierIcon;
 
 class StatusNotifier : public QWidget
 {
 public:
-    StatusNotifier(QWidget * parent = nullptr);
+    StatusNotifier(MainPanel * panel);
+    void registerMenu(QMenu * menu);
 
 private:
     void itemAdded(const QString & serviceAndPath);
     void itemRemoved(const QString & serviceAndPath);
 
+    MainPanel * const mPanel;
     StatusNotifierWatcher mWatcher;
     QHash<QString, StatusNotifierIcon *> mServices;
     QHBoxLayout mLayout;

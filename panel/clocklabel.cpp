@@ -28,12 +28,14 @@
  * END_COMMON_COPYRIGHT_HEADER */
 
 #include "clocklabel.h"
+#include "mainpanel.h"
 
-ClockLabel::ClockLabel(QWidget * parent)
-    : QToolButton(parent), mCalendarAction(this)
+ClockLabel::ClockLabel(MainPanel * panel)
+    : QToolButton(panel), mCalendarAction(this)
 {
     mCalendarAction.setDefaultWidget(&mCalendar);
     mMenu.addAction(&mCalendarAction);
+    panel->registerMenu(&mMenu);
 
     setAutoRaise(true);
     setMenu(&mMenu);

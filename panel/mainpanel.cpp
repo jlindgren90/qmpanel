@@ -74,7 +74,7 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
             LayerShellQt::Window::Anchor::AnchorRight));
         layerShell->setKeyboardInteractivity(
             LayerShellQt::Window::KeyboardInteractivity::
-                KeyboardInteractivityOnDemand);
+                KeyboardInteractivityNone);
     }
 
     show();
@@ -91,6 +91,22 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
     connect(&mUpdateTimer, &QTimer::timeout, this, &MainPanel::updateGeometry);
     connect(qApp, &QApplication::primaryScreenChanged, this,
             &MainPanel::updateGeometryTriple);
+}
+
+void MainPanel::registerMenu(QMenu * menu)
+{
+    connect(menu, &QMenu::aboutToShow, this, [this, menu]() {
+        mMenusShown.insert(menu);
+        updateKeyboardInteractivity();
+    });
+    connect(menu, &QMenu::aboutToHide, this, [this, menu]() {
+        mMenusShown.remove(menu);
+        updateKeyboardInteractivity();
+    });
+    connect(menu, &QObject::destroyed, this, [this, menu]() {
+        mMenusShown.remove(menu);
+        updateKeyboardInteractivity();
+    });
 }
 
 void MainPanel::updateGeometry()
@@ -176,4 +192,18 @@ void MainPanel::updateGeometryTriple()
     // check for changes again after 0.5s and after 1s.
     mUpdateCount = 2;
     updateGeometry();
+}
+
+void MainPanel::updateKeyboardInteractivity()
+{
+    if (qApp->nativeInterface<QNativeInterface::QWaylandApplication>())
+    {
+        auto layerShell = LayerShellQt::Window::get(windowHandle());
+        layerShell->setKeyboardInteractivity(
+            mMenusShown.empty() ? LayerShellQt::Window::KeyboardInteractivity::
+                                      KeyboardInteractivityNone
+                                : LayerShellQt::Window::KeyboardInteractivity::
+                                      KeyboardInteractivityExclusive);
+        update(); // force commit
+    }
 }
