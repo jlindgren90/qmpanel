@@ -31,7 +31,7 @@
 #include "mainpanel.h"
 
 ClockLabel::ClockLabel(MainPanel * panel)
-    : QToolButton(panel), mCalendarAction(this)
+    : QToolButton(panel), mMenu(this), mCalendarAction(this)
 {
     mCalendarAction.setDefaultWidget(&mCalendar);
     mMenu.addAction(&mCalendarAction);

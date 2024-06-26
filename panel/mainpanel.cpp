@@ -40,6 +40,7 @@
 #include <QApplication>
 #include <QScreen>
 #include <private/qtx11extras_p.h>
+#include <private/qwayland-xdg-shell.h>
 #include <stdlib.h>
 
 MainPanel::MainPanel(Resources & res) : mLayout(this)
@@ -98,6 +99,7 @@ void MainPanel::registerMenu(QMenu * menu)
     connect(menu, &QMenu::aboutToShow, this, [this, menu]() {
         mMenusShown.insert(menu);
         updateKeyboardInteractivity();
+        positionMenu(menu);
     });
     connect(menu, &QMenu::aboutToHide, this, [this, menu]() {
         mMenusShown.remove(menu);
@@ -208,5 +210,26 @@ void MainPanel::updateKeyboardInteractivity()
         // created and attempts to grab the keyboard. update() results
         // in a delayed commit and does not work here.
         repaint();
+    }
+}
+
+void MainPanel::positionMenu(QMenu * menu)
+{
+    if (qApp->nativeInterface<QNativeInterface::QWaylandApplication>())
+    {
+        (void)menu->winId(); // create native window
+        auto parent = menu->parentWidget();
+        menu->windowHandle()->setProperty(
+            "_q_waylandPopupAnchorRect",
+            QRect(parent->mapTo(this, QPoint()), parent->size()));
+        menu->windowHandle()->setProperty(
+            "_q_waylandPopupAnchor",
+            QVariant::fromValue(Qt::Edge::TopEdge | Qt::Edge::LeftEdge));
+        menu->windowHandle()->setProperty(
+            "_q_waylandPopupGravity",
+            QVariant::fromValue(Qt::Edge::TopEdge | Qt::Edge::RightEdge));
+        menu->windowHandle()->setProperty(
+            "_q_waylandPopupConstraintAdjustment",
+            QtWayland::xdg_positioner::constraint_adjustment_slide_x);
     }
 }

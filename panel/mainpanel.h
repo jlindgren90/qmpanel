@@ -61,6 +61,7 @@ private:
     void updateGeometry();
     void updateGeometryTriple();
     void updateKeyboardInteractivity();
+    void positionMenu(QMenu * menu);
 };
 
 #endif // MAINPANEL_H
