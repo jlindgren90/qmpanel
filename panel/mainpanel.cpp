@@ -204,6 +204,9 @@ void MainPanel::updateKeyboardInteractivity()
                                       KeyboardInteractivityNone
                                 : LayerShellQt::Window::KeyboardInteractivity::
                                       KeyboardInteractivityExclusive);
-        update(); // force commit
+        // Force a surface commit immediately, before the menu popup is
+        // created and attempts to grab the keyboard. update() results
+        // in a delayed commit and does not work here.
+        repaint();
     }
 }
