@@ -51,7 +51,6 @@ public:
     MainMenu(Resources & res, QWidget * parent);
 
 protected:
-    void actionEvent(QActionEvent * e) override;
     void keyPressEvent(QKeyEvent * e) override;
     void resizeEvent(QResizeEvent * e) override;
     void showEvent(QShowEvent *) override;
@@ -67,7 +66,6 @@ private:
     QLineEdit mSearchEdit;
     ActionView mSearchView;
     bool mPopulated = false;
-    bool mUpdatesInhibited = false;
 };
 
 MainMenu::MainMenu(Resources & res, QWidget * parent)
@@ -100,12 +98,6 @@ MainMenu::MainMenu(Resources & res, QWidget * parent)
     connect(&mSearchEdit, &QLineEdit::returnPressed, &mSearchView,
             &ActionView::activateCurrent);
     connect(&mSearchView, &QListView::activated, this, &QMenu::hide);
-}
-
-void MainMenu::actionEvent(QActionEvent * e)
-{
-    if (!mUpdatesInhibited)
-        QMenu::actionEvent(e);
 }
 
 void MainMenu::keyPressEvent(QKeyEvent * e)
@@ -179,8 +171,6 @@ void MainMenu::searchTextChanged(const QString & text)
 {
     bool shown = !text.isEmpty();
 
-    mUpdatesInhibited = true;
-
     for (auto const & action : actions())
     {
         if (qobject_cast<QWidgetAction *>(action) == nullptr)
@@ -192,7 +182,6 @@ void MainMenu::searchTextChanged(const QString & text)
 
     mSearchView.setVisible(shown);
     mSearchViewAction.setVisible(shown);
-    mUpdatesInhibited = false;
 
     // force re-layout
     QEvent e(QEvent::StyleChange);
