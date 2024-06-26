@@ -42,6 +42,8 @@ class MainPanel : public QWidget
 {
 public:
     MainPanel(Resources & res);
+    ~MainPanel();
+
     void registerMenu(QMenu * menu);
 
 protected:
@@ -54,6 +56,7 @@ protected:
 private:
     QPointer<QScreen> mScreen;
     QHBoxLayout mLayout;
+    QSet<QMenu *> mMenusRegistered;
     QSet<QMenu *> mMenusShown;
     QTimer mUpdateTimer;
     int mUpdateCount = 0;

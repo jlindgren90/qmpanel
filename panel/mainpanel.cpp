@@ -94,18 +94,32 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
             &MainPanel::updateGeometryTriple);
 }
 
+MainPanel::~MainPanel()
+{
+    // The base QObject/QWidget destructor will emit QObject::destroyed
+    // on child objects including menus. Disconnect first so that our
+    // signal handlers don't run in a partially destructed state.
+    for (auto menu : mMenusRegistered)
+        menu->disconnect(this);
+}
+
 void MainPanel::registerMenu(QMenu * menu)
 {
+    mMenusRegistered.insert(menu);
+
     connect(menu, &QMenu::aboutToShow, this, [this, menu]() {
         mMenusShown.insert(menu);
         updateKeyboardInteractivity();
         positionMenu(menu);
     });
+
     connect(menu, &QMenu::aboutToHide, this, [this, menu]() {
         mMenusShown.remove(menu);
         updateKeyboardInteractivity();
     });
+
     connect(menu, &QObject::destroyed, this, [this, menu]() {
+        mMenusRegistered.remove(menu);
         mMenusShown.remove(menu);
         updateKeyboardInteractivity();
     });
