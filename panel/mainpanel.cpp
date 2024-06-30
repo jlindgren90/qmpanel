@@ -125,7 +125,7 @@ void MainPanel::registerMenu(QMenu * menu)
     });
 }
 
-void MainPanel::updateGeometry()
+void MainPanel::updateGeometry2(bool inShowEvent)
 {
     QScreen * screen = QApplication::primaryScreen();
     QRect rect = screen->geometry();
@@ -166,6 +166,16 @@ void MainPanel::updateGeometry()
                 &MainPanel::updateGeometryTriple);
         connect(mScreen, &QObject::destroyed, this,
                 &MainPanel::updateGeometryTriple);
+
+        // layer-shell surfaces are tied to a specific screen once
+        // shown. To change screens, we have to hide and reshow.
+        // updateGeometry() will be called again from the showEvent().
+        if (qApp->nativeInterface<QNativeInterface::QWaylandApplication>() &&
+            !inShowEvent)
+        {
+            hide(), show();
+            return;
+        }
     }
 
     rect.setTop(rect.bottom() + 1 - sizeHint().height());

@@ -49,7 +49,7 @@ public:
 protected:
     void showEvent(QShowEvent * event) override
     {
-        updateGeometry();
+        updateGeometry2(true);
         QWidget::showEvent(event);
     }
 
@@ -61,7 +61,8 @@ private:
     QTimer mUpdateTimer;
     int mUpdateCount = 0;
 
-    void updateGeometry();
+    void updateGeometry2(bool inShowEvent);
+    void updateGeometry() { updateGeometry2(false); }
     void updateGeometryTriple();
     void updateKeyboardInteractivity();
     void positionMenu(QMenu * menu);
