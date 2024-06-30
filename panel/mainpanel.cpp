@@ -92,6 +92,14 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
     connect(&mUpdateTimer, &QTimer::timeout, this, &MainPanel::updateGeometry);
     connect(qApp, &QApplication::primaryScreenChanged, this,
             &MainPanel::updateGeometryTriple);
+
+    // Under Wayland (or XWayland), we pick our own screen, so we also
+    // need to watch for new screens added.
+    if (getenv("WAYLAND_DISPLAY"))
+    {
+        connect(qApp, &QApplication::screenAdded, this,
+                &MainPanel::updateGeometryTriple);
+    }
 }
 
 MainPanel::~MainPanel()
@@ -130,7 +138,7 @@ void MainPanel::updateGeometry2(bool inShowEvent)
     QScreen * screen = QApplication::primaryScreen();
     QRect rect = screen->geometry();
 
-    // Under XWayland, the primary screen may not be set.
+    // Under Wayland (or XWayland), the primary screen may not be set.
     // As a workaround, pick the largest/leftmost screen.
     if (getenv("WAYLAND_DISPLAY"))
     {
