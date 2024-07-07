@@ -1,7 +1,7 @@
 # Maintainer: John Lindgren <john@jlindgren.net>
 
 pkgname=qmpanel
-pkgver=0.4
+pkgver=0.5
 pkgrel=1
 pkgdesc="A Minimal Qt-Based Desktop Panel"
 arch=("x86_64")

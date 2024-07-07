@@ -117,6 +117,6 @@ Features _not_ planned:
  - Port to Qt 6 and KWindowSystem 6
  - Experimental native Wayland support using LayerShellQt
 
-### 0.5 (unreleased)
+### 0.5 (7 Jul 2024)
 
  - Fix various Wayland-related issues
