@@ -20,12 +20,23 @@ qmpanel - A Minimal Qt-Based Desktop Panel
 ## Where to use qmpanel
 
 Currently, qmpanel works best under X11, for example with
-[Openbox](http://openbox.org/wiki/Main_Page). It can also be used in
-[labwc](https://github.com/labwc/labwc/) (with a few patches) via
-XWayland.
+[Openbox](http://openbox.org/wiki/Main_Page).
 
-Native Wayland support is experimental (see
-[issue #7](https://github.com/jlindgren90/qmpanel/issues/7)).
+Wayland support is currently experimental, and you *will* encounter bugs
+due to the immaturity of Wayland in general. If you wish to use Wayland
+anyway, I recommend using [labwc](https://github.com/labwc/labwc/). Make
+sure to use the latest versions of Qt and labwc.
+
+Some known Wayland issues affecting qmpanel:
+
+ - Popup window repositioning has only recently been implemented
+   [in Qt](https://codereview.qt-project.org/c/qt/qtwayland/+/481718)
+   and [in labwc](https://github.com/labwc/labwc/pull/1950). Without
+   these changes, the applications menu will not be positioned correctly
+   when searching.
+
+ - Nested menus are also positioned incorrectly due to a known
+   [Qt issue](https://bugreports.qt.io/browse/QTBUG-124810).
 
 ## Getting qmpanel
 
@@ -68,11 +79,11 @@ All lines except the first (`[Settings]`) are optional.
 
  - Stay small, value correctness above features
  - Work "out of the box" with minimal configuration
- - Depend only on widely-used libraries (GLib, Qt, KWindowSystem)
+ - Depend only on widely-used libraries (GLib, Qt, KWindowSystem, etc.)
 
 ## Potential future development
 
- - Better native Wayland support
+ - (External) fix remaining Qt issues under Wayland
  - Upstream libdbusmenu-qt changes (or find a replacement)
  - Non-English translations
 
@@ -105,3 +116,7 @@ Features _not_ planned:
 
  - Port to Qt 6 and KWindowSystem 6
  - Experimental native Wayland support using LayerShellQt
+
+### 0.5 (unreleased)
+
+ - Fix various Wayland-related issues
