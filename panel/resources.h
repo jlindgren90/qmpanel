@@ -45,6 +45,7 @@ public:
 
     QStringList categories() const;
     QIcon getIcon() const;
+    QString getExecutable() const;
     QAction * getAction();
 
 private:

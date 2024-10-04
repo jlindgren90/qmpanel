@@ -59,6 +59,11 @@ QIcon AppInfo::getIcon() const
     return name ? Resources::getIcon(QString(name)) : QIcon();
 }
 
+QString AppInfo::getExecutable() const
+{
+    return g_app_info_get_executable((GAppInfo *)mInfo.get());
+}
+
 QAction * AppInfo::getAction()
 {
     if (mAction)
@@ -136,6 +141,13 @@ Resources::AppNameMap Resources::makeAppNameMap(AppInfoMap & appInfos)
         name.remove(QRegularExpression("\\.desktop$"));
         name.remove(QRegularExpression(".*\\."));
         nameMap.emplace(name.toLower(), pair.first);
+
+        // Also map by executable name (if different than app name)
+        // Example: gimp-2.10 -> gimp.desktop
+        QString execName = pair.second.getExecutable();
+        execName.remove(QRegularExpression(".*\\/"));
+        if (!execName.isEmpty())
+            nameMap.emplace(execName.toLower(), pair.first);
     }
 
     return nameMap;
