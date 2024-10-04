@@ -56,7 +56,6 @@ protected:
 
 private:
     QTimer mTimer;
-    bool mHideOnRelease = false;
 };
 
 class TaskButtonX11 : public TaskButton
