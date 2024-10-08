@@ -46,6 +46,7 @@ public:
     QStringList categories() const;
     QIcon getIcon() const;
     QString getExecutable() const;
+    QString getStartupWMClass() const;
     QAction * getAction();
 
 private:

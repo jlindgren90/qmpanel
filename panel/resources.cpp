@@ -64,6 +64,11 @@ QString AppInfo::getExecutable() const
     return g_app_info_get_executable((GAppInfo *)mInfo.get());
 }
 
+QString AppInfo::getStartupWMClass() const
+{
+    return g_desktop_app_info_get_startup_wm_class(mInfo.get());
+}
+
 QAction * AppInfo::getAction()
 {
     if (mAction)
@@ -103,7 +108,7 @@ QIcon Resources::getIcon(const QString & name)
     {
         for (auto ext : {"svg", "png", "xpm"})
         {
-            auto path = QString("%1/%2.%3").arg(dir).arg(name).arg(ext);
+            auto path = QString("%1/%2.%3").arg(dir, name, ext);
             if (g_file_test(path.toUtf8(), G_FILE_TEST_EXISTS))
                 return QIcon(path);
         }
@@ -134,20 +139,30 @@ Resources::AppInfoMap Resources::loadAppInfos()
 // Example: thunderbird -> org.mozilla.Thunderbird.desktop
 Resources::AppNameMap Resources::makeAppNameMap(AppInfoMap & appInfos)
 {
+    static QRegularExpression desktopExtRegEx("\\.desktop$");
+    static QRegularExpression beforeDotRegEx(".*\\.");
+    static QRegularExpression beforeSlashRegEx(".*\\/");
+
     auto nameMap = AppNameMap();
     for (auto & pair : appInfos)
     {
         QString name = pair.first;
-        name.remove(QRegularExpression("\\.desktop$"));
-        name.remove(QRegularExpression(".*\\."));
+        name.remove(desktopExtRegEx);
+        name.remove(beforeDotRegEx);
         nameMap.emplace(name.toLower(), pair.first);
 
         // Also map by executable name (if different than app name)
-        // Example: gimp-2.10 -> gimp.desktop
+        // and StartupWMClass key. Maybe it's redundant to check both?
+        // Either one gives (for example): gimp-2.10 -> gimp.desktop.
+        // But "VirtualBox Manager" matches only StartupWMClass.
         QString execName = pair.second.getExecutable();
-        execName.remove(QRegularExpression(".*\\/"));
+        execName.remove(beforeSlashRegEx);
         if (!execName.isEmpty())
             nameMap.emplace(execName.toLower(), pair.first);
+
+        QString wmClass = pair.second.getStartupWMClass();
+        if (!wmClass.isEmpty())
+            nameMap.emplace(wmClass.toLower(), pair.first);
     }
 
     return nameMap;
