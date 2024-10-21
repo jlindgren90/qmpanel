@@ -20,7 +20,7 @@ qmpanel - A Minimal Qt-Based Desktop Panel
 ## Where to use qmpanel
 
 Currently, qmpanel works best under X11, for example with
-[Openbox](http://openbox.org/wiki/Main_Page).
+[Openbox](https://openbox.org).
 
 Wayland support is currently experimental, and you *will* encounter bugs
 due to the immaturity of Wayland in general. If you wish to use Wayland
