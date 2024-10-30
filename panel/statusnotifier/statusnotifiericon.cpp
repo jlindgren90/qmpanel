@@ -66,6 +66,10 @@ StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
 
     newIcon();
     newToolTip();
+
+    // set initial icon
+    auto icon = style()->standardIcon(QStyle::SP_FileIcon);
+    setPixmap(icon.pixmap(style()->pixelMetric(QStyle::PM_ButtonIconSize)));
 }
 
 void StatusNotifierIcon::getPropertyAsync(
@@ -133,8 +137,12 @@ void StatusNotifierIcon::newIcon()
         auto iconName = qdbus_cast<QString>(value);
         if (!iconName.isEmpty())
         {
-            setPixmap(QIcon::fromTheme(iconName).pixmap(
-                style()->pixelMetric(QStyle::PM_ButtonIconSize)));
+            auto icon = QIcon::fromTheme(iconName);
+            if (!icon.isNull())
+            {
+                setPixmap(icon.pixmap(
+                    style()->pixelMetric(QStyle::PM_ButtonIconSize)));
+            }
         }
         else
         {
