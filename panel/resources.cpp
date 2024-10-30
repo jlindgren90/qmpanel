@@ -114,6 +114,7 @@ QIcon Resources::getIcon(const QString & name)
         }
     }
 
+    qWarning() << "Cannot load icon" << name;
     return QIcon();
 }
 

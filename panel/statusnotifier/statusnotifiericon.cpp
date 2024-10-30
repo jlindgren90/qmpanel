@@ -30,6 +30,7 @@
 
 #include "statusnotifiericon.h"
 #include "../../dbusmenu/dbusmenuimporter.h"
+#include "../resources.h"
 #include "statusnotifier.h"
 
 #include <QMenu>
@@ -137,7 +138,7 @@ void StatusNotifierIcon::newIcon()
         auto iconName = qdbus_cast<QString>(value);
         if (!iconName.isEmpty())
         {
-            auto icon = QIcon::fromTheme(iconName);
+            auto icon = Resources::getIcon(iconName);
             if (!icon.isNull())
             {
                 setPixmap(icon.pixmap(
