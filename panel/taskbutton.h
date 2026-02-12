@@ -82,6 +82,12 @@ public:
                       QWidget * parent);
     ~TaskButtonWayland();
 
+    void setIsActive(bool active)
+    {
+        isActive = active;
+        setChecked(active);
+    }
+
 protected:
     void activateWindow() override;
     void minimizeWindow() override;
@@ -92,6 +98,7 @@ private:
 
     Resources & mRes;
     zwlr_foreign_toplevel_handle_v1 * const mHandle;
+    bool isActive = false;
 };
 
 #endif // TASKBUTTON_H

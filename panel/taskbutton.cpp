@@ -181,7 +181,7 @@ TaskButtonWayland::TaskButtonWayland(Resources & res,
                              start, end,
                              ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_ACTIVATED) !=
                          end);
-                    static_cast<TaskButtonWayland *>(data)->setChecked(
+                    static_cast<TaskButtonWayland *>(data)->setIsActive(
                         activated);
                 },
             .done =
@@ -214,6 +214,9 @@ TaskButtonWayland::~TaskButtonWayland()
 
 void TaskButtonWayland::activateWindow()
 {
+    // reset checked state until the window is really active
+    setChecked(isActive);
+
     auto waylandApp =
         qGuiApp->nativeInterface<QNativeInterface::QWaylandApplication>();
     zwlr_foreign_toplevel_handle_v1_unset_minimized(mHandle);
