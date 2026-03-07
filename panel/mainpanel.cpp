@@ -49,8 +49,7 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
     setAttribute(Qt::WA_AlwaysShowToolTips);
     setAttribute(Qt::WA_X11NetWmWindowTypeDock);
 
-    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus |
-                   Qt::WindowStaysOnTopHint);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
 
     mLayout.setContentsMargins(QMargins());
     mLayout.setSpacing(logicalDpiX() / 24);
