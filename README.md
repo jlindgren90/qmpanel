@@ -19,24 +19,10 @@ qmpanel - A Minimal Qt-Based Desktop Panel
 
 ## Where to use qmpanel
 
-Currently, qmpanel works best under X11, for example with
-[Openbox](https://openbox.org).
-
-Wayland support is currently experimental, and you *will* encounter bugs
-due to the immaturity of Wayland in general. If you wish to use Wayland
-anyway, I recommend using [labwc](https://github.com/labwc/labwc/). Make
-sure to use the latest versions of Qt and labwc.
-
-Some known Wayland issues affecting qmpanel:
-
- - Popup window repositioning has only recently been implemented
-   [in Qt](https://codereview.qt-project.org/c/qt/qtwayland/+/481718)
-   and [in labwc](https://github.com/labwc/labwc/pull/1950). Without
-   these changes, the applications menu will not be positioned correctly
-   when searching.
-
- - Nested menus are also positioned incorrectly due to a known
-   [Qt issue](https://bugreports.qt.io/browse/QTBUG-124810).
+qmpanel supports both X11 and Wayland (via wlr-layer-shell protocol).
+It should work well with most standalone X11 window managers, such as
+[Openbox](https://openbox.org). For Wayland, I recommend using a recent
+version of [labwc](https://github.com/labwc/labwc/).
 
 ## Getting qmpanel
 
@@ -45,7 +31,7 @@ can clone the repository and compile from source.
 
 First ensure you have the required dependencies installed:
 
- - Qt 6.5+
+ - Qt 6.5+ (6.11+ recommended for Wayland support)
  - GLib 2.32+
  - KWindowSystem 6.0+
  - LayerShellQt 6.0+
@@ -120,3 +106,8 @@ Features _not_ planned:
 ### 0.5 (7 Jul 2024)
 
  - Fix various Wayland-related issues
+
+### 1.0 (9 Apr 2026)
+
+ - Minor bug fixes, especially related to icon loading
+ - Wayland support no longer considered experimental
