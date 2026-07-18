@@ -48,14 +48,15 @@ srcs = [
   'panel/taskbutton.cpp',
 ]
 
+cc = meson.get_compiler('cpp')
 deps = [
+  cc.find_library('LayerShellQtInterface', required : true),
   dependency('threads'),
   dependency('gio-2.0'),
   dependency('gio-unix-2.0'),
   dependency('qt6', modules: ['Core', 'Gui', 'Widgets', 'DBus', 'WaylandClient'],
              private_headers: true),
   dependency('KF6WindowSystem'),
-  dependency('LayerShellQt', modules: ['LayerShellQt::Interface']),
   dependency('wayland-client'),
   dependency('xcb'),
 ]
