@@ -63,5 +63,7 @@ deps = [
 
 # these are harmless and will be addressed later
 add_global_arguments('-Wno-deprecated-declarations', language : 'cpp')
+# triggered by Qt forward declarations, harmless
+add_global_arguments('-Wno-sfinae-incomplete', language : 'cpp')
 
 executable('qmpanel', srcs, dependencies: deps, install: true)
