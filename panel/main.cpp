@@ -60,10 +60,6 @@ int main(int argc, char * argv[])
     sigprocmask(SIG_BLOCK, &signal_set, nullptr);
 
     QApplication app(argc, argv);
-    app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
-
-    if (app.nativeInterface<QNativeInterface::QWaylandApplication>())
-        LayerShellQt::Shell::useLayerShell();
 
     /* monitor signals once qApp exists */
     std::thread(signal_thread).detach();
