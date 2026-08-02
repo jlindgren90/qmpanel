@@ -200,6 +200,11 @@ QIcon Resources::getAppIcon(const QString & appName)
     if (iter != mAppInfos.end())
         return iter->second.getIcon();
 
+    // same, but lowercase (WM_CLASS name often gets capitalized)
+    iter = mAppInfos.find(appName.toLower() + ".desktop");
+    if (iter != mAppInfos.end())
+        return iter->second.getIcon();
+
     // try known short application names
     auto nameIter = mAppNameMap.find(appName.toLower());
     if (nameIter != mAppNameMap.end())
