@@ -63,21 +63,9 @@ MainPanel::MainPanel(Resources & res) : mLayout(this)
     mLayout.setStretch(2, 1); // stretch taskbar
 
     if (qApp->nativeInterface<QNativeInterface::QWaylandApplication>())
-    {
-        (void)winId(); // create native window
-        auto layerShell = LayerShellQt::Window::get(windowHandle());
-        layerShell->setMargins(QMargins());
-        layerShell->setLayer(LayerShellQt::Window::Layer::LayerTop);
-        layerShell->setAnchors(LayerShellQt::Window::Anchors(
-            LayerShellQt::Window::Anchor::AnchorBottom |
-            LayerShellQt::Window::Anchor::AnchorLeft |
-            LayerShellQt::Window::Anchor::AnchorRight));
-        layerShell->setKeyboardInteractivity(
-            LayerShellQt::Window::KeyboardInteractivity::
-                KeyboardInteractivityNone);
-    }
-
-    show();
+        updateGeometry(); // calls show()
+    else
+        show();
 
     if (QX11Info::isPlatformX11())
     {
@@ -180,8 +168,8 @@ void MainPanel::updateGeometry2(bool inShowEvent)
         if (qApp->nativeInterface<QNativeInterface::QWaylandApplication>() &&
             !inShowEvent)
         {
-            hide(), show();
-            return;
+            hide();
+            destroy();
         }
     }
 
@@ -207,8 +195,23 @@ void MainPanel::updateGeometry2(bool inShowEvent)
 
     if (qApp->nativeInterface<QNativeInterface::QWaylandApplication>())
     {
+        (void)winId(); // create native window
         auto layerShell = LayerShellQt::Window::get(windowHandle());
+        layerShell->setMargins(QMargins());
+        layerShell->setLayer(LayerShellQt::Window::Layer::LayerTop);
+        layerShell->setAnchors(LayerShellQt::Window::Anchors(
+            LayerShellQt::Window::Anchor::AnchorBottom |
+            LayerShellQt::Window::Anchor::AnchorLeft |
+            LayerShellQt::Window::Anchor::AnchorRight));
         layerShell->setExclusiveZone(height());
+        layerShell->setKeyboardInteractivity(
+            LayerShellQt::Window::KeyboardInteractivity::
+                KeyboardInteractivityNone);
+    }
+
+    if (!inShowEvent)
+    {
+        show();
     }
 
     if (mUpdateCount > 0)
