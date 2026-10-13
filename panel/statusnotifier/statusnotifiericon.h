@@ -52,9 +52,10 @@ private:
     void addActivate();
     void newIcon();
     void newToolTip();
+    void updateToolTip();
 
     org::kde::StatusNotifierItem mSni;
-    QString mTitle;
+    QString mTitle, mToolTip;
     QPointer<QMenu> mMenu;
     QPointer<QAction> mActivate;
 

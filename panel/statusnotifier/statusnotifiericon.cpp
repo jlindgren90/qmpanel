@@ -63,6 +63,7 @@ StatusNotifierIcon::StatusNotifierIcon(QString service, QString objectPath,
     getPropertyAsync("Title", [this](const QVariant & value) {
         mTitle = qdbus_cast<QString>(value);
         addActivate();
+        updateToolTip();
     });
 
     newIcon();
@@ -163,9 +164,14 @@ void StatusNotifierIcon::newIcon()
 void StatusNotifierIcon::newToolTip()
 {
     getPropertyAsync("ToolTip", [this](const QVariant & value) {
-        auto tooltip = qdbus_cast<ToolTip>(value);
-        setToolTip(tooltip.title);
+        mToolTip = qdbus_cast<ToolTip>(value).title;
+        updateToolTip();
     });
+}
+
+void StatusNotifierIcon::updateToolTip()
+{
+    setToolTip(!mToolTip.isEmpty() ? mToolTip : mTitle);
 }
 
 void StatusNotifierIcon::mousePressEvent(QMouseEvent * event)
